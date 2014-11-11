@@ -7,7 +7,6 @@ $(function() {
 			$.ajax({
 				type : "POST",
 				cache : false,
-				dataType : "json",
 				url : "php/SPARQLClient.php",
 				async : false,
 				data : {
@@ -18,10 +17,7 @@ $(function() {
 				$('.result').html("<pre>" + syntaxHighlight(JSON.stringify(result, undefined, 4))+ "</pre>");
 			}).fail(function() {
 				console.log("Error retrieving data...");
-			}).always(function(result) {
-				$('.result').html(result);
 			});
-
 			console.log("Asked query: " + query);
 		} else {
 			console.log("No given query");

@@ -9,27 +9,12 @@ EasyRdf_Namespace::set('dbo', 'http://dbpedia.org/ontology/');
 EasyRdf_Namespace::set('dbp', 'http://dbpedia.org/property/');
 
 $sparql = new EasyRdf_Sparql_Client('http://dbpedia.org/sparql');
+$serializer = new EasyRdf_Serialiser_Json();
 
 $result = $sparql->query($_POST['query']);
 
-var_dump($result);
+$serializedData = $serializer->serialise($result, "json");
 
-echo '{
-	"title": "Example Schema",
-	"type": "object",
-	"properties": {
-		"firstName": {
-			"type": "string"
-		},
-		"lastName": {
-			"type": "string"
-		},
-		"age": {
-			"description": "Age in years",
-			"type": "integer",
-			"minimum": 0
-		}
-	},
-	"required": ["firstName", "lastName"]
-}';
+echo $serializedData;
+
 ?>
