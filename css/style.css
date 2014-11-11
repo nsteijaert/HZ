@@ -1,4 +1,4 @@
-/* Basic Grey */
+/* Basic Grey Theme*/
 .basic-grey {
 	margin-left: auto;
 	margin-right: auto;
@@ -84,11 +84,12 @@
 	background: #CF7A7A
 }
 
-/** Result */
+/* Result */
 #result {
 	margin-top: 50px;
 }
 
+/* font-size: 10px makes the results look better */
 pre {
 	font-size: 10px;
 	outline: 1px solid #ccc;

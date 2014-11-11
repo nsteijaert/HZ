@@ -1,3 +1,6 @@
+/*
+ * This function is called when submitting the query form
+ */ 
 $(function() {
 	$('form').submit(function() {
 		var query = $('#query').val();
