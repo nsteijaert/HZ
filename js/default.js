@@ -8,7 +8,7 @@ $(function() {
 				type : "POST",
 				cache : false,
 				dataType : "json",
-				url : "load.php",
+				url : "php/SPARQLClient.php",
 				async : false,
 				data : {
 					query : query
