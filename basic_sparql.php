@@ -1,19 +1,19 @@
 <?php
 /**
- * Making a SPARQL SELECT query
- *
- * This example creates a new SPARQL client, pointing at the
- * dbpedia.org endpoint. It then makes a SELECT query that
- * returns all of the countries in DBpedia along with an
- * english label.
- *
- * Note how the namespace prefix declarations are automatically
- * added to the query.
- *
- * @package EasyRdf
- * @copyright Copyright (c) 2009-2013 Nicholas J Humfrey
- * @license http://unlicense.org/
- */
+* Making a SPARQL SELECT query
+*
+* This example creates a new SPARQL client, pointing at the
+* dbpedia.org endpoint. It then makes a SELECT query that
+* returns all of the countries in DBpedia along with an
+* english label.
+*
+* Note how the namespace prefix declarations are automatically
+* added to the query.
+*
+* @package EasyRdf
+* @copyright Copyright (c) 2009-2013 Nicholas J Humfrey
+* @license http://unlicense.org/
+*/
 set_include_path(get_include_path() . PATH_SEPARATOR . '../lib/');
 require_once "lib/EasyRdf.php";
 require_once "lib/html_tag_helpers.php";
@@ -34,12 +34,19 @@ $sparql = new EasyRdf_Sparql_Client('http://dbpedia.org/sparql');
 <h2>List of countries</h2>
 <ul>
 <?php
-$result = $sparql -> query('SELECT * WHERE {' . ' ?country rdf:type dbo:Country .' . ' ?country rdfs:label ?label .' . ' ?country dc:subject category:Member_states_of_the_United_Nations .' . ' FILTER ( lang(?label) = "en" )' . '} ORDER BY ?label');
+$result = $sparql->query(
+'SELECT * WHERE {'.
+' ?country rdf:type dbo:Country .'.
+' ?country rdfs:label ?label .'.
+' ?country dc:subject category:Member_states_of_the_United_Nations .'.
+' FILTER ( lang(?label) = "en" )'.
+'} ORDER BY ?label'
+);
 foreach ($result as $row) {
-	echo "<li>" . link_to($row -> label, $row -> country) . "</li>\n";
+echo "<li>".link_to($row->label, $row->country)."</li>\n";
 }
 ?>
 </ul>
-<p>Total number of countries: <?= $result -> numRows() ?></p>
+<p>Total number of countries: <?= $result->numRows() ?></p>
 </body>
 </html>
