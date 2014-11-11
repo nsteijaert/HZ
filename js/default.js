@@ -18,6 +18,8 @@ $(function() {
 				$('.result').html("<pre>" + syntaxHighlight(JSON.stringify(result, undefined, 4))+ "</pre>");
 			}).fail(function() {
 				console.log("Error retrieving data...");
+			}).always(function(result) {
+				$('.result').html(result);
 			});
 
 			console.log("Asked query: " + query);
