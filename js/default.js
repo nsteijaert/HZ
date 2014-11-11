@@ -14,7 +14,7 @@ $(function() {
 				}
 			}).done(function(result) {
 				console.log("Data successfully retrieved...");
-				$('.result').html("<pre>" + syntaxHighlight(JSON.stringify(result, undefined, 4))+ "</pre>");
+				$('.result').html("<span>" + new Date() + "</span><pre>" + syntaxHighlight(JSON.stringify(result, undefined, 4)) + "</pre>");
 			}).fail(function() {
 				console.log("Error retrieving data...");
 			});
