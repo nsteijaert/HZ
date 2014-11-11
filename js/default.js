@@ -14,7 +14,10 @@ $(function() {
 				}
 			}).done(function(result) {
 				console.log("Data successfully retrieved...");
-				$('.result').html("<span>" + new Date() + "</span><pre>" + syntaxHighlight(JSON.stringify(result, undefined, 4)) + "</pre>");
+				
+				var json = JSON.parse(result);
+				
+				$('.result').html("<span>" + new Date() + "</span><pre>" + syntaxHighlight(JSON.stringify(json, undefined, 4)) + "</pre>");
 			}).fail(function() {
 				console.log("Error retrieving data...");
 			});
