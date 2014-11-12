@@ -7,11 +7,12 @@ $(function() {
 		var result = $('#selection').val();
 
 		if (query != "") {
+			$('.result').html('<div style="text-align:center"><i class="fa fa-spinner fa-spin fa-3x"></i><br/><span>Loading data...</span></div>');
 			$.ajax({
 				type : "POST",
 				cache : false,
 				url : "php/SPARQLClient.php",
-				async : false,
+				async : true,
 				data : {
 					query : query
 				}
@@ -22,6 +23,7 @@ $(function() {
 				
 				$('.result').html("<span>" + new Date() + "</span><pre>" + syntaxHighlight(JSON.stringify(json, undefined, 4)) + "</pre>");
 			}).fail(function() {
+				$('.result').html('<b style="color:red">Error retrieving data...</b>');
 				console.log("Error retrieving data...");
 			});
 			console.log("Asked query: " + query);
