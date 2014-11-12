@@ -22,6 +22,9 @@
 	display: block;
 	font-size: 11px;
 }
+.basic-grey #runQuery {
+	display: none;
+}
 .basic-grey label {
 	display: block;
 	margin: 0px;

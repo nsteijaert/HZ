@@ -2,6 +2,26 @@
  * This function is called when submitting the query form
  */
 $(function() {
+	if (window.location.hash != "") {
+		if (window.location.hash == "#runQuery") {
+			$('#visualisation').fadeOut(function() {
+				$(this).html('');
+				$('#runQuery').fadeIn();
+			});
+		} else {
+			var str = window.location.hash.replace("#", "");
+			$('#visualisation').load(str).hide();
+			$('#runQuery').fadeOut(function() {
+				$('#visualisation').fadeIn();
+			});
+		}
+	} else {
+		$('#visualisation').fadeOut(function() {
+			$(this).html('');
+			$('#runQuery').fadeIn();
+		});
+	}
+
 	$('form').submit(function() {
 		var query = $('#query').val();
 		var result = $('#selection').val();
