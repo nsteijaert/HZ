@@ -7,48 +7,51 @@
 // Required libraries
 require ('../lib/EasyRdf.php');
 
-class SPARQLclient {
+class SPARQLClient {
 
 	// Global variables
 	private $serialiserType = null;
 	private $serialiser = null;
+	private $sparql = null;
 
 	// Initialise a SPARQL Client with a endpoint URL
 	public function __construct($endpoint) {
-		$sparql = new EasyRdf_Sparql_Client($endpoint);
+		$this -> sparql = new EasyRdf_Sparql_Client($endpoint);
 	}
 
 	// Set the serialiser to be used if the result graph needs to be converted
-	public function setSerialiser($serialiser_user) {
+	public function setSerialiser($serialiser_user = "json") {
+		$this -> serialiserType = $serialiser_user;
 		switch ($serialiser_user) {
-			case "Json" :
-				$serialiser = new EasyRdf_Serializer_Json();
+			case "json" :
+				$this -> serialiser = new EasyRdf_Serialiser_Json();
 				break;
 			case "GraphViz" :
-				$serialiser = new EasyRdf_Serializer_GraphzViz();
+				$this -> serialiser = new EasyRdf_Serialiser_GraphzViz();
 				break;
 			case "JsonLd" :
-				$serialiser_local = new EasyRdf_Serializer_JsonLd();
+				$this -> serialiser_local = new EasyRdf_Serialiser_JsonLd();
 				break;
 			case "Ntriples" :
-				$serialiser = new EasyRdf_Serializer_Ntriples();
+				$this -> serialiser = new EasyRdf_Serialiser_Ntriples();
 				break;
 			case "Rapper" :
-				$serialiser = new EasyRdf_Serializer_Rapper();
+				$this -> serialiser = new EasyRdf_Serialiser_Rapper();
 				break;
 			case "RdfPhp" :
-				$serialiser = new EasyRdf_Serializer_RdfPhp();
+				$this -> serialiser = new EasyRdf_Serialiser_RdfPhp();
 				break;
 			case "RdfXml" :
-				$serialiser = new EasyRdf_Serializer_RdfXml();
+				$this -> serialiser = new EasyRdf_Serialiser_RdfXml();
 				break;
 			case "Turtle" :
-				$serialiser = new EasyRdf_Serializer_Turtle();
+				$this -> serialiser = new EasyRdf_Serialiser_Turtle();
 				break;
 			default :
-				$serialiser = new EasyRdf_Serializer_Json();
+				$this -> serialiser = new EasyRdf_Serialiser_Json();
+				$this -> serialiserType = "json";
+				break;
 		}
-		$this -> serialiserType = $serialiser_user;
 	}
 
 	// Set any general purpose SPARQL prefixes to enable smaller queries
@@ -58,15 +61,15 @@ class SPARQLclient {
 
 	// Execute a query with a non-serialised result (a.k.a. EasyRDF graph as result)
 	public function executeQuery($query) {
-		$result = $sparql -> query($query);
+		$result = $this -> sparql -> query($query);
 		return $result;
 	}
 
 	// Execute a query with a serialised result (set the serialiser first!)
 	public function executeSerialisedQuery($query) {
-		$result = $sparql -> query($query);
-		$serializedData = $serializer -> serialise($result, $serialiserType);
-		return $serialisedResult;
+		$result = $this -> sparql -> query($query);
+		$serializedData = $this -> serialiser -> serialise($result, $this -> serialiserType);
+		return $serializedData;
 	}
 
 }

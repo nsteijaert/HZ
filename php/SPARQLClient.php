@@ -4,26 +4,20 @@
  * SPARQLClient is used to communicatie with an RDF endpoint through SPARQL query's, it returns data in the JSON format.
  */
 //Required libraries
-require('../lib/EasyRdf.php');
-require('../lib/html_tag_helpers.php');
+require('SPARQLClient.class.php');
+//require('../lib/html_tag_helpers.php');
 
-//Pred-defined SPARQL prefixews
-EasyRdf_Namespace::set('category', 'http://dbpedia.org/resource/Category:');
-EasyRdf_Namespace::set('dbpedia', 'http://dbpedia.org/resource/');
-EasyRdf_Namespace::set('dbo', 'http://dbpedia.org/ontology/');
-EasyRdf_Namespace::set('dbp', 'http://dbpedia.org/property/');
+$SPARQLClient = new SPARQLClient('http://dbpedia.org/sparql');
 
-//Initialize a SPARQL client and JSON serialiser
-$sparql = new EasyRdf_Sparql_Client('http://dbpedia.org/sparql');
-$serializer = new EasyRdf_Serialiser_Json();
+$SPARQLClient -> setSerialiser();
 
-//Run query and store result in $result
-$result = $sparql->query($_POST['query']);
+$SPARQLClient -> setPredefinedSparqlPrefixs('category', 'http://dbpedia.org/resource/Category:');
+$SPARQLClient -> setPredefinedSparqlPrefixs('dbpedia', 'http://dbpedia.org/resource/');
+$SPARQLClient -> setPredefinedSparqlPrefixs('dbo', 'http://dbpedia.org/ontology/');
+$SPARQLClient -> setPredefinedSparqlPrefixs('dbp', 'http://dbpedia.org/property/');
 
-//Serialise data to JSON
-$serializedData = $serializer->serialise($result, "json");
+echo $SPARQLClient -> executeSerialisedQuery($_POST['query']);
 
-// Echo serialised data to the page
-echo $serializedData;
+
 
 ?>

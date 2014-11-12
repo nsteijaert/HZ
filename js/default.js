@@ -28,7 +28,6 @@ $(function() {
 		} else {
 			console.log("No given query");
 		}
-		return false;
 	});
 });
 
