@@ -1,30 +1,41 @@
+<!doctype html>
+
 <html>
 	<head>
-		<title>SPARQL - query test</title>
+		<title>SPARQL</title>
 		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 		<link href="css/style.css" rel="stylesheet" />
 		<script src="js/jquery-2.1.1.min.js"></script>
 		<script src="js/default.js"></script>
 	</head>
 	<body>
+		<nav>
+			<a href="#runQuery">Query Form</a>
+			<a href="#visualisation.html">Visualisation (Nick)</a>
+			<a href="#visualisationPieter.html">Visualisation (Pieter)</a>
+		</nav>
 		<div class="basic-grey">
-			<form action="" method="post" onsubmit="return false;">
-				<h1>Query Form <span>Fill in the field, press Submit and enjoy the result.</span></h1>
+			<div id="runQuery">
+				<form action="" method="post" onsubmit="return false;">
+					<h1>Query Form <span>Fill in the field, press Submit and enjoy the result.</span></h1>
 
-				<label> <span>Message :</span> 						<textarea id="query" name="query" placeholder="Your query"></textarea> </label>
-				<label> <span>Result :</span>
-					<select name="selection" id="selection" >
-						<option value="json">JSON</option>
-						<option value="default">No transform</option>
-					</select> </label>
-				<label> <span>&nbsp;</span>
-					<input type="submit" class="button" value="Submit" />
-				</label>
-			</form>
-			<div id="result" >
-				<h3>Result :</h3>
-				<div class="result" ></div>
+					<label> <span>Message :</span> 						<textarea id="query" name="query" placeholder="Your query"></textarea> </label>
+					<label> <span>Result :</span>
+						<select name="selection" id="selection" >
+							<option value="json">JSON</option>
+							<option value="default">No transform</option>
+						</select> </label>
+					<label> <span>&nbsp;</span>
+						<input type="submit" class="button" value="Submit" />
+					</label>
+				</form>
+				<div id="result" >
+					<h3>Result :</h3>
+					<div class="result" ></div>
+				</div>
 			</div>
+			<div id="visualisation"></div>
+
 		</div>
 	</body>
 </html>

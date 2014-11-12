@@ -1,6 +1,6 @@
 /*
  * This function is called when submitting the query form
- */ 
+ */
 $(function() {
 	$('form').submit(function() {
 		var query = $('#query').val();
@@ -18,9 +18,9 @@ $(function() {
 				}
 			}).done(function(result) {
 				console.log("Data successfully retrieved...");
-				
+
 				var json = JSON.parse(result);
-				
+
 				$('.result').html("<span>" + new Date() + "</span><pre>" + syntaxHighlight(JSON.stringify(json, undefined, 4)) + "</pre>");
 			}).fail(function() {
 				$('.result').html('<b style="color:red">Error retrieving data...</b>');
@@ -29,6 +29,21 @@ $(function() {
 			console.log("Asked query: " + query);
 		} else {
 			console.log("No given query");
+		}
+	});
+
+	$('nav').on('click', 'a', function() {
+		if ($(this).attr('href') == "#runQuery") {
+			$('#visualisation').fadeOut(function() {
+				$(this).html('');
+				$('#runQuery').fadeIn();
+			});
+		} else {
+			var str = $(this).attr('href').replace("#", "");
+			$('#visualisation').load(str).hide();
+			$('#runQuery').fadeOut(function() {
+				$('#visualisation').fadeIn();
+			});
 		}
 	});
 });
