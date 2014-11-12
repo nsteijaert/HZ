@@ -10,8 +10,8 @@ require ('../lib/EasyRdf.php');
 class SPARQLclient {
 
 	// Global variables
-	var $serialiserType = null;
-	var $serialiser = null;
+	private $serialiserType = null;
+	private $serialiser = null;
 
 	// Initialise a SPARQL Client with a endpoint URL
 	public function __construct($endpoint) {
@@ -65,14 +65,14 @@ class SPARQLclient {
 	}
 
 	// Execute a query with a non-serialised result (a.k.a. EasyRDF graph as result)
-	public function executeQuery($Query) {
-		$result = $sparql -> query($_POST['query']);
+	public function executeQuery($query) {
+		$result = $sparql -> query($query);
 		return $result;
 	}
 
 	// Execute a query with a serialised result (set the serialiser first!)
 	public function executeSerialisedQuery($query) {
-		$result = $sparql -> query($_POST['query']);
+		$result = $sparql -> query($query);
 		$serializedData = $serializer -> serialise($result, $serialiserType);
 		return $serialisedResult;
 	}
