@@ -2,7 +2,25 @@
  * @author Pieter
  */
 $(function() {
-	var circle = d3.selectAll("circle");
-	circle.style("fill", "steelblue");
-	circle.attr("r", 30);
+
+	var width = $('.visualisationResult').width(), height = 500;
+
+	var randomX = d3.random.normal(width / 2, 80), randomY = d3.random.normal(height / 2, 80);
+
+	var data = d3.range(2000).map(function() {
+		return [randomX(), randomY()];
+	});
+
+	var svg = d3.select(".visualisation").append("svg").attr("width", width).attr("height", height).append("g").call(d3.behavior.zoom().scaleExtent([1, 8]).on("zoom", zoom)).append("g");
+
+	svg.append("rect").attr("class", "overlay").attr("width", width).attr("height", height);
+
+	svg.selectAll("circle").data(data).enter().append("circle").attr("r", 2.5).attr("transform", function(d) {
+		return "translate(" + d + ")";
+	});
+
+	function zoom() {
+		svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+	}
+
 });

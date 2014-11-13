@@ -1,7 +1,46 @@
 <script src="js/default_p.js"></script>
+<style>
+	.visualisationResult {
+		border: 1px solid;
+		position: relative;
+	}
+
+	.evenHandlers {
+		bottom: 0;
+		position: absolute;
+		right: 0;
+	}
+
+	.evenHandlers button {
+		color: #DDDDDD;
+		display: block;
+		border: none;
+		padding: 5px;
+		margin: 5px;
+		background: none;
+	}
+
+	.evenHandlers button:hover {
+		background: #DDDDDD;
+		border-radius: 5px;
+		color: #FFFFFF;
+		cursor: pointer;
+	}
+
+	.overlay {
+		fill: none;
+		pointer-events: all;
+	}
+</style>
 <h3>Result in html</h3>
 <div class="visualisationResult">
-	<svg width="750" height="500" >
-		<circle cx="375" cy="250" r="5"></circle>
-	</svg>
+	<div class="visualisation"></div>
+	<div class="evenHandlers">
+		<button>
+			<i class="fa fa-search-plus fa-2x"></i>
+		</button>
+		<button>
+			<i class="fa fa-search-minus fa-2x"></i>
+		</button>
+	</div>
 </div>
