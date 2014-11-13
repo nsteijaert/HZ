@@ -2,7 +2,7 @@
 /**
  * This visitor class is used to generate an abstract syntax tree with all elements related to contexts
  */
-class ContextVisitee extends Visitor {
+class ContextVisitee extends Visitee {
 	
 	private $value1;
 	private $value2;

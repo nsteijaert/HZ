@@ -1,8 +1,13 @@
 <?php
-writeln('BEGIN TESTING VISITOR PATTERN');
-  writeln('');
- 
-  $context = new ContextVisitee('value1','valu2');
+	//visitee's
+	require_once("visitee.class.php");
+	require_once("contextVisitee.class.php");
+	
+	//visitors
+	require_once("visitor.class.php");
+	require_once("contextVisitor.vlass.php");
+	
+  $context = new ContextVisitee('value1','value2');
 
   $contextVisitor = new ContextVisitor();
  
