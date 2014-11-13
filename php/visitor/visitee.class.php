@@ -1,5 +1,5 @@
 <?php
- abstract class ContextVisitee extends Visitor {
+ abstract class Visitee {
  		abstract function accept(Visitor $visitorIn);
  	}
 ?>
