@@ -1,4 +1,7 @@
 <?php
+/**
+ *  @author Nick Steijaert
+ */
 class contextVisitor extends Visitor {
     private $value1 = null;
     function getValue1() {

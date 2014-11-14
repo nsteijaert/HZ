@@ -1,4 +1,8 @@
 <?php
+/**
+ *  @author Nick Steijaert
+ */
+
 //visitee's
 require_once ("visitee.class.php");
 require_once ("contextVisitee.class.php");

@@ -1,6 +1,7 @@
 <?php
 /**
  * This visitor class is used to generate an abstract syntax tree with all elements related to contexts
+ *  @author Nick Steijaert
  */
 class ContextVisitee extends Visitee {
 
