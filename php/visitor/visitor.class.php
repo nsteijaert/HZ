@@ -1,5 +1,5 @@
 <?php
 abstract class Visitor {
-	abstract function visitContext(ContextVisitee $contextVisitee);
+    abstract function visitContext(ContextVisitee $contextVisitee);
 }
 ?>

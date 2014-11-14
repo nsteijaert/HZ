@@ -1,5 +1,5 @@
 <?php
- abstract class Visitee {
- 		abstract function accept(Visitor $visitorIn);
- 	}
+abstract class Visitee {
+    abstract function accept(Visitor $visitorIn);
+}
 ?>
