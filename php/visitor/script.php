@@ -7,12 +7,18 @@ require_once ("contextVisitee.class.php");
 require_once ("visitor.class.php");
 require_once ("contextVisitor.vlass.php");
 
-$context = new ContextVisitee('value1', 'value2');
+$json_local = null;
 
-$contextVisitor = new ContextVisitor();
+function createAST($json_in) {
+    $json_local = $json_in;
 
-acceptVisitor($value1, $value2);
-acceptVisitor($software, $plainVisitor);
+    $context = new ContextVisitee('value1', 'value2');
+
+    $contextVisitor = new ContextVisitor();
+
+    acceptVisitor($value1, $value2);
+    acceptVisitor($value1, $value2);
+}
 
 function acceptVisitor(Visitee $visitee_in, Visitor $visitor_in) {
     $visitee_in -> accept($visitor_in);
