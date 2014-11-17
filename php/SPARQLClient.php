@@ -7,7 +7,7 @@
 require('SPARQLClient.class.php');
 //require('../lib/html_tag_helpers.php');
 
-$SPARQLClient = new SPARQLClient('http://dbpedia.org/sparql');
+$SPARQLClient = new SPARQLClient('http://127.0.0.1:3030/ds/');
 
 $SPARQLClient -> setSerialiser();
 
@@ -17,7 +17,5 @@ $SPARQLClient -> setPredefinedSparqlPrefixs('dbo', 'http://dbpedia.org/ontology/
 $SPARQLClient -> setPredefinedSparqlPrefixs('dbp', 'http://dbpedia.org/property/');
 
 echo $SPARQLClient -> executeSerialisedQuery($_POST['query']);
-
-
 
 ?>
