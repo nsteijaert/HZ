@@ -7,7 +7,7 @@
 require('SPARQLClient.class.php');
 //require('../lib/html_tag_helpers.php');
 
-$SPARQLClient = new SPARQLClient('http://127.0.0.1:3030/ds/');
+$SPARQLClient = new SPARQLClient('http://localhost:3030/ds/query');
 
 $SPARQLClient -> setSerialiser();
 
