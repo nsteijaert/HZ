@@ -2,6 +2,7 @@
  * This function is called when submitting the query form
  */
 $(function() {
+
 	if (window.location.hash != "") {
 		if (window.location.hash == "#runQuery") {
 			$('#visualisation').fadeOut(function() {
@@ -24,28 +25,60 @@ $(function() {
 
 	$('form').submit(function() {
 		var query = $('#query').val();
-		var result = $('#selection').val();
+		var selection = $('#selection').val();
 
 		if (query != "") {
 			$('.result').html('<div style="text-align:center"><i class="fa fa-spinner fa-spin fa-3x"></i><br/><span>Loading data...</span></div>');
-			$.ajax({
-				type : "POST",
-				cache : false,
-				url : "php/SPARQLClient.php",
-				async : true,
-				data : {
-					query : query
-				}
-			}).done(function(result) {
-				console.log("Data successfully retrieved...");
+			if (true) {
+				$.ajax({
+					type : "GET",
+					cache : false,
+					url : "http://localhost:3030/ds/query",
+					async : true,
+					data : {
+						query : query,
+						output : selection
+					}
+				}).done(function(result) {
+					console.log("Data successfully retrieved...");
 
-				var json = JSON.parse(result);
+					if (selection == "json") {
+						$('.result').html("<span>" + new Date() + "</span><pre><code class='html'>" + JSON.stringify(result, undefined, 4) + "</code></pre>");
+					} else {
+						var xmlText = new XMLSerializer().serializeToString(result);
+						var xmlTextNode = document.createTextNode(xmlText);
+						$('.result').html("<span>" + new Date() + "</span><pre><code class='xml'></code></pre>");
+						$('.result pre code').append(xmlTextNode);
+					}
+					
+					$('pre code').each(function(i, e) {
+						hljs.highlightBlock(e);
+					});
+				}).fail(function() {
+					$('.result').html('<b style="color:red">Error retrieving data...</b>');
+					console.log("Error retrieving data...");
+				});
+			} else {
+				$.ajax({
+					type : "POST",
+					cache : false,
+					url : "php/SPARQLClient.php",
+					async : true,
+					data : {
+						query : query,
+						type : "json"
+					}
+				}).done(function(result) {
+					console.log("Data successfully retrieved...");
 
-				$('.result').html("<span>" + new Date() + "</span><pre>" + syntaxHighlight(JSON.stringify(json, undefined, 4)) + "</pre>");
-			}).fail(function() {
-				$('.result').html('<b style="color:red">Error retrieving data...</b>');
-				console.log("Error retrieving data...");
-			});
+					var json = JSON.parse(result);
+
+					$('.result').html("<span>" + new Date() + "</span><pre>" + syntaxHighlight(JSON.stringify(json, undefined, 4)) + "</pre>");
+				}).fail(function() {
+					$('.result').html('<b style="color:red">Error retrieving data...</b>');
+					console.log("Error retrieving data...");
+				});
+			}
 			console.log("Asked query: " + query);
 		} else {
 			console.log("No given query");

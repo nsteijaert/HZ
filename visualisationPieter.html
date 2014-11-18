@@ -34,7 +34,24 @@
 </style>
 <h3>Result in html</h3>
 <div class="visualisationResult">
-	<div class="visualisation"></div>
+	<div class="visualisation">
+		<svg xmlns="http://www.w3.org/2000/svg"
+   xmlns:xhtml="http://www.w3.org/1999/xhtml"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.1"
+   width="20cm" height="20cm"
+   viewBox="0 0 1000 1000"
+   preserveAspectRatio="xMinYMin"
+   style="background-color:white; border: solid 1px black;"
+>
+<defs>
+<path id="textPath" d="M 250 500 A 250,150 0 1 1 750,500"/>
+</defs>
+<text x="0" y="0" text-anchor="middle" style="font-size:30pt;"><textPath xlink:href="#textPath" startOffset="50%" >here goes my text</textPath></text>
+</svg><svg>
+			<path id="textPath" d="M 250 500 A 250,150 0 1 1 750,500" />
+		</svg>
+	</div>
 	<div class="evenHandlers">
 		<button>
 			<i class="fa fa-search-plus fa-2x"></i>

@@ -7,6 +7,10 @@
 		<link href="css/style.css" rel="stylesheet" />
 		<script src="js/jquery-2.1.1.min.js"></script>
 		<script src="js/d3.min.js"></script>
+
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/7.0/styles/default.min.css">
+		<script src="http://yandex.st/highlightjs/7.0/highlight.min.js"></script>
+
 		<script src="js/default.js"></script>
 	</head>
 	<body>
@@ -21,12 +25,11 @@
 				<form action="" method="post" onsubmit="return false;">
 					<h1>Query Form <span>Fill in the field, press Submit and enjoy the result.</span></h1>
 
-					<label> <span>Message :</span>
-						<textarea id="query" name="query" placeholder="Your query"></textarea> </label>
+					<label> <span>Message :</span> 						<textarea id="query" name="query" placeholder="Your query"></textarea> </label>
 					<label> <span>Result :</span>
 						<select name="selection" id="selection" >
 							<option value="json">JSON</option>
-							<option value="default">No transform</option>
+							<option value="xml">XML</option>
 						</select> </label>
 					<label> <span>&nbsp;</span>
 						<input type="submit" class="button" value="Submit" />
