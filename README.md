@@ -4,5 +4,5 @@ This project is used by Pieter Moens, Nick Steijaert and Michael Steenbeek as a 
 E.g. a Thessaurus visualisation, 3D knowledge model visualisation and a Rich learning enviroment.
 
 Howto
-==
+--
 If you want to resolve data from the triple-store, you need to start the fuseki-server on your localhost.
