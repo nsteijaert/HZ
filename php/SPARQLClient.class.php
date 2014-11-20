@@ -103,7 +103,7 @@ class SPARQLClient {
             foreach ($property as $object_property) {
                 $object -> setProperty($object_property);
             }
-            $intermediate_data[$object];
+            array_push($intermediate_data, $object);
         }
         return $intermediate_data;
     }
