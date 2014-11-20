@@ -19,6 +19,11 @@ class SPARQLObject {
         $this -> $properties[$property_value] = $property_name;
     }
 
+    //Sets all properties
+    public function setProperties($propertyArray) {
+        array_merge($this -> $properties, $propertyarray);
+    }
+
     //Sets the type
     public function getType() {
         return $this -> $type;
