@@ -14,9 +14,10 @@ class SPARQLClient {
     private $serialiserType = null;
     private $serialiser = null;
     private $sparql = null;
-
+    
     // Initialise a SPARQL Client with a endpoint URL
-    public function __construct($endpoint) {
+    public function __construct($endpoint = null) {
+    	if ($endpoint != null)
         $this -> sparql = new EasyRdf_Sparql_Client($endpoint);
     }
 
@@ -80,6 +81,22 @@ class SPARQLClient {
         $intermediate_data = array();
 
         $decoded_data = json_decode($serializedData);
+
+        foreach ($decoded_data as $name => $value) {
+            $object = new SPARQLObject($value);
+            foreach ($property as $object_property) {
+                $object -> setProperty($object_property);
+            }
+            $intermediate_data[$object];
+        }
+        return $intermediate_data;
+    }
+	
+	//Return the result as an array of PHP objects with properties in an array within the object
+    public function parseJSON($json) {
+        $intermediate_data = array();
+
+        $decoded_data = json_decode($json);
 
         foreach ($decoded_data as $name => $value) {
             $object = new SPARQLObject($value);

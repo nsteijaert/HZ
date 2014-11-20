@@ -4,8 +4,14 @@
  * SPARQLClient is used to communicatie with an RDF endpoint through SPARQL query's, it returns data in the JSON format.
  */
 //Required libraries
-require('SPARQLClient.class.php');
+require ('SPARQLClient.class.php');
 //require('../lib/html_tag_helpers.php');
+
+$SPARQLClient = new SPARQLClient();
+
+var_dump($SPARQLClient -> parseJSON($_POST["json"]));
+
+exit ;
 
 //$SPARQLClient = new SPARQLClient('http://dbpedia.org/sparql');
 $SPARQLClient = new SPARQLClient('http://localhost:3030/ds/query');
@@ -19,5 +25,4 @@ $SPARQLClient -> setSerialiser();
 $SPARQLClient -> setPredefinedSparqlPrefixs('dbwiki', 'http://localhost:3030/');
 
 echo $SPARQLClient -> executeSerialisedQuery($_POST['query']);
-
 ?>
