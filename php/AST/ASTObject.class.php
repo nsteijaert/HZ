@@ -1,4 +1,7 @@
 <?
+/**
+ * ASTObject is the base for the objects encountered in an asynchronous tree
+ */
 
 class ASTObject {
 
