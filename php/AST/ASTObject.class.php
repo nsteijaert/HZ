@@ -10,7 +10,7 @@ class ASTObject {
 	 * @param (String) $name = Name of the object.
 	 */
 	public function ASTObject($name) {
-		setName($name);
+		$this -> setName($name);
 	}
 
 	/**
