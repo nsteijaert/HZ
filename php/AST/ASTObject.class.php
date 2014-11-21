@@ -12,7 +12,7 @@ class ASTObject {
 	/**
 	 * @param (String) $name = Name of the object.
 	 */
-	public function ASTObject($name) {
+	public function __construct($name) {
 		$this -> setName($name);
 	}
 
