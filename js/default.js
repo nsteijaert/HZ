@@ -40,7 +40,6 @@ $(function() {
 						output : selection
 					}
 				}).done(function(result) {
-					console.log("Data successfully retrieved...");
 
 					if (selection == "json") {
 						$('.result').html("<span>" + new Date() + "</span><pre><code class='html'>" + JSON.stringify(result, undefined, 4) + "</code></pre>");
@@ -58,9 +57,8 @@ $(function() {
 					// $.post("php/SPARQLClient.php", {json: JSON.stringify(result)}, function(result) {
 						// $('.result').html(result);
 					// });
-				}).fail(function() {
-					$('.result').html('<b style="color:red">Error retrieving data...</b>');
-					console.log("Error retrieving data...");
+				}).fail(function(result) {
+					$('.result').html("<p><b style='color:red'>Error retrieving data...</b></p><pre>" + result.responseText + "</pre>");
 				});
 			} else {
 				$.ajax({
@@ -83,7 +81,6 @@ $(function() {
 					console.log("Error retrieving data...");
 				});
 			}
-			console.log("Asked query: " + query);
 		} else {
 			console.log("No given query");
 		}
