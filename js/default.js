@@ -42,22 +42,22 @@ $(function() {
 				}).done(function(result) {
 					console.log("Data successfully retrieved...");
 
-					// if (selection == "json") {
-						// $('.result').html("<span>" + new Date() + "</span><pre><code class='html'>" + JSON.stringify(result, undefined, 4) + "</code></pre>");
-					// } else {
-						// var xmlText = new XMLSerializer().serializeToString(result);
-						// var xmlTextNode = document.createTextNode(xmlText);
-						// $('.result').html("<span>" + new Date() + "</span><pre><code class='xml'></code></pre>");
-						// $('.result pre code').append(xmlTextNode);
-					// }
-// 					
-					// $('pre code').each(function(i, e) {
-						// hljs.highlightBlock(e);
-					// });
+					if (selection == "json") {
+						$('.result').html("<span>" + new Date() + "</span><pre><code class='html'>" + JSON.stringify(result, undefined, 4) + "</code></pre>");
+					} else {
+						var xmlText = new XMLSerializer().serializeToString(result);
+						var xmlTextNode = document.createTextNode(xmlText);
+						$('.result').html("<span>" + new Date() + "</span><pre><code class='xml'></code></pre>");
+						$('.result pre code').append(xmlTextNode);
+					}
 					
-					$.post("php/SPARQLClient.php", {json: JSON.stringify(result)}, function(result) {
-						$('.result').html(result);
+					$('pre code').each(function(i, e) {
+						hljs.highlightBlock(e);
 					});
+					
+					// $.post("php/SPARQLClient.php", {json: JSON.stringify(result)}, function(result) {
+						// $('.result').html(result);
+					// });
 				}).fail(function() {
 					$('.result').html('<b style="color:red">Error retrieving data...</b>');
 					console.log("Error retrieving data...");
