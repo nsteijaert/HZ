@@ -5,8 +5,8 @@
  */
 
 // Required libraries
-require ('../lib/EasyRdf.php');
-require ('SPARQLObject.class.php');
+require (__DIR__.'/../lib/EasyRdf.php');
+require (__DIR__.'/SPARQLObject.class.php');
 
 class SPARQLClient {
 
