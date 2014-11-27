@@ -42,12 +42,15 @@ $(function() {
 				}).done(function(result) {
 
 					if (selection == "json") {
-						$('.result').html("<span>" + new Date() + "</span><pre><code class='html'>" + JSON.stringify(result, undefined, 4) + "</code></pre>");
-					} else {
+						$('.result').html("<span>" + new Date() + "</span><pre><code class='json'>" + JSON.stringify(result, undefined, 4) + "</code></pre>");
+					} else if (selection == "xml") {
 						var xmlText = new XMLSerializer().serializeToString(result);
 						var xmlTextNode = document.createTextNode(xmlText);
 						$('.result').html("<span>" + new Date() + "</span><pre><code class='xml'></code></pre>");
 						$('.result pre code').append(xmlTextNode);
+					} else {
+						$('.result').html("<span>" + new Date() + "</span><pre><code class='text'></code></pre>");
+						$('.result pre code').text(result).append();
 					}
 					
 					$('pre code').each(function(i, e) {
