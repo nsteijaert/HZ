@@ -37,7 +37,7 @@
 	margin-top: 10px;
 	color: #888;
 }
-.basic-grey input[type="text"], .basic-grey input[type="email"], .basic-grey textarea, .basic-grey select {
+.basic-grey input[type="text"], .basic-grey input[type="email"], .basic-grey input[type="number"], .basic-grey textarea, .basic-grey select {
 	border: 1px solid #DADADA;
 	color: #888;
 	height: 30px;
@@ -55,7 +55,7 @@
 }
 .basic-grey textarea {
 	padding: 5px 3px 3px 5px;
-	font: 14px "Calibri", "Times New Roman", Times, serif;
+	/*font: 14px "Calibri", "Times New Roman", Times, serif;*/
 	color: #888;
 }
 .basic-grey select {
@@ -71,7 +71,7 @@
 	line-height: 25px;
 }
 .basic-grey textarea {
-	height: 100px;
+	height: 250px;
 }
 .basic-grey .button {
 	background: #E27575;
