@@ -92,12 +92,12 @@
 	margin-top: 50px;
 }
 
-/* font-size: 10px makes the results look better */
+/* font-size: 12px makes the results look better */
 pre {
-	font-size: 10px;
+	font-size: 12px;
 	outline: 1px solid #ccc;
 	padding: 5px;
-	margin: 5px;
+	margin: 3px 0 0;
 }
 .string {
 	color: green;
