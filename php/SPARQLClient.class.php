@@ -15,7 +15,7 @@ class SPARQLClient {
     private $serialiser = null;
     private $sparql = null;
 
-    // Initialise a SPARQL Client with a endpoint URL
+    // Initialise a SPARQL Client with an endpoint URL
     public function __construct($endpoint = null) {
         if ($endpoint != null)
             $this -> sparql = new EasyRdf_Sparql_Client($endpoint);

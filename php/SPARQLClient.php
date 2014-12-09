@@ -9,7 +9,7 @@ require ('SPARQLClient.class.php');
 
 $SPARQLClient = new SPARQLClient();
 
-var_dump($SPARQLClient -> parseJSON($_POST["json"]));
+//var_dump($SPARQLClient -> parseJSON($_POST["json"]));
 
 exit ;
 
@@ -22,7 +22,7 @@ $SPARQLClient -> setSerialiser();
 //$SPARQLClient -> setPredefinedSparqlPrefixs('dbpedia', 'http://dbpedia.org/resource/');
 //$SPARQLClient -> setPredefinedSparqlPrefixs('dbo', 'http://dbpedia.org/ontology/');
 //$SPARQLClient -> setPredefinedSparqlPrefixs('dbp', 'http://dbpedia.org/property/');
-$SPARQLClient -> setPredefinedSparqlPrefixs('dbwiki', 'http://localhost:3030/');
+//$SPARQLClient -> setPredefinedSparqlPrefixs('dbwiki', 'http://localhost:3030/');
 
 echo $SPARQLClient -> executeSerialisedQuery($_POST['query']);
 ?>

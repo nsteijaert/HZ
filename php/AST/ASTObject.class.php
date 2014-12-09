@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * ASTObject is the base for the objects encountered in an asynchronous tree
  */
@@ -24,16 +24,16 @@ class ASTObject {
 	}
 
 	/**
-	 * @param (String) $relationName = Name of the relation to add.
+	 * @param (String) $relationName = instance of ASTObject class
 	 */
-	public function addRelation($relationName = "") {
+	public function addRelation($relationName) {
 		array_push($this -> relations, $relationName);
 	}
 
 	/**
-	 * @param (String) $relationName = Name of the removable relation.
+	 * @param (String) $relationName = instance of ASTObject class
 	 */
-	public function removeRelation($relationName = "") {
+	public function removeRelation($relationName) {
 		if (($key = array_search($relationName, $this -> relations)) !== false) {
 			unset($this -> relations[$key]);
 		}
@@ -42,8 +42,8 @@ class ASTObject {
 	/**
 	 * @param (String) $propertyName = Name of the property to add.
 	 */
-	public function addProperty($propertyName = "") {
-		array_push($this -> properties, $propertyName);
+	public function addProperty($propertyName = "", $propertyValue = "") {
+		$this -> properties[$propertyName] = $propertyValue;
 	}
 
 	/**

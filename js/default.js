@@ -35,7 +35,7 @@ $(document).ready(function() {
 					$.ajax({
 						type : "POST",
 						cache : false,
-						url : "php/pieter/generateQuery.php",
+						url : "php/generateQuery.php",
 						async : true,
 						data : {
 							concept : query,
@@ -103,9 +103,9 @@ function runQuery(query, selection) {
 			hljs.highlightBlock(e);
 		});
 
-		// $.post("php/SPARQLClient.php", {json: JSON.stringify(result)}, function(result) {
-		// $('.result').html(result);
-		// });
+		$.post("php/AST/ASTParser.php", {
+			data : result
+		});
 	}).fail(function(result) {
 		$('.result').html("<p><b style='color:red'>Error retrieving data...</b></p><pre>" + result.responseText + "</pre>");
 	});
