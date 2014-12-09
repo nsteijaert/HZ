@@ -4,7 +4,7 @@
  * @author: Michael Steenbeek
  */
  require_once('php/SPARQLClient.class.php');
- $client=new SPARQLClient();
+ $client = new SPARQLClient('http://localhost:3030/ds/query');
  // Default
  $client->setSerialiser();
  
