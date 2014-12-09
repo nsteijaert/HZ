@@ -9,11 +9,75 @@ class Activity extends IntentionalElement
 	private $produces;
 	private $consumes;
 	
-	// An array of Connects objects
-	private $connects=array();
+	// An SplObjectStorage of Connects objects
+	private $connects;
 	
 	public function __construct()
 	{
 		super.__construct();
+		$this->connects=new SplObjectStorage();
+	}
+	
+	public function setProduces($produces)
+	{
+		if ($produces instanceOf Outcome)
+		{
+			$this->produces=$produces;
+		}
+		else 
+		{
+			throw new Exception('Not an Outcome');
+		}
+	}
+	
+	public function getProduces()
+	{
+		return $this->produces;
+	}
+	
+	public function setConsumes($consumes)
+	{
+		if ($consumes instanceOf Outcome)
+		{
+			$this->consumes=$consumes;
+		}
+		else 
+		{
+			throw new Exception('Not an Outcome');
+		}
+	}
+	
+	public function getConsumes()
+	{
+		return $this->consumes;
+	}
+	
+	public function addConnects(&$connects)
+	{
+		if ($connects instanceOf Connects)
+		{
+			$this->connects->attach($connects);
+		}
+		else 
+		{
+			throw new Exception('Not a Connects');
+		}
+	}
+	
+	public function removeConnects(&$connects)
+	{
+		if ($connects instanceOf Connects)
+		{
+			$this->connects->detach($connects);
+		}
+		else 
+		{
+			throw new Exception('Not a Connects');
+		}		
+	}
+	
+	public function getConnects()
+	{
+		return $this->connects;
 	}
 }
