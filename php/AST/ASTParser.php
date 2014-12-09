@@ -15,11 +15,27 @@ class ASTParser {
 		$items = array();
 
 		foreach ($this->data['@graph'] as $item) {
-			$obj = new ASTObject($item['label']);
+			$obj = new ASTObject($item['@id']);
 			foreach ($item as $key => $value) {
-
 				if (!$this -> isRelation($key)) {
 					$obj -> addProperty($key, $value);
+				}
+			}
+			$items[$item['@id']] = $obj;
+		}
+
+		foreach ($this->data['@graph'] as $item) {
+			foreach ($item as $key => $value) {
+				if ($this -> isRelation($key)) {
+					if (is_array($value)) {
+						foreach ($value as $relation) {
+							if (array_key_exists($relation, $items))
+								$obj -> addRelation($key, $items[$relation]);
+						}
+					} else {
+						if (array_key_exists($value, $items))
+							$obj -> addRelation($key, $items[$value]);
+					}
 				}
 			}
 		}
