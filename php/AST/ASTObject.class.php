@@ -26,8 +26,8 @@ class ASTObject {
 	/**
 	 * @param (String) $relationName = instance of ASTObject class
 	 */
-	public function addRelation($relationName) {
-		array_push($this -> relations, $relationName);
+	public function addRelation($relationName, $relationValue = "") {
+		$this -> relations[$relationName] = $relationValue;
 	}
 
 	/**
@@ -42,7 +42,7 @@ class ASTObject {
 	/**
 	 * @param (String) $propertyName = Name of the property to add.
 	 */
-	public function addProperty($propertyName = "", $propertyValue = "") {
+	public function addProperty($propertyName, $propertyValue = "") {
 		$this -> properties[$propertyName] = $propertyValue;
 	}
 
