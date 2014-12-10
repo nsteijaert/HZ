@@ -27,7 +27,10 @@ class ASTObject {
 	 * @param (String) $relationName = instance of ASTObject class
 	 */
 	public function addRelation($relationName, $relationValue = "") {
-		$this -> relations[$relationName] = $relationValue;
+		if (array_key_exists($relationName, $this -> relations))
+			array_push($this -> relations[$relationName], $relationValue);
+		else
+			$this -> relations[$relationName] = array($relationValue);
 	}
 
 	/**

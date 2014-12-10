@@ -31,11 +31,36 @@
 		fill: none;
 		pointer-events: all;
 	}
+
+	.link {
+		fill: none;
+		stroke: #666;
+		stroke-width: 1.5px;
+	}
+
+	.node circle {
+		fill: #ccc;
+		stroke: #fff;
+		stroke-width: 1.5px;
+	}
+
+	text {
+		font: 10px sans-serif;
+		pointer-events: none;
+	}
+
+	/* Loaded circle */
+	.bar {
+		height: 5px;
+		width: 0;
+		background: #555555;
+		position: absolute;
+		top: 0;
+	}
 </style>
 <h3>Result in html</h3>
 <div class="visualisationResult">
-	<div class="visualisation">
-	</div>
+	<div class="visualisation"></div>
 	<div class="evenHandlers">
 		<button class="zoomIn">
 			<i class="fa fa-search-plus fa-2x"></i>
@@ -46,7 +71,7 @@
 	</div>
 </div>
 
-<!-- 
+<!--
 
 PREFIX uri: <http://192.168.238.133/index.php/Speciaal:URIResolver/>
 PREFIX skos: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkos-3A>
@@ -54,38 +79,33 @@ PREFIX skosem: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap
 PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
 
 SELECT (?v1 as ?concept) ?relation ?value WHERE
-    {
-        ?v1 ?relation ?value .
-		{
-			SELECT ?c1 ?r1 ?v1 WHERE 
-			{
-				?c1 rdf:label "%s" .
-    			?c1 ?r1 ?v1 .
-    			
-    			FILTER(regex(str(?r1), "Eigenschap-3ASkos-3A") 
-        		|| regex(str(?r1), "Eigenschap-3ASkosem-3A")) .
-			}
-		}
+{
+?v1 ?relation ?value .
+{
+SELECT ?c1 ?r1 ?v1 WHERE
+{
+?c1 rdf:label "%s" .
+?c1 ?r1 ?v1 .
 
-        FILTER(regex(str(?relation), "Eigenschap-3ASkos-3A") 
-        || regex(str(?relation), "Eigenschap-3ASkosem-3A")) .
-    }
-    
-    
-    
+FILTER(regex(str(?r1), "Eigenschap-3ASkos-3A")
+|| regex(str(?r1), "Eigenschap-3ASkosem-3A")) .
+}
+}
+
+FILTER(regex(str(?relation), "Eigenschap-3ASkos-3A")
+|| regex(str(?relation), "Eigenschap-3ASkosem-3A")) .
+}
+
 PREFIX uri: <http://192.168.238.133/index.php/Speciaal:URIResolver/>
 PREFIX skos: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkos-3A>
 PREFIX skosem: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkosem-3A>
 PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
 
 SELECT ?c WHERE
-    {
-				uri:TZW-3Abottumor skosem:broader{,1} ?c .
-    }
-    
-    
-    
-    
+{
+uri:TZW-3Abottumor skosem:broader{,1} ?c .
+}
+
 // SOLVED //
 
 PREFIX uri: <http://192.168.238.133/index.php/Speciaal:URIResolver/>
@@ -95,12 +115,10 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 construct { ?s ?p ?o }
 where {
-  ?c rdfs:label "TZW:mondademen" .
-  ?c (<>|!<>)? ?s .
-  ?s ?p ?o
+?c rdfs:label "TZW:mondademen" .
+?c (<>|!<>)? ?s .
+?s ?p ?o
 }
-
-
 
 // ALTERNATIVE //
 
@@ -110,12 +128,10 @@ PREFIX skosem: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 select ?s ?p ?o {
-  ?c rdfs:label "TZW:ademhaling" .
-  ?c (<>|!<>){,2} ?s .
-  ?s ?p ?o .
+?c rdfs:label "TZW:ademhaling" .
+?c (<>|!<>){,2} ?s .
+?s ?p ?o .
 }
-
-
 
 // MORE BETTER //
 PREFIX uri: <http://192.168.238.133/index.php/Speciaal:URIResolver/>
@@ -124,8 +140,8 @@ PREFIX skosem: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 select distinct ?s ?p ?o {
-  ?c rdfs:label "TZW:ademhaling" .
-  ?c (skosem:broader|skosem:narrower){,3} ?s .
-  ?s ?p ?o .
+?c rdfs:label "TZW:ademhaling" .
+?c (skosem:broader|skosem:narrower){,3} ?s .
+?s ?p ?o .
 }
 -->

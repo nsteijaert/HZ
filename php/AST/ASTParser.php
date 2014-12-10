@@ -25,6 +25,7 @@ class ASTParser {
 		}
 
 		foreach ($this->data['@graph'] as $item) {
+			$obj = $items[$item['@id']];
 			foreach ($item as $key => $value) {
 				if ($this -> isRelation($key)) {
 					if (is_array($value)) {
@@ -34,11 +35,13 @@ class ASTParser {
 						}
 					} else {
 						if (array_key_exists($value, $items))
-							$obj -> addRelation($key, $items[$value]);
+							$obj -> addRelation($key);
 					}
 				}
 			}
 		}
+		
+		return $items;
 	}
 
 	function parseDataJSON() {
