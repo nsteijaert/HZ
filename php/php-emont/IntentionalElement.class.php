@@ -39,9 +39,9 @@ class IntentionalElement
 	{
 		switch($decompositionType)
 		{
-			case "IOR":
-			case "XOR":
-			case "AND":
+			case 'IOR':
+			case 'XOR':
+			case 'AND':
 				$this->decompositionType=$decompositionType;
 				break;
 			default:
