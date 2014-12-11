@@ -145,15 +145,15 @@ $(document).ready(function() {
 
 	var force = d3.layout.force().nodes(d3.values(nodes)).links(links).size([width, height]).linkDistance(100).charge(-600).on("tick", tick).start();
 
-	var svg = d3.select(".visualisation").append("svg").attr("width", width).attr("height", height).call(d3.behavior.zoom().scaleExtent([1, 8]).on("zoom", zoom));
+	var svg = d3.select(".visualisation").append("svg").attr("width", "100%").attr("height", height).call(d3.behavior.zoom().scaleExtent([1, 8]).on("zoom", zoom));
 
 	var link = svg.selectAll(".link").data(force.links()).enter().append("line").attr("class", "link");
 
 	var node = svg.selectAll(".node").data(force.nodes()).enter().append("g").attr("class", "node").on("mouseover", mouseover).on("mouseout", mouseout);
 
-	node.append("circle").attr("r", 8);
+	node.append("a").attr("xlink:href", "http://www.w3schools.com/svg/").append("circle").attr("r", 8);
 
-	node.append("text").attr("x", 12).attr("dy", ".35em").text(function(d) {
+	node.append("a").attr("xlink:href", "http://www.w3schools.com/svg/").append("text").attr("x", 13).attr("dy", ".35em").text(function(d) {
 		return d.name;
 	});
 
@@ -174,11 +174,11 @@ $(document).ready(function() {
 	}
 
 	function mouseover() {
-		d3.select(this).select("circle").transition().duration(750).attr("r", 16);
+		d3.select(this).select("circle").transition().duration(1500).attr("r", 12).style("fill", "#fff").style("stroke", "#555");
 	}
 
 	function mouseout() {
-		d3.select(this).select("circle").transition().duration(750).attr("r", 8);
+		d3.select(this).select("circle").transition().duration(750).attr("r", 8).style("fill", "#555").style("stroke", "#fff");
 	}
 
 	// Events
@@ -186,8 +186,6 @@ $(document).ready(function() {
 	d3.select(".evenHandlers button.zoomOut").on("click", zoom);
 
 	function zoom() {
-		//var matrixRegex = /matrix\((-?\d*\.?\d+),\s*0,\s*0,\s*(-?\d*\.?\d+),\s*0,\s*0\)/, matches = $(element).css('transform').match(matrixRegex);
-
 		svg.transition().attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
 	}
 
