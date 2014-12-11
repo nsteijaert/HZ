@@ -187,6 +187,8 @@ $(document).ready(function() {
 
 	function zoom() {
 		svg.transition().attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
+		svg.transition().attr("-webkit-transform", "-webkit-translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
+		//svg.transition().attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
 	}
 
 });
