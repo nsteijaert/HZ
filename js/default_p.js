@@ -151,7 +151,8 @@ $(document).ready(function() {
 
 	var node = svg.selectAll(".node").data(force.nodes()).enter().append("g").attr("class", "node").on("mouseover", mouseover).on("mouseout", mouseout);
 
-	node.append("a").attr("xlink:href", "http://www.w3schools.com/svg/").append("circle").attr("r", 8);
+	var nodePath = d3.superformula().type("circle").size(125).segments(360);
+	node.append("a").attr("xlink:href", "http://www.w3schools.com/svg/").append("path").attr("class", "path").attr("d", nodePath);
 
 	node.append("a").attr("xlink:href", "http://www.w3schools.com/svg/").append("text").attr("x", 13).attr("dy", ".35em").text(function(d) {
 		return d.name;
@@ -174,11 +175,14 @@ $(document).ready(function() {
 	}
 
 	function mouseover() {
-		d3.select(this).select("circle").transition().duration(1500).attr("r", 12).style("fill", "#fff").style("stroke", "#555");
+		var obj = this;
+		setTimeout(function() {
+			d3.select(obj).select(".path").transition().duration(1500).attr("d", nodePath.type("rectangle").size(80000)).style("fill", "#fff").style("stroke", "#555");
+		}, 1000);
 	}
 
 	function mouseout() {
-		d3.select(this).select("circle").transition().duration(750).attr("r", 8).style("fill", "#555").style("stroke", "#fff");
+		d3.select(this).select(".path").transition().duration(500).attr("d", nodePath.type("circle").size(125)).style("fill", "#555").style("stroke", "#fff");
 	}
 
 	// Events
