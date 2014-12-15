@@ -5,25 +5,23 @@
  */
 class contextObject {
     
+	private $contextName;
+	private $contextURL;
 
-private $contextName;
-private $contextURL;
+	public function setContextName($contextName_in){
+    	$this->contextName = $contextName_in;
+	}
 
-public function setContextName($contextName_in){
-    $this->contextName = $contextName_in;
-}
+	public function setContextURL($contextURL_in){
+	    $this->contextURL = $contextURL_in;
+	}
 
-public function setContextURL($contextURL_in){
-    $this->contextURL = $contextURL_in;
-}
+	public function getContextName(){
+	    return $this->contextName;
+	}
 
-public function getContextName(){
-    return $this->contextName;
-}
-
-public function getContextName(){
-    return $this->contextURL;
-}
-
+	public function getContextName(){
+	    return $this->contextURL;
+	}
 }
 ?>
