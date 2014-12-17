@@ -2,6 +2,7 @@
  * @author Pieter
  */
 $(document).ready(function() {
+	var timeOut;
 
 	function load() {
 		$('.visualisationResult').append('<div class="bar"></div>');
@@ -176,12 +177,14 @@ $(document).ready(function() {
 
 	function mouseover() {
 		var obj = this;
-		setTimeout(function() {
+		d3.select(obj).select(".path").transition().duration(1500).style("fill", "#fff").style("stroke", "#555");
+		timeOut = setTimeout(function() {
 			d3.select(obj).select(".path").transition().duration(1500).attr("d", nodePath.type("rectangle").size(80000)).style("fill", "#fff").style("stroke", "#555");
 		}, 1000);
 	}
 
 	function mouseout() {
+		clearTimeout(timeOut);
 		d3.select(this).select(".path").transition().duration(500).attr("d", nodePath.type("circle").size(125)).style("fill", "#555").style("stroke", "#fff");
 	}
 
@@ -191,7 +194,7 @@ $(document).ready(function() {
 
 	function zoom() {
 		svg.transition().attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
-		svg.transition().attr("-webkit-transform", "-webkit-translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
+		//svg.transition().attr("-webkit-transform", "-webkit-translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
 		//svg.transition().attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
 	}
 
