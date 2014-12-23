@@ -1,5 +1,5 @@
 <?php
-require_once 'SKOSConcept.class.php';
+require_once (__DIR__ . '/visitor/SKOSConcept.class.php');
 
 class DataParser {
 	private $data;
@@ -32,12 +32,12 @@ class DataParser {
 						}
 					} else {
 						if (array_key_exists($value, $items))
-							$obj -> addRelation($key);
+							$obj -> addRelation($key, $items[$value]);
 					}
 				}
 			}
 		}
-		
+
 		return $items;
 	}
 

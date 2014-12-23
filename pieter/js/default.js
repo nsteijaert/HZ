@@ -30,26 +30,10 @@ $(document).ready(function() {
 
 		if (query != "") {
 			$('.result').html('<div style="text-align:center"><i class="fa fa-spinner fa-spin fa-3x"></i><br/><span>Loading data...</span></div>');
-			if (true) {
-				if (depth != "") {
-					$.ajax({
-						type : "POST",
-						cache : false,
-						url : "php/generateQuery.php",
-						async : true,
-						data : {
-							concept : query,
-							depth : depth
-						}
-					}).done(function(result) {
-						runQuery(result, selection);
-					});
-				} else {
-					runQuery(query, selection);
-				}
-
+			if (depth != "") {
+				getQuery(query, depth, true, selection);
 			} else {
-				runQuery_Old(query);
+				runQuery(query, selection);
 			}
 		} else {
 			console.log("No given query");
@@ -71,6 +55,25 @@ $(document).ready(function() {
 		}
 	});
 });
+
+function getQuery(concept, depth, run, selection) {
+	$.ajax({
+		type : "POST",
+		cache : false,
+		url : "php/VisualisationScript.php",
+		async : true,
+		data : {
+			do : "generate",
+			concept : concept,
+			depth : depth
+		}
+	}).done(function(result) {
+		if ( typeof run === 'undefined')
+			return result;
+		else
+			console.log(runQuery(result, selection));
+	});
+}
 
 /*
  * This function runs a query on your local fuseki server
@@ -103,36 +106,14 @@ function runQuery(query, selection) {
 			hljs.highlightBlock(e);
 		});
 
-		$.post("php/AST/ASTParser.php", {
+		$.post("php/VisualisationScript.php", {
+			do : "parse",
 			data : result
+		}, function(data) {
+			return data
 		});
 	}).fail(function(result) {
 		$('.result').html("<p><b style='color:red'>Error retrieving data...</b></p><pre>" + result.responseText + "</pre>");
-	});
-}
-
-/*
- * This function runs a query with the predicted SPARQLClient.
- */
-function runQuery_Old(query) {
-	$.ajax({
-		type : "POST",
-		cache : false,
-		url : "php/SPARQLClient.php",
-		async : true,
-		data : {
-			query : query,
-			type : "json"
-		}
-	}).done(function(result) {
-		console.log("Data successfully retrieved...");
-
-		var json = JSON.parse(result);
-
-		$('.result').html("<span>" + new Date() + "</span><pre>" + syntaxHighlight(JSON.stringify(json, undefined, 4)) + "</pre>");
-	}).fail(function() {
-		$('.result').html('<b style="color:red">Error retrieving data...</b>');
-		console.log("Error retrieving data...");
 	});
 }
 

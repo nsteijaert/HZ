@@ -2,6 +2,6 @@
 
 //Element interface
 abstract class Concept {
-	function accept(Visitor $visitor);
+	abstract function accept(Visitor $visitor);
 }
 ?>
