@@ -105,7 +105,7 @@ function runQuery(query, selection) {
 
 		$.post("php/AST/ASTParser.php", {
 			data : result
-		});
+		},function(data){console.log(data);});
 	}).fail(function(result) {
 		$('.result').html("<p><b style='color:red'>Error retrieving data...</b></p><pre>" + result.responseText + "</pre>");
 	});
