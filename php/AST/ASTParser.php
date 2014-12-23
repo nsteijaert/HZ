@@ -14,6 +14,9 @@ class ASTParser {
 	function parseDataRDF() {
 		$items = array();
 
+		if (!array_key_exists('@graph', $this -> data))
+			return $items;
+
 		foreach ($this->data['@graph'] as $item) {
 			$obj = new ASTObject($item['@id']);
 			foreach ($item as $key => $value) {
@@ -40,7 +43,7 @@ class ASTParser {
 				}
 			}
 		}
-		
+
 		return $items;
 	}
 

@@ -1,7 +1,11 @@
 <?php
 
 //Element interface
-abstract class Concept {
-	abstract function accept(Visitor $visitor);
+abstract class Concept implements JsonSerializable {
+	function accept(Visitor $visitor);
+	
+	function toJSON(){
+		return json_encode($this);
+	}
 }
 ?>
