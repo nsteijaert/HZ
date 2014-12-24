@@ -1,6 +1,6 @@
 <script src="js/default_p.js"></script>
 <style>
-	.visualisation{
+	.visualisation {
 		display: block;
 	}
 
@@ -10,13 +10,19 @@
 		display: block;
 	}
 
-	.evenHandlers {
+	.zoomHandlers {
 		bottom: 0;
 		position: absolute;
 		right: 0;
 	}
 
-	.evenHandlers button {
+	.optionsHandlers {
+		top: 0;
+		position: absolute;
+		right: 0;
+	}
+
+	.zoomHandlers button, .optionsHandlers button {
 		color: #DDDDDD;
 		display: block;
 		border: none;
@@ -25,7 +31,7 @@
 		background: none;
 	}
 
-	.evenHandlers button:hover {
+	.zoomHandlers button:hover, .optionsHandlers button:hover {
 		background: #DDDDDD;
 		border-radius: 5px;
 		color: #FFFFFF;
@@ -42,7 +48,7 @@
 		stroke: #ddd;
 		stroke-width: 1.5px;
 	}
-	
+
 	#arrow {
 		fill: #ddd;
 	}
@@ -67,16 +73,92 @@
 		position: absolute;
 		top: 0;
 	}
+
+	/* CSS Options Tooltip */
+	.tooltip {
+		position: absolute;
+		width: 175px;
+		/* color: #FFFFFF; */
+		background: #FFFFFF;
+		border: 2px solid #DDDDDD;
+		/* height: 30px; */
+		/* line-height: 30px; */
+		/* text-align: center; */
+		display: none;
+		border-radius: 6px;
+		right: 1px;
+		padding: 4px;
+	}
+	.tooltip:before {
+		content: '';
+		position: absolute;
+		bottom: 100%;
+		left: 100%;
+		margin-left: -26px;
+		width: 0;
+		height: 0;
+		border-bottom: 11px solid #DDDDDD;
+		border-right: 12px solid transparent;
+		border-left: 12px solid transparent;
+	}
+	.tooltip:after {
+		content: '';
+		position: absolute;
+		bottom: 100%;
+		left: 92%;
+		margin-left: -7px;
+		width: 0;
+		height: 0;
+		border-bottom: 8px solid #FFFFFF;
+		border-right: 8px solid transparent;
+		border-left: 8px solid transparent;
+	}
+	#options label {
+		display: inline-block;
+	}
+	#options input {
+		margin: 0;
+		line-height: normal;
+		height: auto;
+	}
 </style>
 <h3>Result in html</h3>
 <div class="visualisationResult">
 	<div class="visualisation"></div>
-	<div class="evenHandlers">
+	<div class="optionsHandlers">
+		<button class="options">
+			<i class="fa fa-cog fa-lg"></i>
+		</button>
+		<div id="options" class="tooltip">
+			<table>
+				<tr>
+					<td>Diepte:</td>
+					<td>
+					<input type="number" class="depth" name="depth" />
+					</td>
+				</tr>
+				<tr>
+					<td>Relaties:</td>
+					<td>
+					<label>
+					<input type="checkbox" class="broader" name="relations[]" />
+					Breder
+					</label>
+					<label>
+						<input type="checkbox" class="narrower" name="relations[]" />
+						Specifieker
+					</label>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div class="zoomHandlers">
 		<button class="zoomIn">
-			<i class="fa fa-search-plus fa-2x"></i>
+			<i class="fa fa-search-plus fa-lg"></i>
 		</button>
 		<button class="zoomOut">
-			<i class="fa fa-search-minus fa-2x"></i>
+			<i class="fa fa-search-minus fa-lg"></i>
 		</button>
 	</div>
 </div>

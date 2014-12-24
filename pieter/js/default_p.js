@@ -13,10 +13,14 @@ $(document).ready(function() {
 		});
 	}
 
-	visualize("TZW:hoofd", 2);
+	if ($.cookie("depth") != "")
+		visualize("TZW:neus", $.cookie("depth"));
+	else
+		visualize("TZW:neus", 2);
 
 	function visualize(concept, depth) {
 		var timeOut;
+		var mouseTimeOut;
 
 		var width = $('.visualisation').width(), height = 500;
 
@@ -45,6 +49,8 @@ $(document).ready(function() {
 					do : "parse",
 					data : result
 				}, function(data) {
+					loadOptions();
+
 					var links = JSON.parse(data);
 
 					var nodes = {};
@@ -59,7 +65,7 @@ $(document).ready(function() {
 						});
 					});
 
-					var width = 960, height = 500;
+					//var width = 960, height = 500;
 
 					var force = d3.layout.force().nodes(d3.values(nodes)).links(links).size([width, height]).linkDistance(100).charge(-600).on("tick", tick).start();
 
@@ -97,19 +103,35 @@ $(document).ready(function() {
 					function mouseover() {
 						var obj = this;
 						d3.select(obj).select(".path").transition().duration(1500).style("fill", "#fff").style("stroke", "#555");
+						d3.select(obj).moveToFront();
 						timeOut = setTimeout(function() {
 							d3.select(obj).select(".path").transition().duration(1500).attr("d", nodePath.type("rectangle").size(80000)).style("fill", "#fff").style("stroke", "#555");
+							d3.select(obj).select("text").style("visibility", "hidden");
 						}, 1000);
 					}
 
 					function mouseout() {
 						clearTimeout(timeOut);
 						d3.select(this).select(".path").transition().duration(500).attr("d", nodePath.type("circle").size(125)).style("fill", "#555").style("stroke", "#fff");
+						d3.select(this).select("text").style("visibility", "visible");
 					}
 
 					// Events
-					d3.select(".evenHandlers button.zoomIn").on("click", zoom);
-					d3.select(".evenHandlers button.zoomOut").on("click", zoom);
+					d3.select(".zoomHandlers button.zoomIn").on("click", zoom);
+					d3.select(".zoomHandlers button.zoomOut").on("click", zoom);
+
+					$(".optionsHandlers button.options").click(function() {
+						$(".optionsHandlers #options").fadeIn('fast');
+					});
+					$(".optionsHandlers").mouseleave(function() {
+						clearTimeout(mouseTimeOut);
+					});
+					$(".optionsHandlers").mouseleave(function() {
+						mouseTimeOut = setTimeout(function() {
+							$(".optionsHandlers #options").slideUp('fast');
+							saveOptions();
+						}, 500);
+					});
 
 					function zoom() {
 						svg.transition().attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
@@ -117,6 +139,40 @@ $(document).ready(function() {
 						//svg.transition().attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
 					}
 
+					function loadOptions() {
+						var currentDepth = $.cookie("depth");
+						var currentRelations = $.cookie("relations").split(",");
+
+						$("#options .depth").val(currentDepth);
+						console.log(currentRelations[0]);
+						$("#options .broader").prop("checked", (currentRelations[0] === "true"));
+						$("#options .narrower").prop("checked", (currentRelations[1] === "true"));
+					}
+
+					function saveOptions() {
+						var currentDepth = $.cookie("depth");
+						var currentRelations = $.cookie("relations");
+
+						var newDepth = $("#options .depth").val();
+						var newRelations = $("#options .broader").is(":checked") + "," + $("#options .narrower").is(":checked");
+
+						console.log(newRelations);
+						if (newDepth != currentDepth || newRelations != currentRelations) {
+							$.cookie("depth", newDepth, {
+								expires : 365
+							});
+							$.cookie("relations", newRelations, {
+								expires : 365
+							});
+						}
+					}
+
+
+					d3.selection.prototype.moveToFront = function() {
+						return this.each(function() {
+							this.parentNode.appendChild(this);
+						});
+					};
 				});
 			});
 		});
