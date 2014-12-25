@@ -13,14 +13,19 @@ $(document).ready(function() {
 		});
 	}
 
-	if ($.cookie("depth") != "")
-		visualize("TZW:neus", $.cookie("depth"));
+	if ($.cookie("depth") != "" && $.cookie("relations") != "")
+		visualize("TZW:gezicht", $.cookie("depth"), $.cookie("relations"));
 	else
-		visualize("TZW:neus", 2);
+		visualize("TZW:gezicht");
 
-	function visualize(concept, depth) {
+	function visualize(concept, depth, relations) {
+		var depth = typeof depth !== 'undefined' ? depth : 1;
+		var relations = typeof relations !== 'undefined' ? relations : "true,true";
 		var timeOut;
 		var mouseTimeOut;
+		
+		// Clear div
+		d3.select(".visualisation").html("");
 
 		var width = $('.visualisation').width(), height = 500;
 
@@ -32,7 +37,8 @@ $(document).ready(function() {
 			data : {
 				do : "generate",
 				concept : concept,
-				depth : depth.toString()
+				depth : depth.toString(),
+				relations : relations
 			}
 		}).done(function(result) {
 			$.ajax({
@@ -49,7 +55,7 @@ $(document).ready(function() {
 					do : "parse",
 					data : result
 				}, function(data) {
-					loadOptions();
+					loadOptions(depth, relations);
 
 					var links = JSON.parse(data);
 
@@ -129,7 +135,7 @@ $(document).ready(function() {
 					$(".optionsHandlers").mouseleave(function() {
 						mouseTimeOut = setTimeout(function() {
 							$(".optionsHandlers #options").slideUp('fast');
-							saveOptions();
+							saveOptions(concept);
 						}, 500);
 					});
 
@@ -139,24 +145,22 @@ $(document).ready(function() {
 						//svg.transition().attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
 					}
 
-					function loadOptions() {
-						var currentDepth = $.cookie("depth");
-						var currentRelations = $.cookie("relations").split(",");
+					function loadOptions(depth, relations) {
+						var currentDepth = depth;
+						var currentRelations = relations.split(",");
 
 						$("#options .depth").val(currentDepth);
-						console.log(currentRelations[0]);
 						$("#options .broader").prop("checked", (currentRelations[0] === "true"));
 						$("#options .narrower").prop("checked", (currentRelations[1] === "true"));
 					}
 
-					function saveOptions() {
+					function saveOptions(concept) {
 						var currentDepth = $.cookie("depth");
 						var currentRelations = $.cookie("relations");
 
 						var newDepth = $("#options .depth").val();
 						var newRelations = $("#options .broader").is(":checked") + "," + $("#options .narrower").is(":checked");
 
-						console.log(newRelations);
 						if (newDepth != currentDepth || newRelations != currentRelations) {
 							$.cookie("depth", newDepth, {
 								expires : 365
@@ -164,6 +168,7 @@ $(document).ready(function() {
 							$.cookie("relations", newRelations, {
 								expires : 365
 							});
+							visualize(concept, newDepth, newRelations);
 						}
 					}
 

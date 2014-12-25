@@ -7,7 +7,7 @@ switch ($_POST["do"]) {
 	case "generate" :
 		// Load data
 		$querybuilder = new QueryBuilder($_POST["depth"], $_POST["concept"]);
-		echo $query = $querybuilder -> generateQuery();
+		echo $query = $querybuilder -> generateQuery($_POST["relations"]);
 
 		break;
 	case "parse" :

@@ -10,9 +10,23 @@ class QueryBuilder {
 		$this -> concept = $concept;
 	}
 
-	function generateQuery($depth = "", $concept = "") {
+	function generateQuery($relations = "", $depth = "", $concept = "") {
+		$relations = $relations == "" ? "true,true" : $relations;
 		$depth = $depth == "" ? $this -> depth : $depth;
 		$concept = $concept == "" ? $this -> concept : $concept;
+
+		$relation = "";
+		$relations = explode(",", $relations);
+
+		if (($relations[0] === 'true') && ($relations[1] === 'true')) {
+			$relation .= "<>|!<>";
+		} else if (($relations[0] === 'true')) {
+			$relation .= "skosem:broader";
+		} else if (($relations[1] === 'true')) {
+			$relation .= "skosem:narrower";
+		} else {
+			$relation .= "<>|!<>";
+		}
 
 		return sprintf('
 			PREFIX uri: <http://192.168.238.133/index.php/Speciaal:URIResolver/>
@@ -23,11 +37,11 @@ class QueryBuilder {
 			construct { ?s ?p ?o }
 			where {
 			  ?c rdfs:label "%s" .
-			  ?c (<>|!<>){,%d} ?s .
+			  ?c (%s){,%d} ?s .
 			  ?s ?p ?o
 			  FILTER(EXISTS { ?s a uri:Categorie-3ASKOS_Concept } )
 			}
-		', $concept, $depth);
+		', $concept, $relation, $depth);
 	}
 
 }
