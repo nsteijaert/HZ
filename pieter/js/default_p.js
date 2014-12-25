@@ -23,7 +23,7 @@ $(document).ready(function() {
 		var relations = typeof relations !== 'undefined' ? relations : "true,true";
 		var timeOut;
 		var mouseTimeOut;
-		
+
 		// Clear div
 		d3.select(".visualisation").html("");
 
@@ -90,6 +90,25 @@ $(document).ready(function() {
 						return d.name;
 					});
 
+					// Events
+					d3.select(".zoomHandlers button.zoomIn").on("click", zoom);
+					d3.select(".zoomHandlers button.zoomOut").on("click", zoom);
+
+					$(".optionsHandlers button.options").click(function() {
+						$(".optionsHandlers #options").fadeIn('fast');
+					});
+					$(".optionsHandlers").mouseleave(function() {
+						clearTimeout(mouseTimeOut);
+					});
+					$(".optionsHandlers").mouseleave(function() {
+						mouseTimeOut = setTimeout(function() {
+							$(".optionsHandlers #options").slideUp('fast');
+							saveOptions(concept);
+						}, 500);
+					});
+
+					// Functions
+					//
 					function tick() {
 						link.attr("x1", function(d) {
 							return d.source.x;
@@ -112,32 +131,15 @@ $(document).ready(function() {
 						d3.select(obj).moveToFront();
 						timeOut = setTimeout(function() {
 							d3.select(obj).select(".path").transition().duration(1500).attr("d", nodePath.type("rectangle").size(80000)).style("fill", "#fff").style("stroke", "#555");
-							d3.select(obj).select("text").style("visibility", "hidden");
+							d3.select(obj).select("text").transition().duration(1000).style("opacity", 0);
 						}, 1000);
 					}
 
 					function mouseout() {
 						clearTimeout(timeOut);
 						d3.select(this).select(".path").transition().duration(500).attr("d", nodePath.type("circle").size(125)).style("fill", "#555").style("stroke", "#fff");
-						d3.select(this).select("text").style("visibility", "visible");
+						d3.select(this).select("text").transition().duration(1000).style("opacity", 100);
 					}
-
-					// Events
-					d3.select(".zoomHandlers button.zoomIn").on("click", zoom);
-					d3.select(".zoomHandlers button.zoomOut").on("click", zoom);
-
-					$(".optionsHandlers button.options").click(function() {
-						$(".optionsHandlers #options").fadeIn('fast');
-					});
-					$(".optionsHandlers").mouseleave(function() {
-						clearTimeout(mouseTimeOut);
-					});
-					$(".optionsHandlers").mouseleave(function() {
-						mouseTimeOut = setTimeout(function() {
-							$(".optionsHandlers #options").slideUp('fast');
-							saveOptions(concept);
-						}, 500);
-					});
 
 					function zoom() {
 						svg.transition().attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
