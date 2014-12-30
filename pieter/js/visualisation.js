@@ -14,11 +14,14 @@ $(document).ready(function() {
 	}
 
 	if ($.cookie("depth") != "" && $.cookie("relations") != "")
-		visualize("TZW:gezicht", $.cookie("depth"), $.cookie("relations"));
+		visualize("TZW:hoofd", $.cookie("depth"), $.cookie("relations"));
 	else
 		visualize("TZW:gezicht");
 
 	function visualize(concept, depth, relations) {
+		if ( typeof concept === 'undefined' || concept === '') {
+			throw "Concept is undefined";
+		}
 		var depth = typeof depth !== 'undefined' ? depth : 1;
 		var relations = typeof relations !== 'undefined' ? relations : "true,true";
 		var timeOut;
@@ -185,4 +188,19 @@ $(document).ready(function() {
 		});
 	}
 
+
+	QUnit.test("Visualisation", function(assert) {
+		assert.raises(function() {
+			visualize("TZW:hoofd");
+		}, "Red is passed!");
+		assert.raises(function() {
+			visualize("TZW:hoofd", "1");
+		}, "Red is passed!");
+		assert.raises(function() {
+			visualize("TZW:hoofd", "3", "true,false");
+		}, "Red is passed!");
+		assert.raises(function() {
+			visualize();
+		}, "Red is passed!");
+	});
 });

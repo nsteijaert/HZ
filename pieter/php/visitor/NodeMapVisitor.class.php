@@ -32,7 +32,7 @@ class NodeMapVisitor extends Visitor {
 		}
 	}
 
-	function createJSON() {
+	function getUsableJSON() {
 
 	}
 

@@ -4,6 +4,6 @@
 abstract class Visitor {
 	abstract function visit(SKOSConcept $type);
 	
-	abstract function createJSON();
+	abstract function getUsableJSON();
 }
 ?>
