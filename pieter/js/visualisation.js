@@ -188,19 +188,19 @@ $(document).ready(function() {
 		});
 	}
 
-
-	QUnit.test("Visualisation", function(assert) {
-		assert.raises(function() {
-			visualize("TZW:hoofd");
-		}, "Red is passed!");
-		assert.raises(function() {
-			visualize("TZW:hoofd", "1");
-		}, "Red is passed!");
-		assert.raises(function() {
-			visualize("TZW:hoofd", "3", "true,false");
-		}, "Red is passed!");
-		assert.raises(function() {
-			visualize();
-		}, "Red is passed!");
-	});
+	// Uncomment this to run the tests. It is unable to run the tests in a separate file.
+	// QUnit.test("Visualisation", function(assert) {
+		// assert.raises(function() {
+			// visualize("TZW:hoofd");
+		// }, "Red is passed!");
+		// assert.raises(function() {
+			// visualize("TZW:hoofd", "1");
+		// }, "Red is passed!");
+		// assert.raises(function() {
+			// visualize("TZW:hoofd", "3", "true,false");
+		// }, "Red is passed!");
+		// assert.raises(function() {
+			// visualize();
+		// }, "Red is passed!");
+	// });
 });
