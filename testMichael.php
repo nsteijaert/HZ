@@ -3,6 +3,19 @@
  * PHP-testpagina. Bedoeld om te kunnen testen zonder de rest van het systeem te beïnvloeden
  * @author: Michael Steenbeek
  */
+ 
+ $lijst_van_contexten='SELECT ?context WHERE { ?context <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AContext>
+}';
+ $query=urlencode($lijst_van_contexten);
+ //echo '<pre>'.$query.'</pre>';
+ $result=file_get_contents('http://127.0.0.1:3030/ds/query?output=json&query='.$query);
+ echo 'Lijstje van contexten:<br />';
+ echo '<pre>'.$result.'</pre>';
+ 
+ 
+ 
+ /* Ouwe meuk
+ 
  require_once('php/SPARQLClient.class.php');
  $client = new SPARQLClient('http://localhost:3030/ds/query');
  // Default
@@ -19,4 +32,6 @@
  echo "\n\n\n\n\n\n\n\n";
  var_dump($idata);
  echo '</pre>';
+  * 
+  */
 ?>
