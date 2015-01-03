@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'Activity.class.php');
+require_once(__DIR__.'/Activity.class.php');
 
 class Connects
 {

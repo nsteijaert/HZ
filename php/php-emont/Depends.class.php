@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'IntentionalElement.class.php');
+require_once(__DIR__.'/IntentionalElement.class.php');
 
 class Depends
 {

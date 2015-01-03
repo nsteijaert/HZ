@@ -3,35 +3,61 @@
  * EMont-modellen in JSON-formaat omzetten naar PHP-objecten
  * @author Michael Steenbeek
  */
-require_once(__DIR__.'/Context.class.php');
+require_once(__DIR__.'/IntentionalElement.class.php');
+require_once(__DIR__.'/Activity.class.php');
+require_once(__DIR__.'/Belief.class.php');
+require_once(__DIR__.'/Condition.class.php');
+require_once(__DIR__.'/Goal.class.php');
+require_once(__DIR__.'/Outcome.class.php');
 
 class JSON_EMontParser {
-	private $data;
 
-	function __construct($input) {
-		$this -> data = json_decode($input,true);
-		$this->parseRDFData();
+	private function __construct($input) {
+		
 	}
 
-	function parseRDFData()
+	public static function parse($input)
 	{
+		
+		$data = json_decode($input,true);
+		
 		$items = array();
 
-		foreach ($this->data['@graph'] as $item) {
-			$obj = new Context();
+		foreach ($data['@graph'] as $item) {
+			// Bepaal type IE
+			switch($item['Eigenschap-3AIntentional_Element_type'])
+			{
+				case 'Activity':
+					$obj=new Activity();
+					break;
+				case 'Outcome':
+					$obj=new Outcome();
+					break;
+				case 'Goal':
+					$obj=new Goal();
+					break;
+				case 'Belief':
+					$obj=new Belief();
+					break;
+				case 'Condition':
+					$obj=new Condition();
+					break;
+				default:
+					$obj = new IntentionalElement();		
+			}
+			
 			foreach ($item as $key => $value) {
-				if ($key == 'label') {
-					//Nu nog niets
+				echo $key.'<br />';
+				if ($key == 'Eigenschap-3AIntentional_Element_decomposition_type') {
+					$obj->setDecompositionType($value);
 				}
 			}
 			$items[$item['@id']] = $obj;
 		}
-		echo '<pre>';
-		var_dump($items);
-		echo '</pre>';
+		return $items;
 	}
 
-	function parseDataRDF() {
+/*	function parseDataRDF() {
 
 		foreach ($this->data['@graph'] as $item) {
 			$obj = $items[$item['@id']];
@@ -50,29 +76,7 @@ class JSON_EMontParser {
 			}
 		}
 
-		return $items;
 	}
-
-	function setData($data) {
-		$this -> data = $data;
-	}
-
-	function getData() {
-		return $this -> data;
-	}
-
-/*	function isRelation($key) {
-		$relationKeys = array("broader", "narrower", "related", "partof");
-
-		foreach ($relationKeys as $relation) {
-			if (strpos($key, $relation))
-				return true;
-		}
-
-		return false;
-
-
-	}*/
-
+*/
 }
 ?>

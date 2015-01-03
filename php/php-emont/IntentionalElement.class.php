@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'Context.class.php');
+require_once(__DIR__.'/Context.class.php');
 
 class IntentionalElement
 {

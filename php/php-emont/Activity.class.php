@@ -1,7 +1,7 @@
-<?
-require_once(__DIR__.'IntentionalElement.class.php');
-require_once(__DIR__.'Outcome.class.php');
-require_once(__DIR__.'Connects.class.php');
+<?php
+require_once(__DIR__.'/IntentionalElement.class.php');
+require_once(__DIR__.'/Outcome.class.php');
+require_once(__DIR__.'/Connects.class.php');
 
 class Activity extends IntentionalElement
 {
@@ -14,7 +14,7 @@ class Activity extends IntentionalElement
 	
 	public function __construct()
 	{
-		super.__construct();
+		parent::__construct();
 		$this->connects=new SplObjectStorage();
 	}
 	

@@ -3,18 +3,22 @@
  * PHP-testpagina. Bedoeld om te kunnen testen zonder de rest van het systeem te beïnvloeden
  * @author: Michael Steenbeek
  */
+ $geselecteerde_context='<http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Brede_groene_dijk_met_voorland>';
  
- $lijst_van_contexten='DESCRIBE ?context WHERE { ?context <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AContext>
-} LIMIT 2';
- $query=urlencode($lijst_van_contexten);
+ $lijst_van_ies_in_context='DESCRIBE ?ie WHERE { ?ie <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AContext> '.$geselecteerde_context.'}';
+ $query=urlencode($lijst_van_ies_in_context);
  //echo '<pre>'.$query.'</pre>';
  $result=file_get_contents('http://127.0.0.1:3030/ds/query?output=json&query='.$query);
- echo 'Lijstje van contexten:<br />';
+ echo 'Lijstje van IEs in context "Brede groene dijk met voorland":<br />';
  echo '<pre>'.$result.'</pre>';
  
- require_once(__DIR__.'/php/php-emont/JSON_EMontParser.class.php');
- $contexten=new JSON_EMontParser($result);
  
+ require_once(__DIR__.'/php/php-emont/JSON_EMontParser.class.php');
+ $parse=JSON_EMontParser::parse($result);
+ echo 'Geparsed:<br />'; 
+ echo '<pre>';
+ var_dump($parse);
+ echo '</pre>';
  
  
  /* Ouwe meuk
