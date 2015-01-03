@@ -4,13 +4,16 @@
  * @author: Michael Steenbeek
  */
  
- $lijst_van_contexten='SELECT ?context WHERE { ?context <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AContext>
-}';
+ $lijst_van_contexten='DESCRIBE ?context WHERE { ?context <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AContext>
+} LIMIT 2';
  $query=urlencode($lijst_van_contexten);
  //echo '<pre>'.$query.'</pre>';
  $result=file_get_contents('http://127.0.0.1:3030/ds/query?output=json&query='.$query);
  echo 'Lijstje van contexten:<br />';
  echo '<pre>'.$result.'</pre>';
+ 
+ require_once(__DIR__.'/php/php-emont/JSON_EMontParser.class.php');
+ $contexten=new JSON_EMontParser($result);
  
  
  
