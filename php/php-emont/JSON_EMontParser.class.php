@@ -9,7 +9,7 @@ class JSON_EMontParser {
 	private $data;
 
 	function __construct($input) {
-		$this -> data = $input;
+		$this -> data = json_decode($input,true);
 		$this->parseRDFData();
 	}
 
