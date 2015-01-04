@@ -3,13 +3,14 @@
  * PHP-testpagina. Bedoeld om te kunnen testen zonder de rest van het systeem te beïnvloeden
  * @author: Michael Steenbeek
  */
- $geselecteerde_context='<http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Brede_groene_dijk_met_voorland>';
+ $context='Menselijk-2D_en_ecosysteem';
+ $context_uri='<http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'.$context.'>';
  
- $lijst_van_ies_in_context='DESCRIBE ?ie WHERE { ?ie <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AContext> '.$geselecteerde_context.'}';
+ $lijst_van_ies_in_context='DESCRIBE ?ie WHERE { ?ie <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AContext> '.$context_uri.'}';
  $query=urlencode($lijst_van_ies_in_context);
- //echo '<pre>'.$query.'</pre>';
+  
  $result=file_get_contents('http://127.0.0.1:3030/ds/query?output=json&query='.$query);
- echo 'Lijstje van IEs in context "Brede groene dijk met voorland":<br />';
+ echo 'Lijstje van IEs in context "'.$context.'":<br />';
  echo '<pre>'.$result.'</pre>';
  
  
