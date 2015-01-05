@@ -4,12 +4,12 @@ class Context
 {
 	private $description;
 	
-	// A Context object
+	// An SplObjectStorage of Context objects
 	private $supercontext;
 	
 	public function __construct()
 	{
-		
+		$this->supercontext=new SplObjectStorage();
 	}
 	
 	public function setDescription($description)
@@ -22,11 +22,23 @@ class Context
 		return $this->description;
 	}
 	
-	public function setSupercontext($supercontext)
+	public function addSupercontext($supercontext)
 	{
 		if ($supercontext instanceOf Context)
 		{
-			$this->supercontext=$supercontext;
+			$this->supercontext->attach($supercontext);
+		}
+		else 
+		{
+			throw new Exception('Not a Context');
+		}
+	}
+	
+	public function removeSupercontext($supercontext)
+	{
+		if ($supercontext instanceOf Context)
+		{
+			$this->supercontext->detach($supercontext);
 		}
 		else 
 		{
