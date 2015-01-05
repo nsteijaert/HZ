@@ -1,6 +1,6 @@
 <?php
 /**
- * PHP-testpagina. Bedoeld om te kunnen testen zonder de rest van het systeem te beïnvloeden
+ * Testpagina voor EMont-parser.
  * @author: Michael Steenbeek
  */
  

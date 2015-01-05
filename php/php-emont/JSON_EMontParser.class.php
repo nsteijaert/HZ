@@ -50,7 +50,6 @@ class JSON_EMontParser {
 			}
 			
 			foreach ($item as $key => $value) {
-				echo $key.'<br />';
 				switch($key)
 				{
 					case 'Eigenschap-3AIntentional_Element_decomposition_type':
