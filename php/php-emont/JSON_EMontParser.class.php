@@ -48,79 +48,93 @@ class JSON_EMontParser {
 				default:
 					$obj = new IntentionalElement();		
 			}
-			
+
+			if($item['Eigenschap-3AHeading_nl']!="")
+			{
+				$obj->setHeading($item['Eigenschap-3AHeading_nl']);
+			}
+			elseif($item['Eigenschap-3AHeading_en']!="")
+			{
+				$obj->setHeading($item['Eigenschap-3AHeading_en']);
+			}
+			else
+			{
+				// ID's in RDF-store staan in procentnotatie, maar met een - ipv een %. Dit stukje code zorgt voor
+				// een correcte procentnotatie en zet die vervolgens om naar de bedoelde tekens.
+				$obj->setHeading(urldecode(strtr($item['@id'], "-_","% ")));
+			}
+
+
 			foreach ($item as $key => $value) {
 				switch($key)
 				{
 					case 'Eigenschap-3AIntentional_Element_decomposition_type':
 						$obj->setDecompositionType($value);
 						break;
-					case 'Eigenschap-3AHeading_nl':
-						$obj->setHeading($value);
-						break;
 					default:
 				}
 			}
 			$items[$item['@id']] = $obj;
 		}
-		foreach ($data['@graph'] as $item) 
+
+		foreach ($items as $uri => $item)
 		{
-			foreach ($item as $key => $value) 
+
+			$query='DESCRIBE ?s WHERE { ?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AElement_back_link> <'.$uri.'> }';
+			$koppeling=self::geefEen($query);
+
+			try
 			{
-				if($key=='Eigenschap-3ADummy_element_link')
+				$object=$items[$uri];
+				switch($koppeling['Eigenschap-3AElement_link_type'])
 				{
-					if(array_key_exists('Eigenschap-3ADummy_element_contribution_value',$item))
-					{
-						try
-						{
-							$contobj=new Contributes();
-							$contobj->setContributionValue($item['Eigenschap-3ADummy_element_contribution_value']);
-							@$contobj->setLink($items[$value]);
-							$object=$items[$item['@id']];
-							$object->addContributes($contobj);
-							$items[$item['@id']] = $object;
-						}
-						catch(Exception $e)
-						{
-							//Link is blijkbaar geen onderdeel van de Context
-						}
-					}
-					elseif(array_key_exists('Eigenschap-3ADummy_element_condition',$item))
-					{
-						try
-						{
-							$connobj=new Connects();
-							$connobj->setLinkCondition($item['Eigenschap-3ADummy_element_condition']);
-							@$connobj->setLink($items[$value]);
-							$object=$items[$item['@id']];
-							$object->addConnects($connobj);
-							$items[$item['@id']] = $object;
-						}
-						catch(Exception $e)
-						{
-							//Link is blijkbaar geen onderdeel van de Context
-						}
-					}
-					elseif(array_key_exists('Eigenschap-3ADummy_element_link_note',$item))
-					{
-						try
-						{
-							$depobj=new Depends();
-							$depobj->setLinkNote($item['Eigenschap-3ADummy_element_link_note']);
-							@$depobj->setLink($items[$value]);
-							$object=$items[$item['@id']];
-							$object->addDepends($depobj);
-							$items[$item['@id']] = $object;
-						}
-						catch(Exception $e)
-						{
-							//Link is blijkbaar geen onderdeel van de Context
-						}						
-					}
+					case 'Depends':
+						$koppelobject=new Depends();
+						$koppelobject->setLinkNote($koppeling['Eigenschap-3AElement_link_note']);
+						@$koppelobject->setLink($items[$koppeling['Eigenschap-3AElement_link']]);
+						$object->addDepends($koppelobject);
+						break;
+					case 'Connects':
+						$koppelobject=new Connects();
+						$koppelobject->setLinkNote($koppeling['Eigenschap-3AElement_link_note']);
+						$koppelobject->setLinkCondition($koppeling['Eigenschap-3AElement_condition']);
+						$koppelobject->setConnectionType($koppeling['Element_connection_type']);
+						@$koppelobject->setLink($items[$koppeling['Eigenschap-3AElement_link']]);
+						$object->addConnects($koppelobject);
+						break;
+					case 'Contributes':
+						$koppelobject=new Contributes();
+						$koppelobject->setLinkNote($koppeling['Eigenschap-3AElement_link_note']);
+						$koppelobject->setContributionValue($koppeling['Eigenschap-3AElement_contribution_value']);
+						@$koppelobject->setLink($items[$koppeling['Eigenschap-3AElement_link']]);
+						$object->addContributes($koppelobject);
+						break;
+					default:
+						break;
 				}
+
+				
+				
+				$items[$uri]=$object;
+			}
+			catch(Exception $e)
+			{
+				// Link valt vermoedelijk buiten de Context
 			}
 		}
 		return $items;
+	}
+
+	static function geefEen($query)
+	{
+		//TODO: Netter maken
+		$query=urlencode($query);
+  
+		$result=file_get_contents('http://127.0.0.1:3030/ds/query?output=json&query='.$query);
+		$data=json_decode($result,true);
+		
+		return $data;
+		
 	}
 
 /*	function parseDataRDF() {
