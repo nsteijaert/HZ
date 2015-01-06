@@ -75,6 +75,10 @@ class SKOSConcept extends Concept {
 			$this -> addProperty($property);
 		}
 	}
+	
+	public function getProperty($name) {
+		return $this -> properties[$name];
+	}
 
 	/**
 	 * @param (String) $propertyName = Name of the removable property.

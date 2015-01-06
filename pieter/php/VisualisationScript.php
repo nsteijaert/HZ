@@ -17,12 +17,10 @@ switch ($_POST["do"]) {
 
 		// Handle data
 		$visitor = new NodeMapVisitor();
-		$tojson = array();
 		foreach ($objects as $object) {
-			$array = $object -> accept($visitor);
-			$tojson = is_array($array) ? array_merge($tojson, $array) : $tojson;
+			$object -> accept($visitor);
 		}
-		echo json_encode($tojson);
+		echo $visitor -> getUsableJSON();
 		break;
 	default :
 		exit ;

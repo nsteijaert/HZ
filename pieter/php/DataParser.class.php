@@ -11,6 +11,9 @@ class DataParser {
 	function parseDataRDF() {
 		$items = array();
 
+		if (!isset($this -> data['@graph']))
+			return $items;
+		
 		foreach ($this->data['@graph'] as $item) {
 			$obj = new SKOSConcept($item['@id']);
 			foreach ($item as $key => $value) {

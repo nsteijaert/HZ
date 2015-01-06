@@ -14,7 +14,7 @@ $(document).ready(function() {
 	}
 
 	if ($.cookie("depth") != "" && $.cookie("relations") != "")
-		visualize("TZW:hoofd", $.cookie("depth"), $.cookie("relations"));
+		visualize("TZW:gezicht", $.cookie("depth"), $.cookie("relations"));
 	else
 		visualize("TZW:gezicht");
 
@@ -54,10 +54,16 @@ $(document).ready(function() {
 					output : "json"
 				}
 			}).done(function(result) {
-				$.post("php/VisualisationScript.php", {
-					do : "parse",
-					data : result
-				}, function(data) {
+				$.ajax({
+					type : "POST",
+					cache : false,
+					url : "php/VisualisationScript.php",
+					async : true,
+					data : {
+						do : "parse",
+						data : result
+					}
+				}).done(function(data) {
 					loadOptions(depth, relations);
 
 					var links = JSON.parse(data);
@@ -67,10 +73,12 @@ $(document).ready(function() {
 					// Compute the distinct nodes from the links.
 					links.forEach(function(link) {
 						link.source = nodes[link.source] || (nodes[link.source] = {
-							name : link.source
+							name : link.source,
+							url : link.urlsource
 						});
 						link.target = nodes[link.target] || (nodes[link.target] = {
-							name : link.target
+							name : link.target,
+							url : link.urltarget
 						});
 					});
 
@@ -84,12 +92,16 @@ $(document).ready(function() {
 
 					var link = svg.selectAll(".link").data(force.links()).enter().append("line").attr("class", "link").attr("marker-end", "url(#arrow)");
 
-					var node = svg.selectAll(".node").data(force.nodes()).enter().append("g").attr("class", "node").on("mouseover", mouseover).on("mouseout", mouseout);
+					var node = svg.selectAll(".node").data(force.nodes()).enter().append("g").attr("class", "node").on("mouseover", mouseover).on("mouseleave", mouseleave);
 
 					var nodePath = d3.superformula().type("circle").size(125).segments(360);
-					node.append("a").attr("xlink:href", "http://www.w3schools.com/svg/").append("path").attr("class", "path").attr("d", nodePath);
+					node.append("a").attr("xlink:href", function(d) {
+						return d.url;
+					}).append("path").attr("class", "path").attr("d", nodePath);
 
-					node.append("a").attr("xlink:href", "http://www.w3schools.com/svg/").append("text").attr("x", 13).attr("dy", ".35em").text(function(d) {
+					node.append("a").attr("xlink:href", function(d) {
+						return d.url;
+					}).append("text").attr("x", 13).attr("dy", ".35em").text(function(d) {
 						return d.name;
 					});
 
@@ -133,15 +145,21 @@ $(document).ready(function() {
 						d3.select(obj).select(".path").transition().duration(1500).style("fill", "#fff").style("stroke", "#555");
 						d3.select(obj).moveToFront();
 						timeOut = setTimeout(function() {
-							d3.select(obj).select(".path").transition().duration(1500).attr("d", nodePath.type("rectangle").size(80000)).style("fill", "#fff").style("stroke", "#555");
+							d3.select(obj).select(".path").transition().duration(1500).attr("d", nodePath.type("rectangle").size(80000)).style("fill", "#fff").style("stroke", "#555").each("end", function() {
+								d3.select(obj).append("foreignObject").attr("x", "-175px").attr("y", "-85px").attr("width", 350).attr("height", 170).append("xhtml:div").html(function(){
+									return '<h4><a href="#">Title</a></h4><table><tr><td>Beschrijving:</td><td>Beschrijving</td></tr></table><div class="links"><img src="http://www.jolwin.nl/wp-content/uploads/2013/02/logo-bibliotheek-150x150.png"/></div>';
+								});
+							});
 							d3.select(obj).select("text").transition().duration(1000).style("opacity", 0);
 						}, 1000);
 					}
 
-					function mouseout() {
+					function mouseleave() {
 						clearTimeout(timeOut);
+
+						d3.select(this).selectAll("foreignObject").remove();
 						d3.select(this).select(".path").transition().duration(500).attr("d", nodePath.type("circle").size(125)).style("fill", "#555").style("stroke", "#fff");
-						d3.select(this).select("text").transition().duration(1000).style("opacity", 100);
+						d3.select(this).select("a > text").transition().duration(1000).style("opacity", 100);
 					}
 
 					function zoom() {
@@ -183,6 +201,10 @@ $(document).ready(function() {
 							this.parentNode.appendChild(this);
 						});
 					};
+
+					d3.selection.prototype.first = function() {
+						return d3.select(this[0][0]);
+					}
 				});
 			});
 		});
@@ -190,17 +212,19 @@ $(document).ready(function() {
 
 	// Uncomment this to run the tests. It is unable to run the tests in a separate file.
 	// QUnit.test("Visualisation", function(assert) {
-		// assert.raises(function() {
-			// visualize("TZW:hoofd");
-		// }, "Red is passed!");
-		// assert.raises(function() {
-			// visualize("TZW:hoofd", "1");
-		// }, "Red is passed!");
-		// assert.raises(function() {
-			// visualize("TZW:hoofd", "3", "true,false");
-		// }, "Red is passed!");
-		// assert.raises(function() {
-			// visualize();
-		// }, "Red is passed!");
+	// assert.ok(function() {
+	// visualize("TZW:hoofd");
+	// }, "Passed!");
+	// assert.ok(function() {
+	// visualize("TZW:hoofd", "1");
+	// }, "Passed!");
+	// assert.ok(function() {
+	// visualize("TZW:hoofd", "3", "true,false");
+	// }, "Passed!");
+	//
+	// // Check if returns an exception.
+	// assert.raises(function() {
+	// visualize();
+	// }, "Passed!");
 	// });
 });

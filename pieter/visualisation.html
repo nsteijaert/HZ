@@ -122,6 +122,35 @@
 		line-height: normal;
 		height: auto;
 	}
+
+	table {
+		border-collapse: collapse;
+		width: 100%;
+	}
+
+	table td:first-child {
+		font-weight: bold;
+	}
+
+	h4 {
+		margin: 0 0 15px;
+	}
+	h4 a {
+		color: inherit;
+		text-decoration: none;
+	}
+	h4 a:hover {
+		color: #000;
+	}
+
+	div.links {
+		bottom: 0;
+		position: absolute;
+		right: 0;
+	}
+	div.links img {
+		height: 35px;
+	}
 </style>
 <h3>Result in html</h3>
 <div class="visualisationResult">
@@ -140,16 +169,11 @@
 				</tr>
 				<tr>
 					<td>Relaties:</td>
-					<td>
-					<label>
-					<input type="checkbox" class="broader" name="relations[]" />
-					Breder
-					</label>
-					<label>
+					<td><label>
+						<input type="checkbox" class="broader" name="relations[]" />
+						Breder </label><label>
 						<input type="checkbox" class="narrower" name="relations[]" />
-						Specifieker
-					</label>
-					</td>
+						Specifieker </label></td>
 				</tr>
 			</table>
 		</div>
