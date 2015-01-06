@@ -22,7 +22,7 @@ class Context
 		return $this->description;
 	}
 	
-	public function addSupercontext($supercontext)
+	public function addSupercontext(&$supercontext)
 	{
 		if ($supercontext instanceOf Context)
 		{
@@ -34,7 +34,7 @@ class Context
 		}
 	}
 	
-	public function removeSupercontext($supercontext)
+	public function removeSupercontext(&$supercontext)
 	{
 		if ($supercontext instanceOf Context)
 		{

@@ -15,8 +15,8 @@ require_once(__DIR__.'/Depends.class.php');
 
 class JSON_EMontParser {
 
-	private function __construct($input) {
-		
+	private function __construct($input)
+	{
 	}
 
 	public static function parse($input)
@@ -26,7 +26,8 @@ class JSON_EMontParser {
 		
 		$items = array();
 
-		foreach ($data['@graph'] as $item) {
+		foreach ($data['@graph'] as $item) 
+		{
 			// Bepaal type IE
 			switch($item['Eigenschap-3AIntentional_Element_type'])
 			{
@@ -65,7 +66,8 @@ class JSON_EMontParser {
 			}
 
 
-			foreach ($item as $key => $value) {
+			foreach ($item as $key => $value) 
+			{
 				switch($key)
 				{
 					case 'Eigenschap-3AIntentional_Element_decomposition_type':
@@ -77,6 +79,39 @@ class JSON_EMontParser {
 			$items[$item['@id']] = $obj;
 		}
 
+		foreach ($data['@graph'] as $item) 
+		{
+			$object=$items[$item['@id']];
+			
+			try
+			{
+				if(@$item['Eigenschap-3AProduces']!='')
+				{
+					@$verwijsobject=$items[$item['Eigenschap-3AProduces']];
+					@$object->addProduces($verwijsobject);
+					$items[$uri]=$object;	
+				}
+			}
+			catch(Exception $e)
+			{
+				// Produces valt vermoedelijk buiten de Context
+ 			}
+
+			try
+			{
+				if(@$item['Eigenschap-3AConsumes']!='')
+				{
+					@$verwijsobject=$items[$item['Eigenschap-3AConsumes']];
+					@$object->addConsumes($verwijsobject);
+					$items[$uri]=$object;
+				}
+			}
+			catch(Exception $e)
+			{
+				// Produces valt vermoedelijk buiten de Context
+			}
+		}
+
 		foreach ($items as $uri => $item)
 		{
 
@@ -86,26 +121,27 @@ class JSON_EMontParser {
 			try
 			{
 				$object=$items[$uri];
-				switch($koppeling['Eigenschap-3AElement_link_type'])
+
+				switch(@$koppeling['Eigenschap-3AElement_link_type'])
 				{
 					case 'Depends':
 						$koppelobject=new Depends();
-						$koppelobject->setLinkNote($koppeling['Eigenschap-3AElement_link_note']);
+						@$koppelobject->setLinkNote($koppeling['Eigenschap-3AElement_link_note']);
 						@$koppelobject->setLink($items[$koppeling['Eigenschap-3AElement_link']]);
 						$object->addDepends($koppelobject);
 						break;
 					case 'Connects':
 						$koppelobject=new Connects();
-						$koppelobject->setLinkNote($koppeling['Eigenschap-3AElement_link_note']);
-						$koppelobject->setLinkCondition($koppeling['Eigenschap-3AElement_condition']);
-						$koppelobject->setConnectionType($koppeling['Element_connection_type']);
+						@$koppelobject->setLinkNote($koppeling['Eigenschap-3AElement_link_note']);
+						@$koppelobject->setLinkCondition($koppeling['Eigenschap-3AElement_condition']);
+						@$koppelobject->setConnectionType($koppeling['Element_connection_type']);
 						@$koppelobject->setLink($items[$koppeling['Eigenschap-3AElement_link']]);
 						$object->addConnects($koppelobject);
 						break;
 					case 'Contributes':
 						$koppelobject=new Contributes();
-						$koppelobject->setLinkNote($koppeling['Eigenschap-3AElement_link_note']);
-						$koppelobject->setContributionValue($koppeling['Eigenschap-3AElement_contribution_value']);
+						@$koppelobject->setLinkNote($koppeling['Eigenschap-3AElement_link_note']);
+						@$koppelobject->setContributionValue($koppeling['Eigenschap-3AElement_contribution_value']);
 						@$koppelobject->setLink($items[$koppeling['Eigenschap-3AElement_link']]);
 						$object->addContributes($koppelobject);
 						break;
@@ -113,8 +149,6 @@ class JSON_EMontParser {
 						break;
 				}
 
-				
-				
 				$items[$uri]=$object;
 			}
 			catch(Exception $e)
@@ -136,27 +170,5 @@ class JSON_EMontParser {
 		return $data;
 		
 	}
-
-/*	function parseDataRDF() {
-
-		foreach ($this->data['@graph'] as $item) {
-			$obj = $items[$item['@id']];
-			foreach ($item as $key => $value) {
-				if ($this -> isRelation($key)) {
-					if (is_array($value)) {
-						foreach ($value as $relation) {
-							if (array_key_exists($relation, $items))
-								$obj -> addRelation($key, $items[$relation]);
-						}
-					} else {
-						if (array_key_exists($value, $items))
-							$obj -> addRelation($key, $items[$value]);
-					}
-				}
-			}
-		}
-
-	}
-*/
 }
 ?>

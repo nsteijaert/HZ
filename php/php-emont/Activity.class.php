@@ -5,7 +5,7 @@ require_once(__DIR__.'/Connects.class.php');
 
 class Activity extends IntentionalElement
 {
-	// Both Outcome objects
+	// Both SplObjectStorages of Outcome objects
 	private $produces;
 	private $consumes;
 	
@@ -16,13 +16,27 @@ class Activity extends IntentionalElement
 	{
 		parent::__construct();
 		$this->connects=new SplObjectStorage();
+		$this->produces=new SplObjectStorage();
+		$this->consumes=new SplObjectStorage();
 	}
 	
-	public function setProduces($produces)
+	public function addProduces(&$produces)
 	{
 		if ($produces instanceOf Outcome)
 		{
-			$this->produces=$produces;
+			$this->produces->attach($produces);
+		}
+		else 
+		{
+			throw new Exception('Not an Outcome');
+		}
+	}
+	
+	public function removeProduces(&$produces)
+	{
+		if ($produces instanceOf Outcome)
+		{
+			$this->produces->detach($produces);
 		}
 		else 
 		{
@@ -35,11 +49,22 @@ class Activity extends IntentionalElement
 		return $this->produces;
 	}
 	
-	public function setConsumes($consumes)
+	public function addConsumes(&$consumes)
 	{
 		if ($consumes instanceOf Outcome)
 		{
-			$this->consumes=$consumes;
+			$this->consumes->attach($consumes);
+		}
+		else 
+		{
+			throw new Exception('Not an Outcome');
+		}
+	}
+	public function removeConsumes(&$consumes)
+	{
+		if ($consumes instanceOf Outcome)
+		{
+			$this->consumes->detach($consumes);
 		}
 		else 
 		{
