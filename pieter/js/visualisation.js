@@ -62,10 +62,14 @@ $(document).ready(function() {
 			});
 
 			//var width = 960, height = 500;
+			center = [width / 2, height / 2];
+
+			// Zoom functionality
+			var zoom = d3.behavior.zoom().scaleExtent([1, 8]).on("zoom", zoomed);
 
 			var force = d3.layout.force().nodes(d3.values(nodes)).links(links).size([width, height]).linkDistance(100).charge(-600).on("tick", tick).start();
 
-			var svg = d3.select(".visualisation").append("svg").attr("width", "100%").attr("height", height).call(d3.behavior.zoom().scaleExtent([1, 8]).on("zoom", zoom)).append("g");
+			var svg = d3.select(".visualisation").append("svg").attr("width", "100%").attr("height", height).call(zoom).append("g");
 			// Arrow
 			svg.append("marker").attr("id", "arrow").attr("viewBox", "0 -5 10 10").attr("refX", "19").attr("refY", "0").attr("markerWidth", "6").attr("markerHeight", "6").attr("orient", "auto").append("path").attr("d", "M0,-5L10,0L0,5");
 
@@ -85,8 +89,15 @@ $(document).ready(function() {
 			});
 
 			// Events
-			d3.select(".zoomHandlers button.zoomIn").on("click", zoom);
-			d3.select(".zoomHandlers button.zoomOut").on("click", zoom);
+			var pressed = false;
+			d3.selectAll(".zoomHandlers button").on('mousedown', function() {
+				pressed = true;
+				zoomButton(d3.select(this).attr("class") === "zoomIn");
+			}).on('mouseup', function() {
+				pressed = false;
+			}).on('mouseout', function() {
+				pressed = false;
+			});
 
 			$(".optionsHandlers button.options").click(function() {
 				$(".optionsHandlers #options").fadeIn('fast');
@@ -119,30 +130,40 @@ $(document).ready(function() {
 				});
 			}
 
+			var isOpen = false;
 			function mouseover() {
-				var obj = this;
-				d3.select(obj).select(".path").transition().duration(1500).style("fill", "#fff").style("stroke", "#555");
-				d3.select(obj).moveToFront();
-				timeOut = setTimeout(function() {
-					d3.select(obj).select(".path").transition().duration(1500).attr("d", nodePath.type("rectangle").size(80000)).style("fill", "#fff").style("stroke", "#555").each("end", function() {
-						d3.select(obj).append("foreignObject").attr("x", "-175px").attr("y", "-85px").attr("width", 350).attr("height", 170).append("xhtml:div").html(function() {
-							return '<h4><a href="#">Title</a></h4><table><tr><td>Beschrijving:</td><td>Beschrijving</td></tr></table><div class="links"><img src="http://www.jolwin.nl/wp-content/uploads/2013/02/logo-bibliotheek-150x150.png"/></div>';
+				if (!isOpen) {
+					isOpen = true;
+					var obj = this;
+					d3.select(obj).select(".path").transition().duration(1000).style("fill", "#fff").style("stroke", "#555");
+					d3.select(obj).moveToFront();
+					timeOut = setTimeout(function() {
+						d3.select(obj).select(".path").transition().duration(1000).attr("d", nodePath.type("rectangle").size(80000)).style("fill", "#fff").style("stroke", "#555").each("end", function() {
+							d3.select(obj).append("foreignObject").attr("x", "-181px").attr("y", "-92px").attr("width", 363).attr("height", 183).append("xhtml:div").attr("class", "objcontext").html(function() {
+								return '<h4><a href="#">Title</a></h4><table><tr><td>Beschrijving:</td><td>Beschrijving</td></tr></table><div class="links"><img src="http://www.jolwin.nl/wp-content/uploads/2013/02/logo-bibliotheek-150x150.png"/></div>';
+							});
 						});
-					});
-					d3.select(obj).select("text").transition().duration(1000).style("opacity", 0);
-				}, 1000);
+						d3.select(obj).select("text").transition().duration(500).style("opacity", 0);
+					}, 800);
+				}
 			}
 
 			function mouseleave() {
-				clearTimeout(timeOut);
+				if (isOpen) {
+					isOpen = false;
+					clearTimeout(timeOut);
 
-				d3.select(this).selectAll("foreignObject").remove();
-				d3.select(this).select(".path").transition().duration(500).attr("d", nodePath.type("circle").size(125)).style("fill", "#555").style("stroke", "#fff");
-				d3.select(this).select("a > text").transition().duration(1000).style("opacity", 100);
+					d3.select(this).selectAll(function() {
+						return this.getElementsByTagName("foreignObject");
+					}).remove();
+					d3.select(this).select(".path").transition().duration(500).attr("d", nodePath.type("circle").size(125)).style("fill", "#555").style("stroke", "#fff");
+					d3.select(this).select("a > text").transition().duration(1000).style("opacity", 100);
+				}
 			}
 
-			function zoom() {
-				svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
+			function zoomed() {
+				//svg.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + (d3.event.scale) + ")");
+				svg.attr("transform", "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")");
 			}
 
 			function loadOptions(depth, relations) {
@@ -172,6 +193,37 @@ $(document).ready(function() {
 				}
 			}
 
+			function zoomButton(zoom_in) {
+				var scale = zoom.scale(), extent = zoom.scaleExtent(), translate = zoom.translate(), x = translate[0], y = translate[1], factor = zoom_in ? 1.3 : 1 / 1.3, target_scale = scale * factor;
+
+				// If we're already at an extent, done
+				if (target_scale === extent[0] || target_scale === extent[1]) {
+					return false;
+				}
+				// If the factor is too much, scale it down to reach the extent exactly
+				var clamped_target_scale = Math.max(extent[0], Math.min(extent[1], target_scale));
+				if (clamped_target_scale != target_scale) {
+					target_scale = clamped_target_scale;
+					factor = target_scale / scale;
+				}
+
+				// Center each vector, stretch, then put back
+				x = (x - center[0]) * factor + center[0];
+				y = (y - center[1]) * factor + center[1];
+
+				// Transition to the new view over 100ms
+				d3.transition().duration(100).tween("zoom", function() {
+					var interpolate_scale = d3.interpolate(scale, target_scale), interpolate_trans = d3.interpolate(translate, [x, y]);
+					return function(t) {
+						zoom.scale(interpolate_scale(t)).translate(interpolate_trans(t));
+						zoomed();
+					};
+				}).each("end", function() {
+					if (pressed)
+						zoomButton(zoom_in);
+				});
+			}
+
 
 			d3.selection.prototype.moveToFront = function() {
 				return this.each(function() {
@@ -181,7 +233,7 @@ $(document).ready(function() {
 
 			d3.selection.prototype.first = function() {
 				return d3.select(this[0][0]);
-			}
+			};
 		});
 	}
 
