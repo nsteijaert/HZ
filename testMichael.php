@@ -3,6 +3,7 @@
  * Testpagina voor EMont-parser.
  * @author: Michael Steenbeek
  */
+require_once(__DIR__.'/php/php-emont/JSON_EMontParser.class.php');
 ?>
 <!DOCTYPE html>
 <html>
@@ -15,16 +16,16 @@
 $context='Menselijk-2D_en_ecosysteem';
 $context_uri='<http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'.$context.'>';
  
-$lijst_van_ies_in_context='DESCRIBE ?ie WHERE { ?ie <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AContext> '.$context_uri.'}';
-$query=urlencode($lijst_van_ies_in_context);
+$query_inhoud_context='DESCRIBE ?ie WHERE { ?ie <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AContext> '.$context_uri.'}';
   
-$result=file_get_contents('http://127.0.0.1:3030/ds/query?output=json&query='.$query);
-echo 'Lijstje van IEs in context "'.urldecode(strtr($context,'-_','% ')).'":<br />';
+$result=file_get_contents('http://127.0.0.1:3030/ds/query?output=json&query='.urlencode($query_inhoud_context));
+echo 'Lijstje van IEs in context "'.JSON_EMontParser::decodeerSMWNaam($context).'":<br />';
+echo '<a href="#geparset">Naar de geparsete gegevens</a><br />';
 echo '<pre>'.$result.'</pre>';
 
-require_once(__DIR__.'/php/php-emont/JSON_EMontParser.class.php');
 $parse=JSON_EMontParser::parse($result);
-echo 'Geparsed:<br />'; 
+
+echo '<a name="geparset">Geparset:</a><br />'; 
 echo '<pre>';
 var_dump($parse);
 echo '</pre>';
