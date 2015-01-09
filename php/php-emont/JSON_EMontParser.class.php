@@ -60,9 +60,7 @@ class JSON_EMontParser {
 			}
 			else
 			{
-				// ID's in RDF-store staan in procentnotatie, maar met een - ipv een %. Dit stukje code zorgt voor
-				// een correcte procentnotatie en zet die vervolgens om naar de bedoelde tekens.
-				$obj->setHeading(urldecode(strtr($item['@id'], "-_","% ")));
+				$obj->setHeading(self::decodeerSMWNaam($item['@id']));
 			}
 
 
@@ -167,8 +165,18 @@ class JSON_EMontParser {
 		$result=file_get_contents('http://127.0.0.1:3030/ds/query?output=json&query='.$query);
 		$data=json_decode($result,true);
 		
-		return $data;
-		
+		return $data;	
+	}
+	
+	/**
+	 * Zet een in SMW opgeslagen naam van een Mediawiki-artikel om in een leesbare variant.
+	 * Bijvoorbeeld: Eigenschap-3AElement_link_type naar Eigenschap: Element link type
+	 */
+	static function decodeerSMWNaam($naam)
+	{
+		// ID's in RDF-store staan in procentnotatie, maar met een - ipv een %. Dit stukje code zorgt voor
+		// een correcte procentnotatie en zet die vervolgens om naar de bedoelde tekens.
+		return urldecode(strtr($naam, "-_","% "));
 	}
 }
 ?>
