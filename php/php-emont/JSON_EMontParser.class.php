@@ -3,6 +3,8 @@
  * EMont-modellen in JSON-formaat omzetten naar PHP-objecten
  * @author Michael Steenbeek
  */
+
+require_once(__DIR__.'/../SPARQLConnection.class.php');
 require_once(__DIR__.'/Context.class.php');
 require_once(__DIR__.'/IntentionalElement.class.php');
 require_once(__DIR__.'/Activity.class.php');
@@ -22,9 +24,10 @@ class JSON_EMontParser {
 
 	public static function parse($input)
 	{
-		
+		$connectie=new SPARQLConnection();
+
 		$data = json_decode($input,true);
-		
+
 		$items = array();
 
 		foreach ($data['@graph'] as $item) 
@@ -115,7 +118,7 @@ class JSON_EMontParser {
 		{
 
 			$query='DESCRIBE ?s WHERE { ?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AElement_back_link> <'.$uri.'> }';
-			$koppeling=self::geefEen($query);
+			$koppeling=$connectie->JSONQueryAsPHPArray($query);
 
 			try
 			{
@@ -158,17 +161,6 @@ class JSON_EMontParser {
 		return $items;
 	}
 
-	static function geefEen($query)
-	{
-		//TODO: Netter maken
-		$query=urlencode($query);
-  
-		$result=file_get_contents('http://127.0.0.1:3030/ds/query?output=json&query='.$query);
-		$data=json_decode($result,true);
-		
-		return $data;	
-	}
-	
 	/**
 	 * Zet een in SMW opgeslagen naam van een Mediawiki-artikel om in een leesbare variant.
 	 * Bijvoorbeeld: Eigenschap-3AElement_link_type naar Eigenschap: Element link type
@@ -190,9 +182,10 @@ class JSON_EMontParser {
 			.
 			?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3APractice_back_link> ?o
 			}";
-		$result=file_get_contents('http://127.0.0.1:3030/ds/query?output=json&query='.urlencode($query));
+		$connectie=new SPARQLConnection();
+		$result=$connectie->JSONQueryAsPHPArray($query);
 
-		if (empty(json_decode($result,true))) // Leeg resultaat
+		if (empty($result)) // Leeg resultaat
 		{
 			return false;
 		}
@@ -200,6 +193,33 @@ class JSON_EMontParser {
 		{
 			return true;
 		}
+	}
+
+	/**
+	 * @input De context-URI, zonder vishaken (< en >)
+	 */
+	static function zoekSubrollen($context_uri)
+	{
+		$subrollen=array();
+
+		$query='DESCRIBE ?context WHERE { ?context <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3ASupercontext> <'.$context_uri.'> }';
+		$connectie=new SPARQLConnection();
+		$contexten=$connectie->JSONQueryAsPHPArray($query);
+
+		if(!empty($contexten))
+		{
+			foreach($contexten['@graph'] as $item)
+			{
+				// Subsituaties moeten niet worden meegenomen.
+				if(!self::isSituatie($item['@id']))
+				{
+					$subrollen[]=$item['@id'];
+					$subrollen=array_merge($subrollen,self::zoekSubrollen($item['@id']));
+				}
+			}
+		}
+
+		return $subrollen;
 	}
 }
 ?>
