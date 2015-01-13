@@ -3,6 +3,7 @@
  * EMont-modellen in JSON-formaat omzetten naar PHP-objecten
  * @author Michael Steenbeek
  */
+require_once(__DIR__.'/Context.class.php');
 require_once(__DIR__.'/IntentionalElement.class.php');
 require_once(__DIR__.'/Activity.class.php');
 require_once(__DIR__.'/Belief.class.php');
@@ -177,6 +178,28 @@ class JSON_EMontParser {
 		// ID's in RDF-store staan in procentnotatie, maar met een - ipv een %. Dit stukje code zorgt voor
 		// een correcte procentnotatie en zet die vervolgens om naar de bedoelde tekens.
 		return urldecode(strtr($naam, "-_","% "));
+	}
+
+	/**
+	 * Staat hier omdat het op URL gaat.
+	 */
+	static function isSituatie($context_uri)
+	{
+		$query="DESCRIBE ?s ?o WHERE {
+			?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3ASelection_link> <".$context_uri.">
+			.
+			?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3APractice_back_link> ?o
+			}";
+		$result=file_get_contents('http://127.0.0.1:3030/ds/query?output=json&query='.urlencode($query));
+
+		if (empty(json_decode($result,true))) // Leeg resultaat
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	}
 }
 ?>

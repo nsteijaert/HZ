@@ -28,8 +28,14 @@ $parse=JSON_EMontParser::parse($result);
 echo '<a name="geparset">Geparset:</a><br />'; 
 echo '<pre>';
 var_dump($parse);
-echo '</pre>';
- 
 ?>
+</pre>
+Test van isSituatie: (moet 1.true en 2.false opleveren)
+<pre>
+<?php
+var_dump(JSON_EMontParser::isSituatie("http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/B_en_O_Kust"));
+var_dump(JSON_EMontParser::isSituatie("http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/B_en_O_Kus"));
+?>
+</pre>
 </body>
 </html>
