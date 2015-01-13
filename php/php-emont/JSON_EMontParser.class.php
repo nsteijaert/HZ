@@ -16,17 +16,31 @@ require_once(__DIR__.'/Contributes.class.php');
 require_once(__DIR__.'/Connects.class.php');
 require_once(__DIR__.'/Depends.class.php');
 
-class JSON_EMontParser {
-
-	private function __construct($input)
+class JSON_EMontParser
+{
+	private $situatie_uri="";
+	
+	public function __construct($situatie_uri)
 	{
+		//TODO: Check of uri wel een situatie is.
+		$this->situatie_uri=$situatie_uri;
 	}
 
-	public static function parse($input)
+	public function geefElementenInSituatie()
 	{
 		$connectie=new SPARQLConnection();
 
-		$data = json_decode($input,true);
+		$subrollen=self::zoekSubrollen($this->situatie_uri);
+		
+		$alle_te_doorzoeken_uris=array_merge(array($this->situatie_uri),$subrollen);
+		//var_dump($alle_te_doorzoeken_uris);
+		$zoekstring=implode('> } UNION { ?ie <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AContext> <',$alle_te_doorzoeken_uris);
+		//$zoekstring=$this->situatie_uri;
+		
+		$query_inhoud_situatie='DESCRIBE ?ie WHERE {{ ?ie <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AContext> <'.$zoekstring.'> }.{?ie <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AIntentional_Element>} UNION {?ie <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AActivity>}}';
+		echo '<pre>'.$query_inhoud_situatie.'</pre>';
+
+		$data=$connectie->JSONQueryAsPHPArray($query_inhoud_situatie);
 
 		$items = array();
 
@@ -81,6 +95,19 @@ class JSON_EMontParser {
 			$items[$item['@id']] = $obj;
 		}
 
+		$contexten=array();
+
+		foreach($alle_te_doorzoeken_uris as $context_uri)
+		{
+			$contexten[$context_uri]=new Context();
+		}
+		foreach($contexten as $context_uri => $context_object)
+		{
+		}
+		echo '<pre>';
+		var_dump($contexten);
+		echo'</pre>';
+
 		foreach ($data['@graph'] as $item) 
 		{
 			$object=$items[$item['@id']];
@@ -91,7 +118,7 @@ class JSON_EMontParser {
 				{
 					@$verwijsobject=$items[$item['Eigenschap-3AProduces']];
 					@$object->addProduces($verwijsobject);
-					$items[$uri]=$object;	
+					$items[$item['@id']]=$object;	
 				}
 			}
 			catch(Exception $e)
@@ -105,7 +132,7 @@ class JSON_EMontParser {
 				{
 					@$verwijsobject=$items[$item['Eigenschap-3AConsumes']];
 					@$object->addConsumes($verwijsobject);
-					$items[$uri]=$object;
+					$items[$item['@id']]=$object;
 				}
 			}
 			catch(Exception $e)
@@ -206,7 +233,7 @@ class JSON_EMontParser {
 		$connectie=new SPARQLConnection();
 		$contexten=$connectie->JSONQueryAsPHPArray($query);
 
-		if(!empty($contexten))
+		if(isset($contexten['@graph']))
 		{
 			foreach($contexten['@graph'] as $item)
 			{

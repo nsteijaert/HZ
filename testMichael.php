@@ -16,17 +16,17 @@ require_once(__DIR__.'/php/SPARQLConnection.class.php');
 <?php
 $connectie=new SPARQLConnection();
 
-$context='Menselijk-2D_en_ecosysteem';
-$context_uri='<http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'.$context.'>';
+//$context='Menselijk-2D_en_ecosysteem';
+$context="Building_with_Nature-2Dinterventies_op_het_systeem";
+$context_uri='http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'.$context;
  
-$query_inhoud_context='DESCRIBE ?ie WHERE { ?ie <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AContext> '.$context_uri.'}';
-  
-$result=$connectie->JSONQuery($query_inhoud_context);
-echo 'Lijstje van IEs in context "'.JSON_EMontParser::decodeerSMWNaam($context).'":<br />';
-echo '<a href="#geparset">Naar de geparsete gegevens</a><br />';
-echo '<pre>'.$result.'</pre>';
 
-$parse=JSON_EMontParser::parse($result);
+echo 'Lijstje van IEs in context "'.JSON_EMontParser::decodeerSMWNaam($context).'":<br />';
+//echo '<a href="#geparset">Naar de geparsete gegevens</a><br />';
+//echo '<pre>'.$result.'</pre>';
+
+$situatieparser=new JSON_EMontParser($context_uri);
+$parse=$situatieparser->geefElementenInSituatie();
 
 echo '<a name="geparset">Geparset:</a><br />'; 
 echo '<pre>';
