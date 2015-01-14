@@ -38,11 +38,14 @@ class JSON_EMontParser
 		//$zoekstring=$this->situatie_uri;
 		
 		$query_inhoud_situatie='DESCRIBE ?ie WHERE {{ ?ie <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AContext> <'.$zoekstring.'> }.{?ie <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AIntentional_Element>} UNION {?ie <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AActivity>}}';
-		echo '<pre>'.$query_inhoud_situatie.'</pre>';
+		echo '<pre>'.$connectie->JSONQuery($query_inhoud_situatie).'</pre>';
 
 		$data=$connectie->JSONQueryAsPHPArray($query_inhoud_situatie);
 
 		$items = array();
+		$produces=array();
+		$consumes=array();
+		$ie_context=array();
 
 		foreach ($data['@graph'] as $item) 
 		{
@@ -81,68 +84,120 @@ class JSON_EMontParser
 				$obj->setHeading(self::decodeerSMWNaam($item['@id']));
 			}
 
-
 			foreach ($item as $key => $value) 
 			{
-				switch($key)
+				if(!empty($value))
 				{
-					case 'Eigenschap-3AIntentional_Element_decomposition_type':
-						$obj->setDecompositionType($value);
-						break;
-					default:
+					switch($key)
+					{
+						case 'Eigenschap-3AIntentional_Element_decomposition_type':
+							$obj->setDecompositionType($value);
+							break;
+						case 'Eigenschap-3AProduces':
+							$produces[$item['@id']]=$value;
+							break;
+						case 'Eigenschap-3AConsumes':
+							$consumes[$item['@id']]=$value;
+							break;
+						case 'Eigenschap-3AContext':
+							$ie_context[$item['@id']]=$value;
+							break;
+						default:
+					}
 				}
 			}
+
 			$items[$item['@id']] = $obj;
 		}
 
+		/**
+		 * Maak voor alle mee te nemen Contexten een object aan 
+		 */
 		$contexten=array();
-
 		foreach($alle_te_doorzoeken_uris as $context_uri)
 		{
 			$contexten[$context_uri]=new Context();
 		}
+
+		echo '<pre>';
+		var_dump($contexten);
+		echo'</pre>';		
+		
+		/**
+		 * Leg de verbanden tussen de Contexten
+		 */
 		foreach($contexten as $context_uri => $context_object)
 		{
+			$supercontexten=$connectie->JSONQueryAsPHPArray('DESCRIBE ?supercontext WHERE { <'.$context_uri.'> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3ASupercontext> ?supercontext}');
+			if(array_key_exists('@graph',$supercontexten)) // Meerdere resultaten
+			{
+				foreach($supercontexten['@graph'] as $supercontext)
+				{
+					if(array_key_exists($supercontext['@id'],$contexten)) // Overslaan als supercontext niet meegenomen moest worden
+					{
+						try
+						{
+							@$context_object->addSupercontext($contexten[$supercontext['@id']]);
+							$contexten[$context_uri]=$context_object;
+						}
+						catch(Exception $e)
+						{
+							// Supercontext blijkbaar niet in scope
+						}
+					}
+				}
+			}
+			elseif(!empty($supercontexten)) // Eén resultaat
+			{
+				if(array_key_exists($supercontexten['@id'],$contexten)) // Overslaan als supercontext niet meegenomen moest worden
+				{
+					try
+					{
+						@$context_object->addSupercontext($contexten[$supercontexten['@id']]);
+						$contexten[$context_uri]=$context_object;
+					}
+					catch(Exception $e)
+					{
+						// Supercontext blijkbaar niet in scope
+					}
+				}
+			}
 		}
 		echo '<pre>';
 		var_dump($contexten);
 		echo'</pre>';
 
-		foreach ($data['@graph'] as $item) 
+		foreach ($items as $uri => $item)
 		{
-			$object=$items[$item['@id']];
+			try
+			{
+				if(array_key_exists($uri,$produces))
+				{
+					@$item->addProduces($items[$produces[$uri]]);
+					$items[$uri]=$item;	
+				}
+			}
+			catch(Exception $e) {}
+
+			try
+			{
+				if(array_key_exists($uri,$consumes))
+				{
+					@$item->addConsumes($items[$produces[$uri]]);
+					$items[$uri]=$item;	
+				}
+			}
+			catch(Exception $e) {}
 			
 			try
 			{
-				if(@$item['Eigenschap-3AProduces']!='')
+				if(array_key_exists($uri,$ie_context))
 				{
-					@$verwijsobject=$items[$item['Eigenschap-3AProduces']];
-					@$object->addProduces($verwijsobject);
-					$items[$item['@id']]=$object;	
+					@$item->setContext($contexten[$ie_context[$uri]]);
+					$items[$uri]=$item;
 				}
 			}
-			catch(Exception $e)
-			{
-				// Produces valt vermoedelijk buiten de Context
- 			}
-
-			try
-			{
-				if(@$item['Eigenschap-3AConsumes']!='')
-				{
-					@$verwijsobject=$items[$item['Eigenschap-3AConsumes']];
-					@$object->addConsumes($verwijsobject);
-					$items[$item['@id']]=$object;
-				}
-			}
-			catch(Exception $e)
-			{
-				// Produces valt vermoedelijk buiten de Context
-			}
-		}
-
-		foreach ($items as $uri => $item)
-		{
+			catch(Exception $e) {}
 
 			$query='DESCRIBE ?s WHERE { ?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AElement_back_link> <'.$uri.'> }';
 			$koppeling=$connectie->JSONQueryAsPHPArray($query);
