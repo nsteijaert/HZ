@@ -4,6 +4,9 @@
  * @author Michael Steenbeek
  */
 
+// Notices worden voornamelijk bij niet-gedefinieerde eigenschappen gegeven. In productie uitzetten.
+error_reporting(E_ALL & ~E_NOTICE);
+
 require_once(__DIR__.'/../SPARQLConnection.class.php');
 require_once(__DIR__.'/Context.class.php');
 require_once(__DIR__.'/IntentionalElement.class.php');
@@ -35,10 +38,9 @@ class JSON_EMontParser
 		$alle_te_doorzoeken_uris=array_merge(array($this->situatie_uri),$subrollen);
 		//var_dump($alle_te_doorzoeken_uris);
 		$zoekstring=implode('> } UNION { ?ie <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AContext> <',$alle_te_doorzoeken_uris);
-		//$zoekstring=$this->situatie_uri;
 		
 		$query_inhoud_situatie='DESCRIBE ?ie WHERE {{ ?ie <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AContext> <'.$zoekstring.'> }.{?ie <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AIntentional_Element>} UNION {?ie <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AActivity>}}';
-		echo '<pre>'.$connectie->JSONQuery($query_inhoud_situatie).'</pre>';
+		//echo '<pre>'.$connectie->JSONQuery($query_inhoud_situatie).'</pre>';
 
 		$data=$connectie->JSONQueryAsPHPArray($query_inhoud_situatie);
 
@@ -116,7 +118,20 @@ class JSON_EMontParser
 		$contexten=array();
 		foreach($alle_te_doorzoeken_uris as $context_uri)
 		{
-			$contexten[$context_uri]=new Context();
+			$nieuwecontext=new Context();
+			$description_query='SELECT ?description WHERE { <'.$context_uri.'> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3ADescription> ?description }';
+			$description_result=$connectie->JSONQueryAsPHPArray($description_query);
+			$description=$description_result['results']['bindings'][0]['description']['value'];
+
+			if ($description!="")
+			{
+				$nieuwecontext->setDescription($description);
+			}
+			else
+			{
+				$nieuwecontext->setDescription(self::decodeerSMWNaam($context_uri));
+			}
+			$contexten[$context_uri]=$nieuwecontext;
 		}
 
 		echo '<pre>';
