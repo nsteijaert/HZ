@@ -1,8 +1,9 @@
 <?php
-/**
- *  @author Nick Steijaert
- */
+
+
 abstract class Visitor {
-    abstract function visitContext(ContextVisitee $contextVisitee);
+	abstract function visit(SKOSConcept $type);
+	
+	abstract function getUsableJSON();
 }
 ?>
