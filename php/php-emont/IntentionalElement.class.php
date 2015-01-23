@@ -10,7 +10,7 @@ class IntentionalElement
 	// A Context object
 	private $context;
 	
-	// Both Intentional Elements
+	// Both SplObjectStorages ofIntentional Elements
 	private $instanceOf;
 	private $partOf;
 	
@@ -23,6 +23,8 @@ class IntentionalElement
 	{
 		$this->contributes=new SplObjectStorage();
 		$this->depends=new SplObjectStorage();
+		$this->partOf=new SplObjectStorage();
+		$this->instanceOf=new SplObjectStorage();
 	}
 	
 	public function setHeading($heading)
@@ -72,15 +74,28 @@ class IntentionalElement
 		return $this->context;
 	}
 	
-	public function setInstanceOf($instanceOf)
+	public function addInstanceOf(&$instanceOf)
 	{
 		// This separates the men from the boys. The first is the parameter for setting the EMont property,
 		// the second is the PHP opcode to check whether the parameters is an Intentional Element object.
 		if ($instanceOf instanceOf IntentionalElement)
 		{
-			$this->instanceOf=$instanceOf;
+			$this->instanceOf->attach($instanceOf);
 		}
-		else 
+		else
+		{
+			throw new Exception('Not an Intentional Element');
+		}
+	}
+		public function removeInstanceOf(&$instanceOf)
+	{
+		// The first is the parameter for setting the EMont property,
+		// the second is the PHP opcode to check whether the parameters is an Intentional Element object.
+		if ($instanceOf instanceOf IntentionalElement)
+		{
+			$this->instanceOf->detach($instanceOf);
+		}
+		else
 		{
 			throw new Exception('Not an Intentional Element');
 		}
@@ -91,13 +106,25 @@ class IntentionalElement
 		return $this->instanceOf;
 	}
 	
-	public function setPartOf($partOf)
+	public function addPartOf(&$partOf)
 	{
 		if ($partOf instanceOf IntentionalElement)
 		{
-			$this->partOf=$partOf;
+			$this->partOf->attach($partOf);
 		}
-		else 
+		else
+		{
+			throw new Exception('Not an Intentional Element');
+		}
+	}
+
+	public function removePartOf(&$partOf)
+	{
+		if ($partOf instanceOf IntentionalElement)
+		{
+			$this->partOf->detach($partOf);
+		}
+		else
 		{
 			throw new Exception('Not an Intentional Element');
 		}

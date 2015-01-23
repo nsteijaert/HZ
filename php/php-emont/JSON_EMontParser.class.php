@@ -22,7 +22,7 @@ require_once(__DIR__.'/Depends.class.php');
 class JSON_EMontParser
 {
 	private $situatie_uri="";
-	
+
 	public function __construct($situatie_uri)
 	{
 		//TODO: Check of uri wel een situatie is.
@@ -34,11 +34,11 @@ class JSON_EMontParser
 		$connectie=new SPARQLConnection();
 
 		$subrollen=self::zoekSubrollen($this->situatie_uri);
-		
+
 		$alle_te_doorzoeken_uris=array_merge(array($this->situatie_uri),$subrollen);
 		//var_dump($alle_te_doorzoeken_uris);
 		$zoekstring=implode('> } UNION { ?ie <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AContext> <',$alle_te_doorzoeken_uris);
-		
+
 		$query_inhoud_situatie='DESCRIBE ?ie WHERE {{ ?ie <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AContext> <'.$zoekstring.'> }.{?ie <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AIntentional_Element>} UNION {?ie <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AActivity>}}';
 		//echo '<pre>'.$connectie->JSONQuery($query_inhoud_situatie).'</pre>';
 
@@ -48,8 +48,10 @@ class JSON_EMontParser
 		$produces=array();
 		$consumes=array();
 		$ie_context=array();
+		$instanceOf=array();
+		$partOf=array();
 
-		foreach ($data['@graph'] as $item) 
+		foreach ($data['@graph'] as $item)
 		{
 			// Bepaal type IE
 			switch($item['Eigenschap-3AIntentional_Element_type'])
@@ -70,7 +72,7 @@ class JSON_EMontParser
 					$obj=new Condition();
 					break;
 				default:
-					$obj = new IntentionalElement();		
+					$obj = new IntentionalElement();
 			}
 
 			if($item['Eigenschap-3AHeading_nl']!="")
@@ -86,7 +88,7 @@ class JSON_EMontParser
 				$obj->setHeading(self::decodeerSMWNaam($item['@id']));
 			}
 
-			foreach ($item as $key => $value) 
+			foreach ($item as $key => $value)
 			{
 				if(!empty($value))
 				{
@@ -104,6 +106,12 @@ class JSON_EMontParser
 						case 'Eigenschap-3AContext':
 							$ie_context[$item['@id']]=$value;
 							break;
+						case 'Eigenschap-3APart_of':
+							$partOf[$item['@id']]=$value;
+							break;
+						case 'Eigenschap-3AInstance_of':
+							$instanceOf[$item['@id']]=$value;
+							break;
 						default:
 					}
 				}
@@ -113,7 +121,7 @@ class JSON_EMontParser
 		}
 
 		/**
-		 * Maak voor alle mee te nemen Contexten een object aan 
+		 * Maak voor alle mee te nemen Contexten een object aan
 		 */
 		$contexten=array();
 		foreach($alle_te_doorzoeken_uris as $context_uri)
@@ -136,8 +144,8 @@ class JSON_EMontParser
 
 		echo '<pre>';
 		var_dump($contexten);
-		echo'</pre>';		
-		
+		echo'</pre>';
+
 		/**
 		 * Leg de verbanden tussen de Contexten
 		 */
@@ -189,7 +197,7 @@ class JSON_EMontParser
 				if(array_key_exists($uri,$produces))
 				{
 					@$item->addProduces($items[$produces[$uri]]);
-					$items[$uri]=$item;	
+					$items[$uri]=$item;
 				}
 			}
 			catch(Exception $e) {}
@@ -198,12 +206,33 @@ class JSON_EMontParser
 			{
 				if(array_key_exists($uri,$consumes))
 				{
-					@$item->addConsumes($items[$produces[$uri]]);
-					$items[$uri]=$item;	
+					@$item->addConsumes($items[$consumes[$uri]]);
+					$items[$uri]=$item;
 				}
 			}
 			catch(Exception $e) {}
-			
+
+			try
+			{
+				if(array_key_exists($uri,$partOf))
+				{
+					@$item->addPartOf($items[$partOf[$uri]]);
+					$items[$uri]=$item;
+				}
+			}
+			catch(Exception $e) {}
+
+			try
+			{
+				if(array_key_exists($uri,$instanceOf))
+				{
+					@$item->addInstanceOf($items[$instanceOf[$uri]]);
+					$items[$uri]=$item;
+				}
+			}
+			catch(Exception $e) {}
+
+
 			try
 			{
 				if(array_key_exists($uri,$ie_context))
