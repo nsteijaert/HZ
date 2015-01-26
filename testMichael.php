@@ -83,9 +83,6 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
 	// container to hold the visualization. We only need to specify
 	// the dimensions for this container.
 
-	/*var svg = d3.select('body').append('svg')
-    	.attr('width', width)
-    	.attr('height', height);*/
     var svg = d3.select('#visualisatie');
 
 	// Before we do anything else, let's define the data for the visualization.
@@ -157,20 +154,6 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
 	    // To move the node, we set the appropriate SVG
 	    // attributes to their new values. Also give the
 	    // nodes a non-zero radius so they're visible.
-
-	    // Per-type markers, as they don't inherit styles.
-	    /*svg.append("defs").selectAll("marker")
-	    .data(["standaard"])
-	    .enter().append("marker")
-	    .attr("id", function(d) { return d; })
-	    .attr("viewBox", "0 -5 10 10")
-	    .attr("refX", "10")
-	    .attr("refY", "0")
-	    .attr("markerWidth", "6")
-	    .attr("markerHeight", "6")
-	    .attr("orient", "auto")
-	    .append("path")
-	    .attr("d", "M0,-5L10,0L0,5");*/
 
 	    node.attr('x', function(d) { return d.x; })
 	        .attr('y', function(d) { return d.y; })
