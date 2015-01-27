@@ -142,9 +142,9 @@ class JSON_EMontParser
 			$contexten[$context_uri]=$nieuwecontext;
 		}
 
-		echo '<pre>';
-		var_dump($contexten);
-		echo'</pre>';
+		//echo '<pre>';
+		//var_dump($contexten);
+		//echo'</pre>';
 
 		/**
 		 * Leg de verbanden tussen de Contexten
@@ -186,9 +186,9 @@ class JSON_EMontParser
 				}
 			}
 		}
-		echo '<pre>';
-		var_dump($contexten);
-		echo'</pre>';
+		//echo '<pre>';
+		//var_dump($contexten);
+		//echo'</pre>';
 
 		foreach ($items as $uri => $item)
 		{
