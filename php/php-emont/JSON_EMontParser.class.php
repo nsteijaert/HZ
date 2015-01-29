@@ -57,22 +57,22 @@ class JSON_EMontParser
 			switch($item['Eigenschap-3AIntentional_Element_type'])
 			{
 				case 'Activity':
-					$obj=new Activity();
+					$obj=new Activity($item['@id']);
 					break;
 				case 'Outcome':
-					$obj=new Outcome();
+					$obj=new Outcome($item['@id']);
 					break;
 				case 'Goal':
-					$obj=new Goal();
+					$obj=new Goal($item['@id']);
 					break;
 				case 'Belief':
-					$obj=new Belief();
+					$obj=new Belief($item['@id']);
 					break;
 				case 'Condition':
-					$obj=new Condition();
+					$obj=new Condition($item['@id']);
 					break;
 				default:
-					$obj = new IntentionalElement();
+					$obj = new IntentionalElement($item['@id']);
 			}
 
 			if($item['Eigenschap-3AHeading_nl']!="")
@@ -116,7 +116,6 @@ class JSON_EMontParser
 					}
 				}
 			}
-
 			$items[$item['@id']] = $obj;
 		}
 
@@ -126,7 +125,7 @@ class JSON_EMontParser
 		$contexten=array();
 		foreach($alle_te_doorzoeken_uris as $context_uri)
 		{
-			$nieuwecontext=new Context();
+			$nieuwecontext=new Context($context_uri);
 			$description_query='SELECT ?description WHERE { <'.$context_uri.'> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3ADescription> ?description }';
 			$description_result=$connectie->JSONQueryAsPHPArray($description_query);
 			$description=$description_result['results']['bindings'][0]['description']['value'];
@@ -284,7 +283,7 @@ class JSON_EMontParser
 				// Link valt vermoedelijk buiten de Context
 			}
 		}
-		return $items;
+		return array_merge($items,$contexten);
 	}
 
 	/**
