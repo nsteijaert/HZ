@@ -17,7 +17,7 @@ class Context
 	public function __construct($uri)
 	{
 		$this->supercontext=new SplObjectStorage();
-		$this->uri=uri;
+		$this->uri=$uri;
 	}
 
 	public function setDescription($description)
@@ -59,8 +59,13 @@ class Context
 		return $this->supercontext;
 	}
 
+	public function getUri()
+	{
+		return $this->uri;
+	}
+
 	public function accepts(PHPEMontVisitor $v)
 	{
-		$v->visit($this);
+		return $v->visit($this);
 	}
 }

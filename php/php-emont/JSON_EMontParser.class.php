@@ -236,7 +236,7 @@ class JSON_EMontParser
 			{
 				if(array_key_exists($uri,$ie_context))
 				{
-					@$item->setContext($contexten[$ie_context[$uri]]);
+					@$item->addContext($contexten[$ie_context[$uri]]);
 					$items[$uri]=$item;
 				}
 			}

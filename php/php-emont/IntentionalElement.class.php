@@ -29,6 +29,7 @@ class IntentionalElement implements PHPEMontVisitee
 		$this->depends=new SplObjectStorage();
 		$this->partOf=new SplObjectStorage();
 		$this->instanceOf=new SplObjectStorage();
+		$this->context=new SplObjectStorage();
 		$this->uri=$uri;
 	}
 
@@ -61,12 +62,24 @@ class IntentionalElement implements PHPEMontVisitee
 		return $this->decompositionType;
 	}
 
-	public function setContext($context)
+	public function addContext(&$context)
 	{
 		// This is the PHP opcode, not the EMont property!
 		if ($context instanceOf Context)
 		{
-			$this->context=$context;
+			$this->context->attach($context);
+		}
+		else
+		{
+			throw new Exception('Not a Context');
+		}
+	}
+	public function removeContext(&$context)
+	{
+		// This is the PHP opcode, not the EMont property!
+		if ($context instanceOf Context)
+		{
+			$this->context->detach($context);
 		}
 		else
 		{
@@ -137,7 +150,7 @@ class IntentionalElement implements PHPEMontVisitee
 
 	public function getPartOf()
 	{
-		return $this->partOf();
+		return $this->partOf;
 	}
 
 	public function addContributes(&$contributes)
@@ -205,6 +218,6 @@ class IntentionalElement implements PHPEMontVisitee
 
 	function accepts(PHPEMontVisitor $v)
 	{
-		$v->visit($this);
+		return $v->visit($this);
 	}
 }
