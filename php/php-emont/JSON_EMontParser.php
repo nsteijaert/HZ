@@ -1,6 +1,7 @@
 <?php
 /**
  * Pagina om Ajax-aanroepen vanuit JSON te beantwoorden met JSON
+ * VERMOEDELIJK OVERBODIG. (Sinds 2015-01-29)
  * @author: Michael Steenbeek
  */
 require_once(__DIR__.'/JSON_EMontParser.class.php');
