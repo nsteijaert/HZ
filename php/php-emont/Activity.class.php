@@ -12,9 +12,9 @@ class Activity extends IntentionalElement
 	// An SplObjectStorage of Connects objects
 	private $connects;
 	
-	public function __construct()
+	public function __construct($uri)
 	{
-		parent::__construct();
+		parent::__construct($uri);
 		$this->connects=new SplObjectStorage();
 		$this->produces=new SplObjectStorage();
 		$this->consumes=new SplObjectStorage();
