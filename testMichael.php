@@ -72,43 +72,32 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
     	</marker>
 	</defs>
 </svg>
+<div id="dump"></div>
 <script type="text/javascript">
-	var theData;
+	var graph;
+	var nodes;
+	var links;
 	
+	// Haal de gegevens op
+	// Kan nog wat netter: asynchroon, waarbij gewacht wordt met tekenen
 	$.ajax({
 		type : "POST",
 		cache : true,
-		url : "php/php-emont/JSON_EMontParser.php",
-		async : true,
-/*		data : {
-			concept : concept,
-			depth : depth.toString(),
-			relations : relations
-		}*/
-		}).done(function(data) {
-			thedata=data;
-		});
+		url : "php/php-emont/VisualisationJSON.php",
+		async : false,
+		dataType: 'json',
+		success: function(data) {
+			graph=data;
+			console.log(data);
+		}
+	});
 
 	var width = <?php echo $svgwidth;?>,
     	height = <?php echo $svgheight;?>;
 
-	// Here's were the code begins. We start off by creating an SVG
-	// container to hold the visualization. We only need to specify
-	// the dimensions for this container.
-
+	// Selecteer de visualisatie-container
     var svg = d3.select('#visualisatie');
 
-	// Before we do anything else, let's define the data for the visualization.
-
-	var graph = {
-    	"nodes": [  { "name": "A" },
-                	{ "name": "B" },
-            	    { "name": "C" }
-        	    ],
-    	"links": [  { "target":  1, "source":  0 },
-                	{ "target":  2, "source":  0 }
-            	]
-    };
 	var nodes = graph.nodes,
     	links = graph.links;
 
@@ -120,40 +109,36 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
     	.charge(-450)
     	.on("tick",tick);
 
-	// Okay, everything is set up now so it's time to turn
-	// things over to the force layout. Here we go.
-
+	// De force layout zet alles automatisch op zijn plek
 	force.start();
 	
-	//link.attr("marker-end", function(d) { return "url(#standaard)"; });
-
-	// add the links and the arrows
+	// Pijlen (lijnen + pijlpunten) definiëren
 	var path = svg.append("svg:g").selectAll("line")
     	.data(links)
     	.enter().append("svg:line")
     	.attr("class", "link")
     	.attr("marker-end", "url(#standaard)");
 
-	// define the nodes
+	// Nodes definiëren
 	var node = svg.selectAll(".node")
     	.data(nodes)
   		.enter().append("g")
     	.attr("class", "node")
     	.call(force.drag);
 
-	// add the nodes
+	// Nodes (IE's) tekenen
 	node.append('rect')
 	    .attr('width',75)
 	    .attr('height',20);
 
-	// add the text 
+	// Titels 
 	node.append("text")
     .attr("x",12)
     .attr("y",0)
     .attr("dy", "1.0em")
-    .text(function(d) { return d.name; });
+    .text(function(d) { return d.heading; });
 
-	// add the curvy lines
+	// Teken de pijlen
 	function tick() {
 	    path.attr("x1", function(d) {
 	        return d.source.x+75})
@@ -167,12 +152,7 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
 	    node.attr("transform", function(d) { 
 	        return "translate(" + d.x + "," + d.y + ")"; });
 	}
-
-
-
-
 </script>
-<div class="visualisation">
 </div>
 </body>
 </html>

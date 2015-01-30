@@ -20,13 +20,16 @@ $links=array();
 $ies_contexten=array();
 $contexten=array();
 $contextLinks=array();
-
+$indices=array();
+$teller=0;
 foreach($result as $uri =>$object)
 {
 	if($object instanceOf IntentionalElement)
 	{
 		$result=($object->accepts($visitor));
-		$nodes[$uri]=$result['node'];
+		$nodes[]=$result['node'];
+		$indices[$uri]=$teller;
+		$teller++;
 		$links=array_merge($links,$result['links']);
 		$ies_contexten=array_merge($ies_contexten,$result['ies_contexten']);
 	}
@@ -37,8 +40,13 @@ foreach($result as $uri =>$object)
 		$contextLinks=array_merge($contextLinks,$result['contextLinks']);
 	}
 }
-echo '<pre>';
-var_dump($nodes);
-var_dump($links);
-var_dump($ies_contexten);
-echo '</pre>';
+
+$post['nodes']=$nodes;
+foreach($links as $link)
+{
+	$post['links'][]=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']]);
+}
+$post['ies_contexten']=$ies_contexten;
+$post['contexten']=$contexten;
+$post['contextLinks']=$contextLinks;
+echo strtr(json_encode($post),array('<\/'=>'</'));

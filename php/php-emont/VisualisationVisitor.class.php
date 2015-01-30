@@ -18,6 +18,7 @@ class VisualisationVisitor implements PHPEMontVisitor
 		{
 			$uri=$visitee->getUri();
 			$node=array();
+			$node['uri']=$uri;
 			$node['type']=get_class($visitee);
 			$node['heading']=$visitee->getHeading();
 			$node['decompositionType']=$visitee->getDecompositionType();
@@ -65,7 +66,7 @@ class VisualisationVisitor implements PHPEMontVisitor
 			$contextLinks=array();
 			foreach($visitee->getSupercontext() as $link)
 			{
-				$contextLinks[]=array('source'=>$uri,'target'=>$link->getUri());
+				$contextLinks[]=array('context'=>$uri,'supercontext'=>$link->getUri());
 			}
 			$return['context']=$context;
 			$return['contextLinks']=$contextLinks;
