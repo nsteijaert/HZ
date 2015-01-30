@@ -1,75 +1,19 @@
-<!doctype html>
-
+<!DOCTYPE html>
 <html>
-	<head>
-		<title>SPARQL</title>
-		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-		<link href="css/style.css" rel="stylesheet" />
-		<script src="js/jquery-2.1.1.min.js"></script>
-		<script src="js/d3.min.js"></script>
+<head>
+	<title>Force3D test</title>
+<script src="lib/jquery-2.1.1.min.js"></script>
+<script src="lib/three.min.js"></script>
+<script src="lib/d3.min.js"></script>
+<script src="lib/d3.layout.force3d.js"></script>
+<!--<script src="lib/TrackballControls.js"></script>-->
+<script src="lib/OrbitControls.js"></script>
+<script src="js/Visualisation.js"></script>
 
-		<link rel="stylesheet" href="http://yandex.st/highlightjs/7.0/styles/default.min.css">
-		<script src="http://yandex.st/highlightjs/7.0/highlight.min.js"></script>
-		
-		<script src="js/superformula.js"></script>
-
-		<script src="js/default.js"></script>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-					<meta charset="utf-8">
-
-
-			<script>
-
-				function takeAction() {
-					if (ie && ie < 9) {
-						D3notok();
-					} else {
-						// Load D3.js, and once loaded do our stuff
-						var head = document.getElementsByTagName('head')[0];
-						var script = document.createElement('script');
-						script.type = 'text/javascript';
-						script.src = "http://d3js.org/d3.v3.min.js";
-						script.addEventListener('load', D3ok, false);
-						script.onload = "D3ok();";
-						head.appendChild(script);
-					}
-				}
-			</script>
-		
-	</head>
-	<body onload="takeAction()">
-		<nav>
-			<a href="#runQuery">Query Form</a>
-			<a href="#visualisationNick.html">Visualisation (Nick)</a>
-			<a href="#visualisationPieter.html">Visualisation (Pieter)</a>
-			<a href="#visualisationMichael.html">Visualisation (Michael)</a>
-		</nav>
-		<div class="basic-grey">
-			<div id="runQuery">
-				<form action="" method="post" onsubmit="return false;">
-					<h1>Query Form <span>Fill in the field, press Submit and enjoy the result.</span></h1>
-
-					<label> <span>Message :</span> 						<textarea id="query" name="query" placeholder="Your query"></textarea> </label>
-					<label> <span>Result :</span>
-						<select name="selection" id="selection" >
-							<option value="json">JSON</option>
-							<option value="text">Text</option>
-							<option value="xml">XML</option>
-							<option value="rdf">RDF</option>
-						</select> </label>
-					<label> <span>Depth</span>
-						<input type="number" name="depth" id="depth" placeholder="Leave empty for normal operation!" />
-					</label>
-					<label> <span>&nbsp;</span>
-						<input type="submit" class="button" value="Submit" />
-					</label>
-				</form>
-				<div id="result" >
-					<h3>Result :</h3>
-					<div class="result" ></div>
-				</div>
-			</div>
-			<div id="visualisation"></div>
-		</div>
-	</body>
-</html>
+</head>
+<body>
+	<div id="canvas-svg"></div>
+<script type="text/javascript">
+init();
+</script>
+</body>

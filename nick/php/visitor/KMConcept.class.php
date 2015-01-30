@@ -1,13 +1,16 @@
 <?php
-/**
- * ASTObject is the base for the objects encountered in an asynchronous tree
- */
+require (__DIR__ . '/Concept.class.php');
 
-class ASTObject {
+class SKOSConcept extends Concept {
 
+	//Global Variables
 	private $relations = array();
 	private $properties = array();
 	private $name;
+
+	function accept(Visitor $visitor) {
+		return $visitor -> visit($this);
+	}
 
 	/**
 	 * @param (String) $name = Name of the object.
@@ -24,7 +27,15 @@ class ASTObject {
 	}
 
 	/**
-	 * @param (String) $relationName = instance of ASTObject class
+	 * Return the name of the object.
+	 */
+	public function getName() {
+		return $this -> name;
+	}
+
+	/**
+	 * @param (String) $relationName = Name of the relation
+	 * @param (String) $relationValue = Value/Object of the relation
 	 */
 	public function addRelation($relationName, $relationValue = "") {
 		if (array_key_exists($relationName, $this -> relations))
@@ -32,9 +43,16 @@ class ASTObject {
 		else
 			$this -> relations[$relationName] = array($relationValue);
 	}
+	
+	/**
+	 * Returns an array of all relations
+	 */
+	public function getRelations() {
+		return $this->relations;
+	}
 
 	/**
-	 * @param (String) $relationName = instance of ASTObject class
+	 * @param (String) $relationName = Name of the relation
 	 */
 	public function removeRelation($relationName) {
 		if (($key = array_search($relationName, $this -> relations)) !== false) {
@@ -57,6 +75,10 @@ class ASTObject {
 			$this -> addProperty($property);
 		}
 	}
+	
+	public function getProperty($name) {
+		return $this -> properties[$name];
+	}
 
 	/**
 	 * @param (String) $propertyName = Name of the removable property.
@@ -66,6 +88,5 @@ class ASTObject {
 			unset($this -> properties[$key]);
 		}
 	}
-
 }
 ?>
