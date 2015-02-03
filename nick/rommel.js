@@ -4,135 +4,158 @@ function init() {
 			"x" : 469,
 			"y" : 410,
 			"z" : 600,
-			"label" : 1
+			"label" : "dijk"
 		}, {
 			"x" : 493,
 			"y" : 364,
 			"z" : 14,
-			"label":"2"
+			"label" : "brug"
 		}, {
 			"x" : 442,
 			"y" : 365,
 			"z" : 123,
-			"label":"3"
+			"label" : "zee"
 		}, {
 			"x" : 467,
 			"y" : 314,
 			"z" : 80,
-			"label":"4"
+			"label" : "oester"
 		}, {
 			"x" : 477,
 			"y" : 248,
 			"z" : 56,
-			"label":"5"
+			"label" : "dam"
 		}, {
 			"x" : 425,
 			"y" : 207,
 			"z" : 156,
-			"label":"6"
+			"label" : "bekken"
 		}, {
 			"x" : 402,
 			"y" : 155,
 			"z" : 231,
-			"label":"7"
+			"label" : "reservoir"
 		}, {
 			"x" : 369,
 			"y" : 196,
 			"z" : 201,
-			"label":"8"
+			"label" : "duin"
 		}, {
 			"x" : 350,
 			"y" : 148,
 			"z" : 180,
-			"label":"9"
+			"label" : "golfbreker"
 		}, {
 			"x" : 539,
 			"y" : 222,
 			"z" : 234,
-			"label":"10"
+			"label" : "vis"
 		}, {
 			"x" : 594,
 			"y" : 235,
 			"z" : 265,
-			"label":"11"
+			"label" : "zeewier"
 		}, {
 			"x" : 582,
 			"y" : 185,
 			"z" : 10,
-			"label":"12"
+			"label" : "koraal"
 		}, {
 			"x" : 633,
 			"y" : 200,
 			"z" : 100,
-			"label":"13"
+			"label" : "sluis"
 		}, {
 			"x" : 0,
 			"y" : 0,
 			"z" : 104,
-			"label":"14"
+			"label" : "slot"
 		}],
 		"links" : [{
 			"source" : 0,
-			"target" : 1
+			"target" : 1,
+			"type" : "sibling"
 		}, {
 			"source" : 1,
-			"target" : 2
+			"target" : 2,
+			"type" : "parent"
 		}, {
 			"source" : 2,
-			"target" : 0
+			"target" : 0,
+			"type" : "analogy"
 		}, {
 			"source" : 1,
-			"target" : 3
+			"target" : 3,
+			"type" : "child"
 		}, {
 			"source" : 3,
-			"target" : 2
+			"target" : 2,
+			"type" : "sibling"
 		}, {
 			"source" : 3,
-			"target" : 4
+			"target" : 4,
+			"type" : "child"
 		}, {
 			"source" : 4,
-			"target" : 5
+			"target" : 5,
+			"type" : "sibling"
 		}, {
 			"source" : 5,
-			"target" : 6
+			"target" : 6,
+			"type" : "parent"
 		}, {
 			"source" : 5,
-			"target" : 7
+			"target" : 7,
+			"type" : "child"
+		}, {
+			"source" : 2,
+			"target" : 5,
+			"type" : "child"
 		}, {
 			"source" : 6,
-			"target" : 7
+			"target" : 7,
+			"type" : "sibling"
 		}, {
 			"source" : 6,
-			"target" : 8
+			"target" : 8,
+			"type" : "sibling"
 		}, {
 			"source" : 7,
-			"target" : 8
+			"target" : 8,
+			"type" : "child"
 		}, {
 			"source" : 9,
-			"target" : 4
+			"target" : 4,
+			"type" : "sibling"
 		}, {
 			"source" : 9,
-			"target" : 11
+			"target" : 11,
+			"type" : "parent"
 		}, {
 			"source" : 9,
-			"target" : 10
+			"target" : 10,
+			"type" : "child"
 		}, {
 			"source" : 10,
-			"target" : 11
+			"target" : 11,
+			"type" : "sibling"
 		}, {
 			"source" : 11,
-			"target" : 12
+			"target" : 12,
+			"type" : "sibling"
 		}, {
 			"source" : 12,
-			"target" : 10
+			"target" : 10,
+			"type" : "parent"
 		}, {
 			"source" : 7,
-			"target" : 13
+			"target" : 13,
+			"type" : "child"
 		}]
 	};
 	// Set visualisation variables
-	var WIDTH = 1000,
-	    HEIGHT = 600;
+	var WIDTH = $(window).width();
+	HEIGHT = $(window).height();
 	COLOR = "steelblue";
 	LINK_COLOR = "#cccccc";
 
@@ -170,16 +193,26 @@ function init() {
 	// Create arrays for spheres and links
 	var spheres = [],
 	    three_links = [];
-	    labels = [];
+	labels = [];
 
 	// Define the 3d force
 	var force = d3.layout.force3d().nodes( sort_data = []).links( links = []).size([50, 50]).gravity(0.3).charge(-400);
 	var DISTANCE = 1;
 
+	//mouse event variables
+	var projector = new THREE.Projector(), 
+    mouse_vector = new THREE.Vector3(),
+    mouse = { x: 0, y: 0, z: 1 },
+    ray = new THREE.Raycaster( new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0) ),
+    intersects = [];
+
 	//initControls();
 	createNodes();
 	initForce3D();
 	animate();
+	
+	//we add the even listener function to the domElement
+    renderer.domElement.addEventListener( 'mousedown', onMouseDown );
 	
 	function createNodes() {
 		for (var i = 0; i < data.nodes.length; i++) {
@@ -191,8 +224,8 @@ function init() {
 
 			// set up the sphere vars
 			var radius = 5,
-			    segments = 16,
-			    rings = 16;
+			    segments = 32,
+			    rings = 32;
 
 			// create the sphere's material
 			var sphereMaterial = new THREE.MeshLambertMaterial({
@@ -205,60 +238,65 @@ function init() {
 
 			// add the sphere to the scene
 			scene.add(sphere);
-			
+
 			var canvas1 = document.createElement('canvas');
-				//canvas1.width = 500;
-				//canvas1.height = 500;
 			var context1 = canvas1.getContext('2d');
-				context1.font = "Bold 10px Arial";
-				context1.fillStyle = "rgba(255,0,0,0.95)";
-				context1.fillText('Hello, world! ' + data.nodes[i].label, 0, 50);
+			context1.font = "Bold 30px Arial";
+			context1.fillStyle = "rba(0,0,0,0.95)";
+			context1.fillText(data.nodes[i].label, 0, 20);
 			var texture1 = new THREE.Texture(canvas1);
-				texture1.needsUpdate = true;
-				texture1.magFilter = THREE.NearestFilter;
-				texture1.minFilter = THREE.LinearMipMapLinearFilter;
+			texture1.needsUpdate = true;
+			texture1.magFilter = THREE.NearestFilter;
+			texture1.minFilter = THREE.LinearMipMapLinearFilter;
 			var material1 = new THREE.MeshBasicMaterial({
 				map : texture1,
 				side : THREE.DoubleSide
 			});
-				material1.transparent = true;
-			var mesh1 = new THREE.Mesh(new THREE.PlaneGeometry(300, 100), material1);
-			
-			labels.push(mesh1);
-			
-			scene.add(mesh1);
-			
-					// /////// draw text on canvas /////////
-		// // create a canvas element
-		// 
-		// //console.log(data.nodes[i].label);
-		// // canvas contents will be used for a texture
-		// var texture1 = new THREE.Texture(canvas1);
-		// texture1.needsUpdate = true;
-		// texture1.magFilter = THREE.NearestFilter;
-		// texture1.minFilter = THREE.LinearMipMapLinearFilter;
-		// var material1 = new THREE.MeshBasicMaterial({
-			// map : texture1,
-			// side : THREE.DoubleSide
-		// });
-		// material1.transparent = true;
-		// var mesh1 = new THREE.Mesh(new THREE.PlaneGeometry(300, 100), material1);
-		// //mesh1.position.set(Math.floor((Math.random() * 100) + 1), Math.floor((Math.random() * 100) + 1), Math.floor((Math.random() * 100) + 1));
-		// mesh1.position = new THREE.Vector3(data.nodes[i].x + DISTANCE, data.nodes[i].y + DISTANCE, data.nodes[i].z);
-		// scene.add(mesh1);
-		}
+			material1.transparent = true;
+			var mesh1 = new THREE.Mesh(new THREE.PlaneGeometry(40, 15), material1);
 
+			labels.push(mesh1);
+
+			scene.add(mesh1);
+		}
 
 		for (var i = 0; i < data.links.length; i++) {
 			links.push({
 				target : sort_data[data.links[i].target],
 				source : sort_data[data.links[i].source]
 			});
-
-			var material = new THREE.LineBasicMaterial({
-				color : LINK_COLOR,
-				linewidth : 2
-			});
+			var type = data.links[i].type;
+			switch(type) {
+			case "sibling":
+				var material = new THREE.LineBasicMaterial({
+					color : "green",
+					linewidth : 3
+				});
+				break;
+			case "parent":
+				var material = new THREE.LineBasicMaterial({
+					color : "red",
+					linewidth : 3
+				});
+				break;
+			case "child":
+				var material = new THREE.LineBasicMaterial({
+					color : "blue",
+					linewidth : 3
+				});
+				break;
+			case "analogy":
+				var material = new THREE.LineBasicMaterial({
+					color : "yellow",
+					linewidth : 3
+				});
+				break;
+			default:
+				var material = new THREE.LineBasicMaterial({
+					color : "black",
+					linewidth : 3
+				});
+			}
 			var geometry = new THREE.Geometry();
 
 			geometry.vertices.push(new THREE.Vector3(0, 0, 0));
@@ -271,8 +309,9 @@ function init() {
 			three_links.push(line);
 			scene.add(line);
 
-			force.start();
+			force.start(); 
 		}
+
 	}
 
 	function initForce3D() {
@@ -313,11 +352,49 @@ function init() {
 		requestAnimationFrame(animate);
 		renderer.render(scene, camera);
 		controls.update();
+
+		for (var i = 0; i < labels.length; i++) {
+			labels[i].lookAt(camera.position);
+		}
+		render();
 	}
 
 	function render() {
-		renderer.render(scene, camera);
-		animate();
+
 	}
+	//event listener
+function onMouseDown( event_info ) {
+	console.log(spheres.children);
+    //stop any other event listener from recieving this event
+    event_info.preventDefault();  
+    
+    //this where begin to transform the mouse cordinates to three,js cordinates
+    mouse.x = ( event_info.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( event_info.clientY / window.innerHeight ) * 2 + 1;
+    
+    //this vector caries the mouse click cordinates
+    mouse_vector.set( mouse.x, mouse.y, mouse.z );
+    
+    //the final step of the transformation process, basically this method call
+    //creates a point in 3d space where the mouse click occurd
+    projector.unprojectVector( mouse_vector, camera );
+    
+    var direction = mouse_vector.sub( camera.position ).normalize();
+    
+    //ray = new THREE.Raycaster( camera.position, direction );
+    ray.set( camera.position, direction );
+    
+    //asking the raycaster if the mouse click touched the sphere object
+    intersects = ray.intersectObject();
+    
+    //the ray will return an array with length of 1 or greater if the mouse click
+    //does touch the sphere object
+    if( intersects.length ) {
+        
+        alert( "hit" );
+        
+    }
+    
+}
 
 }
