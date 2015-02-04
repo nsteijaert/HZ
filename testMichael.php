@@ -13,8 +13,9 @@ require_once(__DIR__.'/php/SPARQLConnection.class.php');
 	<meta charset='utf-8'>
 </head>
 <body>
-<script src="js/d3.min.js"></script>
 <script src="js/jquery-2.1.1.min.js"></script>
+<script src="js/d3.min.js"></script>
+<script src="js/cola.v3.min.js"></script>
 <?php
 $connectie=new SPARQLConnection();
 
@@ -51,8 +52,8 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
 <style>
 
 .node {
-    fill: #ccc;
-    stroke: #fff;
+    fill: #eee;
+    stroke: #000;
     stroke-width: 1px;
 }
 
@@ -61,9 +62,15 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
     stroke-width: 2px;
     marker-end:#standaard;
 }
+text
+{
+	font-size:10px;
+	font-family:Arial,Helvetica,sans-serif;
+	color:#000;
+}
 
     </style>
-<?php $svgheight=480; $svgwidth=640;?>
+<?php $svgheight=1280;$svgwidth=1024;$nodeheight=30;$nodewidth=100;?>
 
 <svg id="visualisatie" width="<?php echo $svgwidth;?>" height="<?php echo $svgheight;?>">
 	<defs>
@@ -77,7 +84,7 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
 	var graph;
 	var nodes;
 	var links;
-	
+
 	// Haal de gegevens op
 	// Kan nog wat netter: asynchroon, waarbij gewacht wordt met tekenen
 	$.ajax({
@@ -101,17 +108,31 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
 	var nodes = graph.nodes,
     	links = graph.links;
 
-	var force = d3.layout.force()
+	var force = cola.d3adaptor()
 		.size([width, height])
     	.nodes(nodes)
     	.links(links)
     	.linkDistance(110)
-    	.charge(-450)
-    	.on("tick",tick);
+    	.avoidOverlaps(true);
+
+	// Teken de pijlen
+	force.on("tick", function () {
+	    path.attr("x1", function(d) {
+	        return d.source.x+<?php echo $nodewidth;?>})
+	    path.attr("y1", function(d) {
+	        return d.source.y+<?php echo $nodeheight/2;?>})
+	    path.attr("x2", function(d) {
+	        return d.target.x})
+	    path.attr("y2", function(d) {
+	        return d.target.y+<?php echo $nodeheight/2;?>})
+	
+	    node.attr("transform", function(d) { 
+	        return "translate(" + d.x + "," + d.y + ")"; });
+	});
 
 	// De force layout zet alles automatisch op zijn plek
 	force.start();
-	
+
 	// Pijlen (lijnen + pijlpunten) definiëren
 	var path = svg.append("svg:g").selectAll("line")
     	.data(links)
@@ -128,30 +149,17 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
 
 	// Nodes (IE's) tekenen
 	node.append('rect')
-	    .attr('width',75)
-	    .attr('height',20);
+	    .attr('width',<?php echo $nodewidth;?>)
+	    .attr('height',<?php echo $nodeheight;?>);
 
 	// Titels 
 	node.append("text")
-    .attr("x",12)
+    .attr("x",0)
     .attr("y",0)
     .attr("dy", "1.0em")
     .text(function(d) { return d.heading; });
 
-	// Teken de pijlen
-	function tick() {
-	    path.attr("x1", function(d) {
-	        return d.source.x+75})
-	    path.attr("y1", function(d) {
-	        return d.source.y+10})
-	    path.attr("x2", function(d) {
-	        return d.target.x})
-	    path.attr("y2", function(d) {
-	        return d.target.y+10})
-	
-	    node.attr("transform", function(d) { 
-	        return "translate(" + d.x + "," + d.y + ")"; });
-	}
+
 </script>
 </div>
 </body>
