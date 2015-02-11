@@ -1,5 +1,7 @@
 <?php
 /**
+ * NOTICE 2015-02-04: Dummy data
+ *
  * @author Pieter Moens, Nick Steijaert
  * SPARQLObject is part of the intermediate datastructure, this class instantiates an object with an array of properties.
  */
