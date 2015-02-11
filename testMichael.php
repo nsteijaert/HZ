@@ -55,6 +55,7 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
     fill: #eee;
     stroke: #000;
     stroke-width: 1px;
+    cursor: move;
 }
 
 .link {
@@ -62,15 +63,24 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
     stroke-width: 2px;
     marker-end:#standaard;
 }
-text
-{
-	font-size:10px;
-	font-family:Arial,Helvetica,sans-serif;
-	color:#000;
+
+.group {
+  stroke: #fff;
+  stroke-width: 1.5px;
+  cursor: move;
+  opacity: 0.7;
+  color:#00FF00;
 }
 
-    </style>
-<?php $svgheight=1280;$svgwidth=1024;$nodeheight=30;$nodewidth=100;?>
+.label {
+  	font-size:10px;
+	font-family:Arial,Helvetica,sans-serif;
+	color:#000;
+    /*text-anchor: middle;*/
+    cursor: move;
+}
+</style>
+<?php $svgheight=1280;$svgwidth=1600;$nodeheight=30;$nodewidth=100;?>
 
 <svg id="visualisatie" width="<?php echo $svgwidth;?>" height="<?php echo $svgheight;?>">
 	<defs>
@@ -82,8 +92,12 @@ text
 <div id="dump"></div>
 <script type="text/javascript">
 	var graph;
-	var nodes;
-	var links;
+	/*var nodes;
+	var links;*/
+
+    var color = d3.scale.category20();
+
+	//TODO: partOf-relaties niet links-rechts, maar boven/beneden
 
 	// Haal de gegevens op
 	// Kan nog wat netter: asynchroon, waarbij gewacht wordt met tekenen
@@ -105,34 +119,81 @@ text
 	// Selecteer de visualisatie-container
     var svg = d3.select('#visualisatie');
 
-	var nodes = graph.nodes,
-    	links = graph.links;
+	/*var nodes = graph.nodes,
+    	links = graph.links,
+    	constraints=graph.constraints
+    	groups=graph.groups;*/
 
 	var force = cola.d3adaptor()
+    	.linkDistance(120)
+    	.avoidOverlaps(true)
 		.size([width, height])
-    	.nodes(nodes)
-    	.links(links)
-    	.linkDistance(110)
-    	.avoidOverlaps(true);
+		//.flowLayout('x', 150)
+		//.jaccardLinkLengths(150)
+        .handleDisconnected(false)
+    	.nodes(graph.nodes)
+    	.links(graph.links)
+    	.constraints(graph.constraints)
+    	.groups(graph.groups);
+    	
 
 	// Teken de pijlen
 	force.on("tick", function () {
-	    path.attr("x1", function(d) {
+	    link.attr("x1", function(d) {
 	        return d.source.x+<?php echo $nodewidth;?>})
-	    path.attr("y1", function(d) {
+	    link.attr("y1", function(d) {
 	        return d.source.y+<?php echo $nodeheight/2;?>})
-	    path.attr("x2", function(d) {
+	    link.attr("x2", function(d) {
 	        return d.target.x})
-	    path.attr("y2", function(d) {
+	    link.attr("y2", function(d) {
 	        return d.target.y+<?php echo $nodeheight/2;?>})
 	
 	    node.attr("transform", function(d) { 
 	        return "translate(" + d.x + "," + d.y + ")"; });
+	        
+        group.attr("x", function (d) { return d.bounds.x-5; })
+             .attr("y", function (d) { return d.bounds.y-5; })
+             .attr("width", function (d) { return d.bounds.width()+<?php echo $nodewidth;?>+2*5; })
+             .attr("height", function (d) { return d.bounds.height()+<?php echo $nodeheight;?>+2*5; });
+
+        label.attr("x", function (d) { return d.x; })
+             .attr("y", function (d) {
+                 var h = this.getBBox().height;
+                 return d.y + h/4;
+        });
 	});
 
 	// De force layout zet alles automatisch op zijn plek
 	force.start();
 
+    var group = svg.selectAll(".group")
+        .data(graph.groups)
+       .enter().append("rect")
+        .attr("rx", 10).attr("ry", 10)
+        .attr("class", "group")
+        .attr('width',<?php echo $nodewidth;?>)
+	    .attr('height',<?php echo $nodeheight;?>)
+        .style("fill", function (d, i) { return color(i); });
+
+    var link = svg.selectAll(".link")
+        .data(graph.links)
+       .enter().append("line")
+        .attr("class", "link")
+        .attr("marker-end", "url(#standaard)");
+
+    var node = svg.selectAll(".node")
+         .data(graph.nodes)
+       .enter().append("rect")
+         .attr("class", "node")
+//         .attr("width", function (d) { return d.width - 2 * pad; })
+//         .attr("height", function (d) { return d.height - 2 * pad; })
+           .attr("rx", 5).attr("ry", 5)
+           .attr('width',<?php echo $nodewidth;?>)
+	       .attr('height',<?php echo $nodeheight;?>)
+//         .style("fill", function (d) { return color(graph.groups.length); })
+         .call(force.drag);
+
+/*
 	// Pijlen (lijnen + pijlpunten) definiëren
 	var path = svg.append("svg:g").selectAll("line")
     	.data(links)
@@ -151,16 +212,28 @@ text
 	node.append('rect')
 	    .attr('width',<?php echo $nodewidth;?>)
 	    .attr('height',<?php echo $nodeheight;?>);
-
+*/
 	// Titels 
-	node.append("text")
+    var label = svg.selectAll(".label")
+        .data(graph.nodes)
+        .enter().append("text")
+         .attr("class", "label")
+         .text(function (d) { return d.heading; })
+         .attr("x",0)
+    	 .attr("y",0)
+    	 .attr("dy", "1.0em")
+	     .call(force.drag);
+
+    node.append("title")
+        .text(function (d) { return d.heading; });
+
+
+	/*node.append("text")
     .attr("x",0)
     .attr("y",0)
     .attr("dy", "1.0em")
-    .text(function(d) { return d.heading; });
-
+    .text(function(d) { return d.heading; });*/
 
 </script>
-</div>
 </body>
 </html>

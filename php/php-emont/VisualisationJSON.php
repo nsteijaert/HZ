@@ -16,6 +16,7 @@ $visualisationItems=array();
 $visitor=new VisualisationVisitor();
 
 $nodes=array();
+$nodeindex=array();
 $links=array();
 $ies_contexten=array();
 $contexten=array();
@@ -28,10 +29,17 @@ foreach($result as $uri =>$object)
 	{
 		$result=($object->accepts($visitor));
 		$nodes[]=$result['node'];
+		$nodeindex[]=$uri;
 		$indices[$uri]=$teller;
 		$teller++;
 		$links=array_merge($links,$result['links']);
-		$ies_contexten=array_merge($ies_contexten,$result['ies_contexten']);
+		foreach ($result['ies_contexten'] as $context => $ies)
+		{
+			foreach($ies as $ie)
+			{
+				$ies_contexten[$context][]=$ie;
+			}
+		}
 	}
 	elseif($object instanceOf Context)
 	{
@@ -40,13 +48,31 @@ foreach($result as $uri =>$object)
 		$contextLinks=array_merge($contextLinks,$result['contextLinks']);
 	}
 }
+//var_dump($ies_contexten);
 
 $post['nodes']=$nodes;
+
 foreach($links as $link)
 {
 	$post['links'][]=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']]);
+	$post['constraints'][]=array('gap'=>120,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
 }
-$post['ies_contexten']=$ies_contexten;
+
+//$post['ies_contexten']=$ies_contexten;
 $post['contexten']=$contexten;
+//var_dump($ies_contexten);
+
+foreach($ies_contexten as $context=>$ies)
+{
+	//echo "\n\n\n\<br /><br />".$context."\n\n\n\<br /><br />";
+	$leaves=array();
+	foreach ($ies as $ie)
+	{
+		$index=array_search($ie,$nodeindex);
+		$leaves[]=$index;	
+	}
+	$post['groups'][]['leaves']=$leaves;
+}
+
 $post['contextLinks']=$contextLinks;
 echo strtr(json_encode($post),array('<\/'=>'</'));

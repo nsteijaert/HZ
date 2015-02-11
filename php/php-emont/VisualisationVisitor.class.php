@@ -43,7 +43,8 @@ class VisualisationVisitor implements PHPEMontVisitor
 			}
 			foreach($visitee->getContext() as $link)
 			{
-				$ies_contexten[]=array('ie'=>$uri,'context'=>$link->getUri());
+				$index=$link->getUri();
+				$ies_contexten[$index][]=$uri;
 			}
 			if($visitee instanceOf Activity)
 			{
