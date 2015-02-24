@@ -85,7 +85,8 @@ class JSON_EMontParser
 			}
 			else
 			{
-				$obj->setHeading(self::decodeerSMWNaam($item['@id']));
+				$name_array=preg_split("/URIResolver\//", self::decodeerSMWNaam($item['@id']));
+				$obj->setHeading($name_array[1]);
 			}
 
 			foreach ($item as $key => $value)
