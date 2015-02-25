@@ -105,7 +105,16 @@ class JSON_EMontParser
 							$consumes[$item['@id']]=$value;
 							break;
 						case 'Eigenschap-3AContext':
-							$ie_context[$item['@id']]=$value;
+							if(!$ie_context[$item['@id']])
+								$ie_context[$item['@id']]=array();
+							if (is_array($value))
+							{
+								$ie_context[$item['@id']]=array_merge($ie_context[$item['@id']],$value);
+							}
+							else
+							{
+								$ie_context[$item['@id']][]=$value;
+							}
 							break;
 						case 'Eigenschap-3APart_of':
 							$partOf[$item['@id']]=$value;
@@ -237,8 +246,16 @@ class JSON_EMontParser
 			{
 				if(array_key_exists($uri,$ie_context))
 				{
-					@$item->addContext($contexten[$ie_context[$uri]]);
-					$items[$uri]=$item;
+					//echo 'key bestaat';
+					foreach($ie_context[$uri] as $context)
+					{
+						//echo 'dump:';
+						//var_dump($context);
+						//echo 'context-uri:'.$context;
+						//var_dump($contexten[$context]);
+						@$item->addContext($contexten[$context]);
+						@$items[$uri]=$item;
+					}
 				}
 			}
 			catch(Exception $e) {}
