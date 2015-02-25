@@ -91,10 +91,9 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
 </svg>
 <div id="dump"></div>
 <script type="text/javascript">
-	var graph;
 
+	var graph;
     var color = d3.scale.category20();
-	console.log(1);
 	
 	//TODO: partOf-relaties niet links-rechts, maar boven/beneden
 
@@ -107,37 +106,29 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
 		dataType: 'json',
 		data:{ context_uri: "<?php echo $context_uri;?>"},
 		success: function(result) {
-			console.log('1,5');
 			graph=result;
-			console.log(result);
 			tekenDiagram();
 		}
 	});
 
 	function tekenDiagram()
 	{
-
-		console.log(2);
 		var width = <?php echo $svgwidth;?>,
 	    	height = <?php echo $svgheight;?>;
 
 		// Selecteer de visualisatie-container
 	    var svg = d3.select('#visualisatie');
-		console.log(3);
 
 		console.trace();	
 		var force = cola.d3adaptor()
 	    	.linkDistance(120)
 	    	.avoidOverlaps(true)
 			.size([width, height])
-			//.flowLayout('x', 150)
-			//.jaccardLinkLengths(150)
 	        .handleDisconnected(false)
 	    	.nodes(graph.nodes)
 	    	.links(graph.links)
 	    	.constraints(graph.constraints)
 	    	.groups(graph.groups);
-		console.log(4);
 	    var margin = 5, pad = 10;
 
 		// Teken de pijlen
