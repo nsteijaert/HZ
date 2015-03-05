@@ -52,21 +52,6 @@ $parse=$situatieparser->geefElementenInSituatie();
 <pre>
 <?php var_dump($parse); ?>
 </pre>
-<?php /*
-Test van isSituatie: (moet 1.true en 2.false opleveren)
-<pre>
-<?php
-var_dump(JSON_EMontParser::isSituatie("http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/B_en_O_Kust"));
-var_dump(JSON_EMontParser::isSituatie("http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/B_en_O_Kus"));
-?>
-</pre>
-Test van zoeken naar subrollen:
-<pre>
-<?php
-var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Building_with_Nature-2Dinterventies_op_het_systeem"));
-?>
-</pre>
-*/?>
 <style>
 
 .node {
@@ -239,12 +224,6 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
 	        }
 	    };
 		label.each(insertLinebreaks);
-
-	    /*var routeEdges = function () {
-    		force.prepareEdgeRouting(margin / 3);
-    		link.attr("d", function (d) { return lineFunction(force.routeEdge(d)); });
-    		if (isIE()) link.each(function (d) { this.parentNode.insertBefore(this, this) });
-		}*/
 	}
 </script>
 </body>
