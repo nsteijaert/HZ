@@ -83,11 +83,11 @@ class JSON_EMontParser
 
 				if($item['Eigenschap-3AHeading_nl']!="")
 				{
-					$obj->setHeading(uri::decodeerHaakjes($item['Eigenschap-3AHeading_nl']));
+					$obj->setHeading(uri::decodeerSpecialeTekens($item['Eigenschap-3AHeading_nl']));
 				}
 				elseif($item['Eigenschap-3AHeading_en']!="")
 				{
-					$obj->setHeading(uri::decodeerHaakjes($item['Eigenschap-3AHeading_en']));
+					$obj->setHeading(uri::decodeerSpecialeTekens($item['Eigenschap-3AHeading_en']));
 				}
 				else
 				{
@@ -334,7 +334,39 @@ class JSON_EMontParser
 
 			foreach($result['@graph'] as $item)
 			{
-				if(self::isSituatie($item['@id']))
+				if(self::isPractice($item['@id']))
+				{
+					$context=new Context($item['@id']);
+					$context->setDescription(self::geefContextbeschrijving($item['@id']));
+					$contexten[$item['@id']]=$context;
+				}
+			}
+
+			return $contexten;
+		}
+		else
+		{
+			return NULL;
+		}
+	}
+
+	/**
+	 * Geeft lijst van L2-cases (situaties)
+	 * TODO: Op een geschiktere plek onderbrengen.
+	 */
+	static function geefL2cases()
+	{
+		$query='DESCRIBE ?context WHERE {?context <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AContext>}';
+		$connectie=new SPARQLConnection();
+		$result=$connectie->JSONQueryAsPHPArray($query);
+
+		if(isset($result['@graph']))
+		{
+			$contexten=array();
+
+			foreach($result['@graph'] as $item)
+			{
+				if(self::isExperience($item['@id']))
 				{
 					$context=new Context($item['@id']);
 					$context->setDescription(self::geefContextbeschrijving($item['@id']));
@@ -406,22 +438,37 @@ class JSON_EMontParser
 
 	static function isPractice($context_uri)
 	{
-		//$context_uri=Uri::escape_uri($context_uri);
-		$query="DESCRIBE ?s ?o WHERE {
-			?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3ASelection_link> ".$context_uri."
-			.
-			?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3APractice_back_link> ?o
-			}";
+		$query='DESCRIBE ?practice WHERE {
+			?practice property:Context '.Uri::escape_uri($context_uri).'.
+			?practice property:Practice_type "Practice"}';
 		$connectie=new SPARQLConnection();
 		$result=$connectie->JSONQueryAsPHPArray($query);
 
-		if (empty($result['@graph'])) // Leeg resultaat
+		if (count($result)>1)
 		{
-			return false;
+			return true;
 		}
 		else
 		{
+			return false;
+		}
+	}
+
+	static function isExperience($context_uri)
+	{
+		$query='DESCRIBE ?experience WHERE {
+			?experience property:Context '.Uri::escape_uri($context_uri).'.
+			?experience property:Practice_type "Experience"}';
+		$connectie=new SPARQLConnection();
+		$result=$connectie->JSONQueryAsPHPArray($query);
+
+		if (count($result)>1)
+		{
 			return true;
+		}
+		else
+		{
+			return false;
 		}
 	}
 }

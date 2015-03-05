@@ -17,10 +17,12 @@ require_once(__DIR__.'/php/SPARQLConnection.class.php');
 <script src="js/d3.v3.js"></script>
 <script src="js/cola.v3.min.js"></script>
 <?php
-$standaard_context_uri='http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Building_with_Nature-2Dinterventies_op_het_systeem';
+$standaard_context_uri='emmwiki:Building_with_Nature-2Dinterventies_op_het_systeem';
 
 $l1modellen=JSON_EMontParser::geefL1modellen();
-echo '<form method="post" action="testMichael.php"><select name="l1model">';
+$l2cases=JSON_EMontParser::geefL2cases();
+
+echo '<form method="post" action="testMichael.php">L1: <select name="l1model">';
 
 foreach ($l1modellen as $l1model)
 {
@@ -29,7 +31,15 @@ foreach ($l1modellen as $l1model)
 		echo 'selected="selected" ';
 	echo 'value="'.$l1model->getUri().'">'.Uri::SMWuriNaarLeesbareTitel($l1model->getUri()).'</option>';
 }
-echo '</select><input type="submit" value="Opvragen" /></form>';
+
+echo '</select><input type="submit" value="Opvragen" /><br />L2: <select name="l2cases">';
+
+foreach($l2cases as $l2case)
+{
+	echo '<option value="'.$l2case->getUri().'">'.Uri::SMWuriNaarLeesbareTitel($l2case->getUri()).'</option>';
+}
+
+echo '</select></form>';
 
 if(!empty($_POST))
 {
@@ -79,7 +89,6 @@ $parse=$situatieparser->geefElementenInSituatie();
   	font-size:10px;
 	font-family:Arial,Helvetica,sans-serif;
 	color:#000;
-    /*text-anchor: middle;*/
     cursor: move;
 }
 </style>
@@ -100,8 +109,6 @@ $parse=$situatieparser->geefElementenInSituatie();
 	var graph;
     var color = d3.scale.category20();
 	
-	//TODO: partOf-relaties niet links-rechts, maar boven/beneden
-
 	// Haal de gegevens op
 	$.ajax({
 		type : "POST",
@@ -204,9 +211,6 @@ $parse=$situatieparser->geefElementenInSituatie();
 	        .enter().append("text")
 	         .attr("class", "label")
 	         .text(function (d) { return d.heading; })
-	         //.attr("x",0)
-	    	 //.attr("y",0)
-	    	 //.attr("dy", "1.0em")
 		     .call(force.drag);
 
 	    node.append("title")
