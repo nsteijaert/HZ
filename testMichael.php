@@ -17,20 +17,38 @@ require_once(__DIR__.'/php/SPARQLConnection.class.php');
 <script src="js/d3.v3.js"></script>
 <script src="js/cola.v3.min.js"></script>
 <?php
+$standaard_context_uri='http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Building_with_Nature-2Dinterventies_op_het_systeem';
+
+$l1modellen=JSON_EMontParser::geefL1modellen();
+echo '<form method="post" action="testMichael.php"><select name="l1model">';
+
+foreach ($l1modellen as $l1model)
+{
+	echo '<option ';
+	if ($l1model->getUri()==$standaard_context_uri)
+		echo 'selected="selected" ';
+	echo 'value="'.$l1model->getUri().'">'.Uri::SMWuriNaarLeesbareTitel($l1model->getUri()).'</option>';
+}
+echo '</select><input type="submit" value="Opvragen" /></form>';
+
+if(!empty($_POST))
+{
+	$context_uri=$_POST['l1model'];
+}
+else
+{
+	$context_uri=$standaard_context_uri;
+}
+
 $connectie=new SPARQLConnection();
 
-//$context='Menselijk-2D_en_ecosysteem';
-$context="Building_with_Nature-2Dinterventies_op_het_systeem";
-//$context="B_en_O_Kust";
-$context_uri='http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'.$context;
+echo '<h1>Elementen uit de context: "'.Uri::SMWuriNaarLeesbareTitel($context_uri).'"</h1>';
 
-echo 'Lijstje van IEs in context "'.JSON_EMontParser::decodeerSMWNaam($context);?>
-<br /><a href="#geparset">Naar de geparsete gegevens</a><br />
-<?php
 $situatieparser=new JSON_EMontParser($context_uri);
 $parse=$situatieparser->geefElementenInSituatie();
 ?>
-<a name="geparset">Geparset:</a><br />
+<a href="#visualisatie">Spring naar de visualisatie</a>
+<h2>Dump</h2>
 <pre>
 <?php var_dump($parse); ?>
 </pre>
@@ -82,6 +100,8 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
 </style>
 <?php $svgheight=1280;$svgwidth=1600;$nodeheight=30;$nodewidth=100;?>
 
+<a name="visualisatie"></a>
+<h2>Visualisatie</h2>
 <svg id="visualisatie" width="<?php echo $svgwidth;?>" height="<?php echo $svgheight;?>">
 	<defs>
 		<marker id="standaard" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="6" markerHeight="6" orient="auto">
@@ -218,8 +238,13 @@ var_dump(JSON_EMontParser::zoekSubrollen("http://127.0.0.1/mediawiki/mediawiki/i
 	                 .attr("font-size", "12");
 	        }
 	    };
+		label.each(insertLinebreaks);
 
-	    label.each(insertLinebreaks);
+	    /*var routeEdges = function () {
+    		force.prepareEdgeRouting(margin / 3);
+    		link.attr("d", function (d) { return lineFunction(force.routeEdge(d)); });
+    		if (isIE()) link.each(function (d) { this.parentNode.insertBefore(this, this) });
+		}*/
 	}
 </script>
 </body>
