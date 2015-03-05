@@ -4,17 +4,29 @@
  */
  class Uri
  {
+ 	private static $encoding=array(
+	'('=>'%28',
+	')'=>'%29',
+	'/'=>'%2F'
+	);
+
+ 	private static $decoding=array(
+	'%28'=>'(',
+	'%29'=>')',
+	'%2F'=>'/'
+	);
+
  	// Alles is statisch, dus een constructor is niet nodig.
  	private function __construct() {}
 	
-	public static function codeerHaakjes($string)
+	public static function codeerSpecialeTekens($string)
 	{
-		return strtr($string,array('('=>'%28',')'=>'%29'));
+		return strtr($string,self::$encoding);
 	}
 	
-	public static function decodeerHaakjes($string)
+	public static function decodeerSpecialeTekens($string)
 	{
-		return strtr($string,array('%28'=>'(', '%29'=>')'));
+		return strtr($string,self::$decoding);
 	}
 
 	/**
