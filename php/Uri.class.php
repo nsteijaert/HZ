@@ -66,7 +66,15 @@
 	public static function SMWuriNaarLeesbareTitel($uri)
 	{
 		$name_array=preg_split("/URIResolver\//", self::decodeerSMWNaam($uri));
-		return $name_array[1];
+		if($name_array[1])
+		{
+			return $name_array[1];
+		}
+		else
+		{
+			$name_array=explode(':',self::decodeerSMWNaam($uri));
+			return end($name_array);
+		}
 	}
  }
  
