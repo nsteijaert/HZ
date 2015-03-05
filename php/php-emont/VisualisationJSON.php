@@ -52,12 +52,17 @@ $post['nodes']=$nodes;
 $post['links']=array();
 foreach($links as $link)
 {
-	$post['links'][]=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']]);
-	$post['constraints'][]=array('gap'=>120,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+	$post['links'][]=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']],'type'=>$link['type']);
+	if($link['type']!='partOf')
+	{
+		$post['constraints'][]=array('gap'=>120,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+	}
+	else
+	{
+		$post['constraints'][]=array('gap'=>30,'axis'=>'y', 'left'=>$indices[$link['target']],'right'=>$indices[$link['source']]);
+	}
 }
 
-$post['ies_contexten']=$ies_contexten;
-$post['contexten']=$contexten;
 $contextindex=array();
 
 foreach($ies_contexten as $context=>$ies)
@@ -72,6 +77,15 @@ foreach($ies_contexten as $context=>$ies)
 	$contextindex[]=$context;
 }
 
+// Ontbrekende contexten
+foreach($contexten as $uri=>$description)
+{
+	if(!array_search($uri,$contextindex))
+	{
+		$contextindex[]=$uri;
+	}
+}
+
 foreach($contextLinks as $contextLink)
 {
 	$context=$contextLink['context'];
@@ -84,6 +98,5 @@ foreach($contextLinks as $contextLink)
 		$post['groups'][$supercontextnr]['groups'][]=$contextnr;
 	}
 }
-$post['contextLinks']=$contextLinks;
 
 echo strtr(json_encode($post),array('<\/'=>'</','<sub>'=>'','<\/sub>'=>''));
