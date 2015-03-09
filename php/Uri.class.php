@@ -10,14 +10,15 @@ class Uri
 	
 	/**
 	 * Voorziet een uri van vishaken ('<' en '>'), indien niet aanwezig.
+	 * Voorziet een iri van geëscapete haakjes en slashes.
 	 */	
 	public static function escape_uri($uri)
 	{
-		if (substr($uri,0,4)=='http')
+		if (substr($uri,0,4)=='http') //uri
 		{
 			return '<'.$uri.'>';
 		}
-		elseif(strpos($uri,':')!==FALSE)
+		elseif(strpos($uri,':')!==FALSE) //iri
 		{
 			return self::escapeSpecialeTekens($uri);
 		}
@@ -29,14 +30,15 @@ class Uri
 	
 	/**
 	 * Verwijdert de vishaken ('<' en '>') van de uri, indien aanwezig.
+	 * Verwijdert de geëscapete haakjes en slashes van een iri, indien aanwezig.
 	 */
 	public static function deescape_uri($uri)
 	{
-		if (substr($uri,0,1)=='<')
+		if (substr($uri,0,1)=='<') //uri
 		{
 			return substr($uri,1,-1);
 		}
-		elseif(strpos($uri,':')!==FALSE)
+		elseif(strpos($uri,':')!==FALSE) //iri
 		{
 			return self::deescapeSpecialeTekens($uri);
 		}
@@ -91,6 +93,5 @@ class Uri
 		'\)' => ')',
 		'\/' => '/'));
 	}
- }
- 
+}
 ?>
