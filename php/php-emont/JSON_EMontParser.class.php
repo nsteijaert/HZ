@@ -83,11 +83,11 @@ class JSON_EMontParser
 
 				if($item['Eigenschap-3AHeading_nl']!="")
 				{
-					$obj->setHeading(uri::decodeerSpecialeTekens($item['Eigenschap-3AHeading_nl']));
+					$obj->setHeading($item['Eigenschap-3AHeading_nl']);
 				}
 				elseif($item['Eigenschap-3AHeading_en']!="")
 				{
-					$obj->setHeading(uri::decodeerSpecialeTekens($item['Eigenschap-3AHeading_en']));
+					$obj->setHeading($item['Eigenschap-3AHeading_en']);
 				}
 				else
 				{

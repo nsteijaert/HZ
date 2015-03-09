@@ -2,33 +2,12 @@
 /**
  * Diverse functies voor het manipuleren van uri's.
  */
- class Uri
- {
- 	private static $encoding=array(
-	'('=>'%28',
-	')'=>'%29',
-	'/'=>'%2F'
-	);
-
- 	private static $decoding=array(
-	'%28'=>'(',
-	'%29'=>')',
-	'%2F'=>'/'
-	);
+class Uri
+{
 
  	// Alles is statisch, dus een constructor is niet nodig.
  	private function __construct() {}
 	
-	public static function codeerSpecialeTekens($string)
-	{
-		return strtr($string,self::$encoding);
-	}
-	
-	public static function decodeerSpecialeTekens($string)
-	{
-		return strtr($string,self::$decoding);
-	}
-
 	/**
 	 * Voorziet een uri van vishaken ('<' en '>'), indien niet aanwezig.
 	 */	
@@ -37,6 +16,10 @@
 		if (substr($uri,0,4)=='http')
 		{
 			return '<'.$uri.'>';
+		}
+		elseif(strpos($uri,':')!==FALSE)
+		{
+			return self::escapeSpecialeTekens($uri);
 		}
 		else
 		{
@@ -52,6 +35,10 @@
 		if (substr($uri,0,1)=='<')
 		{
 			return substr($uri,1,-1);
+		}
+		elseif(strpos($uri,':')!==FALSE)
+		{
+			return self::deescapeSpecialeTekens($uri);
 		}
 		else
 		{
@@ -87,6 +74,22 @@
 			$name_array=explode(':',self::decodeerSMWNaam($uri));
 			return end($name_array);
 		}
+	}
+
+	public static function escapeSpecialeTekens($string)
+	{
+		return strtr($string, array(
+		'(' => '\(',
+		')' => '\)',
+		'/' => '\/'));
+	}
+
+	public static function deescapeSpecialeTekens($string)
+	{
+		return strtr($string, array(
+		'\(' => '(',
+		'\)' => ')',
+		'\/' => '/'));
 	}
  }
  

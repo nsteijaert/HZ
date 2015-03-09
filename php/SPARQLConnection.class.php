@@ -24,7 +24,7 @@ class SPARQLConnection
 	public function JSONQuery($query)
 	{
 		$prefixed_query=self::prefixesIntoQuery().$query;
-		return Uri::codeerSpecialeTekens(file_get_contents($this->endpoint.rawurlencode($prefixed_query)));
+		return file_get_contents($this->endpoint.rawurlencode($prefixed_query));
 	}
 
 	public function JSONQueryAsPHPArray($query)
