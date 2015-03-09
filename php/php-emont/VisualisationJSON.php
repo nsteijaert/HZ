@@ -52,7 +52,7 @@ $post['nodes']=$nodes;
 $post['links']=array();
 foreach($links as $link)
 {
-	$post['links'][]=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']],'type'=>$link['type']);
+	$post['links'][]=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']],'type'=>$link['type'],'extraInfo'=>$link['extraInfo'],'note'=>$link['note']);
 	if($link['type']!='partOf')
 	{
 		$post['constraints'][]=array('gap'=>120,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
@@ -93,10 +93,16 @@ foreach($contextLinks as $contextLink)
 	$contextnr=array_search($context,$contextindex);
 	$supercontextnr=array_search($supercontext,$contextindex);
 
-	if($contextnr!==FALSE && $supercontextnr!==FALSE)
+	if($contextnr!==FALSE && $supercontextnr!==FALSE && !empty($post['groups'][$contextnr]))
 	{
 		$post['groups'][$supercontextnr]['groups'][]=$contextnr;
 	}
 }
-
+// Kan waarschijnlijk efficiënter
+foreach ($post['groups'] as $index=>$inhoud)
+{
+	// Gebruik de uri om een titel toe te voegen aan de context. Deze komen uit een array, en moeten daarna worden omgezet in
+	// een string om ze vervolgens om te zetten in een leesbare titel.
+	$post['groups'][$index]['titel']=Uri::SMWuriNaarLeesbareTitel(implode("",array_slice($contextindex,$index,1)));
+}
 echo strtr(json_encode($post),array('<\/'=>'</','<sub>'=>'','<\/sub>'=>''));

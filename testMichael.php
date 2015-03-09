@@ -22,7 +22,7 @@ $standaard_context_uri='emmwiki:Building_with_Nature-2Dinterventies_op_het_syste
 $l1modellen=JSON_EMontParser::geefL1modellen();
 $l2cases=JSON_EMontParser::geefL2cases();
 
-echo '<form method="post" action="testMichael.php">L1: <select name="l1model">';
+echo '<form method="post" action="testMichael.php">L1: <select name="context">';
 
 foreach ($l1modellen as $l1model)
 {
@@ -31,19 +31,23 @@ foreach ($l1modellen as $l1model)
 		echo 'selected="selected" ';
 	echo 'value="'.$l1model->getUri().'">'.Uri::SMWuriNaarLeesbareTitel($l1model->getUri()).'</option>';
 }
-
-echo '</select><input type="submit" value="Opvragen" /><br />L2: <select name="l2cases">';
-
+?>
+</select><input type="submit" value="Opvragen" /></form>
+<form method="post" action="testMichael.php">
+L2: <select name="context">
+<?php
 foreach($l2cases as $l2case)
 {
 	echo '<option value="'.$l2case->getUri().'">'.Uri::SMWuriNaarLeesbareTitel($l2case->getUri()).'</option>';
 }
-
-echo '</select></form>';
-
+?>
+</select>
+<input type="submit" value="Opvragen" />
+</form>
+<?php
 if(!empty($_POST))
 {
-	$context_uri=$_POST['l1model'];
+	$context_uri=$_POST['context'];
 }
 else
 {
@@ -64,11 +68,30 @@ $parse=$situatieparser->geefElementenInSituatie();
 </pre>
 <style>
 
+/* Standaard */
 .node {
     fill: #eee;
     stroke: #000;
     stroke-width: 1px;
     cursor: move;
+}
+.nodeActivity {
+    fill: #ede7dc;
+}
+
+.nodeCondition {
+	fill: #4c97d6;
+}
+
+.nodeBelief {
+	fill: #4c97d6;
+}
+
+.nodeGoal {
+	fill: #ffffff;
+}
+.nodeOutcome {
+	fill: #ffffff;
 }
 
 .link {
@@ -88,8 +111,12 @@ $parse=$situatieparser->geefElementenInSituatie();
 .label {
   	font-size:10px;
 	font-family:Arial,Helvetica,sans-serif;
-	color:#000;
+	fill:#000;
     cursor: move;
+}
+
+.labelBelief {
+	fill: #fff;
 }
 </style>
 <?php $svgheight=1280;$svgwidth=1600;$nodeheight=30;$nodewidth=100;?>
@@ -173,6 +200,8 @@ $parse=$situatieparser->geefElementenInSituatie();
 	                .attr("width", function (d) { return d.bounds.width(); })
 	                .attr("height", function (d) { return d.bounds.height(); });
 
+	            //groupTitles.attr("x",function(d,i) {return group(i).bounds.x+10;});
+
 	            label.attr("transform", function (d) {
 	                return "translate(" + (d.x + margin - d.width/2) + "," + (d.y + margin - d.height/2) + ")";
 	            });
@@ -188,18 +217,27 @@ $parse=$situatieparser->geefElementenInSituatie();
 	        .attr("class", "group")
 	        .attr('width',<?php echo $nodewidth;?>)
 		    .attr('height',<?php echo $nodeheight;?>)
-	        .style("fill", function (d, i) { return color(i); });
+	        .style("fill", function (d, i) { return color(i); })
+
+	    /*var groupTitles = svg.selectAll(".groupTitles")
+	    	 .data(graph.groups)
+	        .enter().append("rect")
+     	     .attr("class", "groupTitles")
+	         .attr('width',100)
+	         .attr('height',15)
+	         .style("fill","#ff0000");*/
 
 	    var link = svg.selectAll(".link")
 	        .data(graph.links)
 	       .enter().append("line")
 	        .attr("class", "link")
-	        .attr("marker-end", "url(#standaard)");
+	        .attr("marker-end", "url(#standaard)")
+	        .attr("title", function (d) { var title=d.type; if(d.extraInfo!=null){title=title+d.extraInfo}if(d.note!=null){title=title+"\n"+d.note}return title;});
 
 	    var node = svg.selectAll(".node")
 	         .data(graph.nodes)
 	       .enter().append("rect")
-	         .attr("class", "node")
+	         .attr("class", function (d) {return "node node"+d.type})
 	           .attr("rx", 5).attr("ry", 5)
 	           .attr('width',<?php echo $nodewidth;?>)
 		       .attr('height',<?php echo $nodeheight;?>)
@@ -209,7 +247,7 @@ $parse=$situatieparser->geefElementenInSituatie();
 	    var label = svg.selectAll(".label")
 	        .data(graph.nodes)
 	        .enter().append("text")
-	         .attr("class", "label")
+	         .attr("class", function (d) {return "label label"+d.type})
 	         .text(function (d) { return d.heading; })
 		     .call(force.drag);
 
@@ -224,7 +262,8 @@ $parse=$situatieparser->geefElementenInSituatie();
 	        for (var i = 0; i < words.length; i++) {
 	            var tspan = el.append('tspan').text(words[i]);
 	            tspan.attr('x', margin).attr('dy', 15)
-	                 .attr("font-size", "12");
+	                 .attr("font-size", "12")
+	                 .attr("style","fill:inherit;");
 	        }
 	    };
 		label.each(insertLinebreaks);
