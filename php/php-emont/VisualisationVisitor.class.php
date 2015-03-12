@@ -7,6 +7,7 @@ require_once(__DIR__.'/PHPEMontVisitor.interface.php');
 require_once(__DIR__.'/IntentionalElement.class.php');
 require_once(__DIR__.'/Activity.class.php');
 require_once(__DIR__.'/Context.class.php');
+require_once(__DIR__.'/../Uri.class.php');
 
 class VisualisationVisitor implements PHPEMontVisitor
 {
@@ -20,6 +21,7 @@ class VisualisationVisitor implements PHPEMontVisitor
 			$node=array();
 			$node['uri']=$uri;
 			$node['type']=get_class($visitee);
+			$node['name']=Uri::SMWuriNaarLeesbareTitel($visitee->getUri());
 			$node['heading']=$visitee->getHeading();
 			$node['decompositionType']=$visitee->getDecompositionType();
 

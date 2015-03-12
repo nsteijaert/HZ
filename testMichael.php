@@ -11,11 +11,149 @@ require_once(__DIR__.'/php/SPARQLConnection.class.php');
 <head>
 	<title>Testpagina voor EMont-parser</title>
 	<meta charset='utf-8'>
+	<!-- Stylesheets van DeltaExpertise-->
+	<!-- Aangepaste kopie van <link rel="stylesheet" href="http://195.93.238.49/wiki/deltaexpertise/wiki/load.php?debug=false&amp;lang=nl&amp;modules=mediawiki.legacy.commonPrint%2Cshared%7Cskins.deltaskin&amp;only=styles&amp;skin=deltaskin&amp;*" />
+		Vervangen bij integreren in DeltaExpertise-->
+	<link rel="stylesheet" href="css/dex1.css"/>
+	<link rel="stylesheet" href="http://195.93.238.49/wiki/deltaexpertise/wiki/extensions/HeaderTabs/skins/ext.headertabs.large.css" />
+	
+	<style>
+		body, svg {
+			background-color:#eae4d7;
+		}
+		/* Standaard */
+		.node {
+		    fill: #eee;
+		    stroke-width: 1px;
+		    cursor: move;
+		}
+		.nodeActivity {
+		    fill: #eae4d7;
+		    stroke:#bfac88;
+		}
+		
+		.nodeCondition {
+			fill: #4c97d6;
+		}
+		
+		.nodeBelief {
+			fill: #4c97d6;
+		}
+		
+		.nodeGoal {
+			fill: #ffffff;
+		}
+		.nodeOutcome {
+			fill: #ffffff;
+		    stroke:#bfac88;
+		}
+		
+		.link {
+		    stroke:#bfac88;;
+		    stroke-width: 1px;
+		    marker-end:#standaard;
+		    cursor: help;
+		}
+		
+		.group {
+		  stroke: #bfac88;
+		  stroke-width: 1px;
+		  fill: #eae4d7;
+		  fill-opacity:0;
+		  stroke-opacity:1;
+		}
+		
+		.label {
+		  	font-size:17px; /* 17px is 13 pt.*/
+			font-family:Open Sans,Arial,Helvetica,sans-serif;
+			fill:#222;
+		    cursor: move;
+		    text-anchor:middle;
+		}
+		.labelBelief {
+			fill: #fff;
+		}
+		.labelGoal {
+			fill:#4c97d6;
+		}
+		.labelOutcome {
+			fill:#4c97d6;
+		}
+		
+		marker#standaard {
+			fill:#bfac88;
+			stroke: #bfac88;
+		}
+	</style>
 </head>
-<body>
+<!-- Start van gekopieerde DeltaExpertise-code. Verwijderen bij integratie. -->
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Waterkering_VN skin-deltaskin action-view">
+<div id="canvas">
 <script src="js/jquery-2.1.3.js"></script>
 <script src="js/d3.v3.js"></script>
 <script src="js/cola.v3.min.js"></script>
+	<div class="banner" style="background-image: url('http://195.93.238.49/wiki/deltaexpertise/wiki/skins/deltaskin/img/banners/banner-small-waterveiligheid.jpg');"><span></span></div>
+	<header id="mainHeader" >
+				
+		<a href="#" id="toggleMenu" class="icon-menu"><span>Toon menu</span></a>
+		
+		<a href="#" id="toggleSearch" class="icon-menu"><span>Zoeken</span></a>
+			
+		<h1 id="idTag">
+			<span title="DeltaExpertise - voor een leefbare delta">
+		<a href='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Home'>DeltaExpertise - voor een leefbare delta</a>					</span>
+		</h1>
+		
+						
+		<nav>
+			<ul>
+				<li ><a href="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Home">Home</a></li>
+				<li ><a href="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Over%20ons">Over ons</a></li>
+				<li ><a href="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Help">Help</a></li>
+				<li ><a href="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Contact">Contact</a></li>
+				<li ><a href="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Sitemap">Sitemap</a></li>
+				<li class="login"><a href="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Speciaal:Aanmelden" data-icon="o" title="Aanmelden"><span>Aanmelden</span></a></li>
+			</ul>
+		</nav>
+		<div id="searchBoxFront">
+			<form action="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php" id="searchform">
+				<fieldset>
+					<input type='hidden' name="title" value="Speciaal:Zoeken" />
+					<input type="search" name="search" placeholder="Zoeken" title="Zoeken in DeltaExpertise - voor een leefbare delta [f]" accesskey="f" id="searchInput" autocomplete="off" />							<button data-icon="q"><span></span></button>
+				</fieldset>
+				<ul class="suggestions">
+		        </ul>
+			</form>
+		</div>
+	</header>
+	<!--  //////////  BEGIN SECTION NAVIGATIE  ///////////  -->
+	
+	<div id="sectionNav">
+		<nav>
+			<a href="#" id="sectionNavButton">Secties</a>
+			<ul>
+				<li class="quadrant">
+					<a href="#" class="icon-right-open-big"><span>Begrippen</span></a>
+					<div class="navPanel">
+					</div>
+				</li>
+				<li class="quadrant">
+					<a href="#" class="icon-right-open-big"><span>Processen</span></a>
+					<div class="navPanel">
+					</div>
+				</li>
+				<li class="quadrant">
+					<a href="#" class="icon-right-open-big"><span>Praktijk</span></a>
+					<div class="navPanel">
+					</div>
+				</li>
+			</ul>
+		</nav>
+	</div>
+	<!--  //////////  END SECTION NAVIGATIE  ///////////  -->						
+
+<div id="body">
+<!-- Einde van de gekopieerde DeltaExpertise-code -->
 <?php
 $standaard_context_uri='emmwiki:Building_with_Nature-2Dinterventies_op_het_systeem';
 
@@ -61,80 +199,28 @@ echo '<h1>Elementen uit de context: "'.Uri::SMWuriNaarLeesbareTitel($context_uri
 $situatieparser=new JSON_EMontParser($context_uri);
 $parse=$situatieparser->geefElementenInSituatie();
 ?>
-<a href="#visualisatie">Spring naar de visualisatie</a>
+<a href="#visualisatiekop">Spring naar de visualisatie</a><br />
+<button onclick="document.getElementById('dump').style.display='block'">Dump tonen</button>
+<div id="dump" style="display:none;">
 <h2>Dump</h2>
 <pre>
 <?php var_dump($parse); ?>
 </pre>
-<style>
+</div>
 
-/* Standaard */
-.node {
-    fill: #eee;
-    stroke: #000;
-    stroke-width: 1px;
-    cursor: move;
-}
-.nodeActivity {
-    fill: #ede7dc;
-}
-
-.nodeCondition {
-	fill: #4c97d6;
-}
-
-.nodeBelief {
-	fill: #4c97d6;
-}
-
-.nodeGoal {
-	fill: #ffffff;
-}
-.nodeOutcome {
-	fill: #ffffff;
-}
-
-.link {
-    stroke: #777;
-    stroke-width: 2px;
-    marker-end:#standaard;
-}
-
-.group {
-  stroke: #fff;
-  stroke-width: 1.5px;
-  cursor: move;
-  opacity: 0.7;
-  color:#00FF00;
-}
-
-.label {
-  	font-size:10px;
-	font-family:Arial,Helvetica,sans-serif;
-	fill:#000;
-    cursor: move;
-}
-
-.labelBelief {
-	fill: #fff;
-}
-</style>
 <?php $svgheight=1280;$svgwidth=1600;$nodeheight=30;$nodewidth=100;?>
 
-<a name="visualisatie"></a>
-<h2>Visualisatie</h2>
-<svg id="visualisatie" width="<?php echo $svgwidth;?>" height="<?php echo $svgheight;?>">
+<h2 id="visualisatiekop">Visualisatie</h2>
+<svg id="visualisatie" width="100%" height="<?php echo $svgheight;?>">
 	<defs>
-		<marker id="standaard" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="6" markerHeight="6" orient="auto">
+		<marker id="standaard" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="5" markerHeight="5" orient="auto">
         	<path d="M0,-5L10,0L0,5"></path>
     	</marker>
 	</defs>
 </svg>
-<div id="dump"></div>
 <script type="text/javascript">
 
 	var graph;
-    var color = d3.scale.category20();
 	
 	// Haal de gegevens op
 	$.ajax({
@@ -152,11 +238,11 @@ $parse=$situatieparser->geefElementenInSituatie();
 
 	function tekenDiagram()
 	{
-		var width = <?php echo $svgwidth;?>,
-	    	height = <?php echo $svgheight;?>;
-
 		// Selecteer de visualisatie-container
 	    var svg = d3.select('#visualisatie');
+
+		var width = $("#visualisatie").width();
+	    	height = $("#visualisatie").height();
 
 		console.trace();	
 		var force = cola.d3adaptor()
@@ -172,39 +258,39 @@ $parse=$situatieparser->geefElementenInSituatie();
 
 		// Teken de pijlen
 		force.on("tick", function () {
-			 node.each(function (d) {
+			node.each(function (d) {
 	                d.innerBounds = d.bounds.inflate(- margin);
 	            });
-	            link.each(function (d) {
+	        link.each(function (d) {
 	                cola.vpsc.makeEdgeBetween(d, d.source.innerBounds, d.target.innerBounds, 0);
 	            });
 
-	            link.attr("x1", function (d) { return d.sourceIntersection.x; })
-	                .attr("y1", function (d) { return d.sourceIntersection.y; })
-	                .attr("x2", function (d) { return d.arrowStart.x; })
-	                .attr("y2", function (d) { return d.arrowStart.y; });
+            link.attr("x1", function (d) { return d.sourceIntersection.x; })
+                .attr("y1", function (d) { return d.sourceIntersection.y; })
+                .attr("x2", function (d) { return d.arrowStart.x; })
+                .attr("y2", function (d) { return d.arrowStart.y; });
 
-	            label.each(function (d) {
-	                var b = this.getBBox();
-	                d.width = b.width + 2 * margin + 8;
-	                d.height = b.height + 2 * margin + 8;
-	            });
+            label.each(function (d) {
+                var b = this.getBBox();
+                d.width = b.width + 2 * pad;
+                d.height = b.height + 2 * pad;
+            });
 
-	            node.attr("x", function (d) { return d.innerBounds.x; })
-	                .attr("y", function (d) { return d.innerBounds.y; })
-	                .attr("width", function (d) { return d.innerBounds.width(); })
-	                .attr("height", function (d) { return d.innerBounds.height(); });
+            node.attr("x", function (d) { return d.innerBounds.x; })
+                .attr("y", function (d) { return d.innerBounds.y; })
+                .attr("width", function (d) { return d.innerBounds.width(); })
+                .attr("height", function (d) { return d.innerBounds.height(); });
 
-	            group.attr("x", function (d) { return d.bounds.x; })
-	                 .attr("y", function (d) { return d.bounds.y; })
-	                .attr("width", function (d) { return d.bounds.width(); })
-	                .attr("height", function (d) { return d.bounds.height(); });
+            group.attr("x", function (d) { return d.bounds.x+margin; })
+                 .attr("y", function (d) { return d.bounds.y+margin; })
+                .attr("width", function (d) { return d.bounds.width()-pad;})
+                .attr("height", function (d) { return d.bounds.height()-pad;});
 
-	            //groupTitles.attr("x",function(d,i) {return group(i).bounds.x+10;});
+            //groupTitles.attr("x",function(d,i) {return group(i).bounds.x+10;});
 
-	            label.attr("transform", function (d) {
-	                return "translate(" + (d.x + margin - d.width/2) + "," + (d.y + margin - d.height/2) + ")";
-	            });
+            label.attr("transform", function (d) {
+                return "translate(" + (d.x - pad/2) + "," + (d.y + pad/1.5 - d.height/2) + ")";
+            });
 		});
 
 		// De force layout zet alles automatisch op zijn plek
@@ -216,8 +302,7 @@ $parse=$situatieparser->geefElementenInSituatie();
 	        .attr("rx", 10).attr("ry", 10)
 	        .attr("class", "group")
 	        .attr('width',<?php echo $nodewidth;?>)
-		    .attr('height',<?php echo $nodeheight;?>)
-	        .style("fill", function (d, i) { return color(i); })
+		    .attr('height',<?php echo $nodeheight;?>);
 
 	    /*var groupTitles = svg.selectAll(".groupTitles")
 	    	 .data(graph.groups)
@@ -238,7 +323,8 @@ $parse=$situatieparser->geefElementenInSituatie();
 	         .data(graph.nodes)
 	       .enter().append("rect")
 	         .attr("class", function (d) {return "node node"+d.type})
-	           .attr("rx", 5).attr("ry", 5)
+	           .attr("rx", function (d) { if (d.type=="Condition" || d.type=="Goal" || d.type=="Belief") {return 40;}else{return 10;} })
+	           .attr("ry", 10)
 	           .attr('width',<?php echo $nodewidth;?>)
 		       .attr('height',<?php echo $nodeheight;?>)
 	         .call(force.drag);
@@ -248,7 +334,7 @@ $parse=$situatieparser->geefElementenInSituatie();
 	        .data(graph.nodes)
 	        .enter().append("text")
 	         .attr("class", function (d) {return "label label"+d.type})
-	         .text(function (d) { return d.heading; })
+	         .text(function (d) { return d.name; })
 		     .call(force.drag);
 
 	    node.append("title")
@@ -256,11 +342,22 @@ $parse=$situatieparser->geefElementenInSituatie();
 
 	    var insertLinebreaks = function (d) {
 	        var el = d3.select(this);
-	        var words = d.heading.split(' ');
+	        var words = d.name.split(' ');
 	        el.text('');
 
+			var rows=[''];
+			var row_number = 0;
 	        for (var i = 0; i < words.length; i++) {
-	            var tspan = el.append('tspan').text(words[i]);
+	        	if (rows[row_number].length>20)
+	        	{
+	        		rows.push('');
+	        		row_number++;
+	        	}
+	        	rows[row_number]=rows[row_number]+' '+words[i];
+			}
+
+			for (var i = 0; i < rows.length; i++) {      	 
+	            var tspan = el.append('tspan').text(rows[i]);
 	            tspan.attr('x', margin).attr('dy', 15)
 	                 .attr("font-size", "12")
 	                 .attr("style","fill:inherit;");
@@ -269,5 +366,7 @@ $parse=$situatieparser->geefElementenInSituatie();
 		label.each(insertLinebreaks);
 	}
 </script>
+</div>
+</div>
 </body>
 </html>

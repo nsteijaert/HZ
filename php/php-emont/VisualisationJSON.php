@@ -105,4 +105,16 @@ foreach ($post['groups'] as $index=>$inhoud)
 	// een string om ze vervolgens om te zetten in een leesbare titel.
 	$post['groups'][$index]['titel']=Uri::SMWuriNaarLeesbareTitel(implode("",array_slice($contextindex,$index,1)));
 }
+
+usort($post['groups'], 'subgroupsizecmp'); 
+
+function subgroupsizecmp($a,$b)
+{
+	if(count($a['groups'])>count($b['groups']))
+	{
+		return 1;
+	}
+	return -1;
+}
+
 echo strtr(json_encode($post),array('<\/'=>'</','<sub>'=>'','<\/sub>'=>''));
