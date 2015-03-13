@@ -55,7 +55,7 @@ foreach($links as $link)
 	$post['links'][]=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']],'type'=>$link['type'],'extraInfo'=>$link['extraInfo'],'note'=>$link['note']);
 	if($link['type']!='partOf')
 	{
-		$post['constraints'][]=array('gap'=>120,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+		$post['constraints'][]=array('gap'=>30,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
 	}
 	else
 	{

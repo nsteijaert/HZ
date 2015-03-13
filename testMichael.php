@@ -49,10 +49,20 @@ require_once(__DIR__.'/php/SPARQLConnection.class.php');
 		}
 		
 		.link {
-		    stroke:#bfac88;;
+		    stroke:#bfac88;
 		    stroke-width: 1px;
 		    marker-end:#standaard;
+		}
+
+		.linktooltip
+		{
+			stroke:#222;
+			stroke-opacity:0;
+			stroke-width:7px;
 		    cursor: help;
+		}
+		.linktooltip:hover {
+			stroke-opacity:0.3;
 		}
 		
 		.group {
@@ -219,6 +229,15 @@ $parse=$situatieparser->geefElementenInSituatie();
 	</defs>
 </svg>
 <script type="text/javascript">
+/*function prefixReplace(url) {
+}
+
+function OpenInNewTab(url) {
+	url = prefixReplace(url)
+	var win = window.open(url, '_blank');
+	win.focus();
+}
+*/
 
 	var graph;
 	
@@ -250,6 +269,7 @@ $parse=$situatieparser->geefElementenInSituatie();
 	    	.avoidOverlaps(true)
 			.size([width, height])
 	        .handleDisconnected(false)
+	        .symmetricDiffLinkLengths(30)
 	    	.nodes(graph.nodes)
 	    	.links(graph.links)
 	    	.constraints(graph.constraints)
@@ -266,6 +286,15 @@ $parse=$situatieparser->geefElementenInSituatie();
 	            });
 
             link.attr("x1", function (d) { return d.sourceIntersection.x; })
+                .attr("y1", function (d) { return d.sourceIntersection.y; })
+                .attr("x2", function (d) { return d.arrowStart.x; })
+                .attr("y2", function (d) { return d.arrowStart.y; });
+
+	        linktooltip.each(function (d) {
+	                cola.vpsc.makeEdgeBetween(d, d.source.innerBounds, d.target.innerBounds, 0);
+	            });
+
+            linktooltip.attr("x1", function (d) { return d.sourceIntersection.x; })
                 .attr("y1", function (d) { return d.sourceIntersection.y; })
                 .attr("x2", function (d) { return d.arrowStart.x; })
                 .attr("y2", function (d) { return d.arrowStart.y; });
@@ -294,7 +323,8 @@ $parse=$situatieparser->geefElementenInSituatie();
 		});
 
 		// De force layout zet alles automatisch op zijn plek
-		force.start();
+		force.start(80,160,100000);
+		//force.start();
 
 	    var group = svg.selectAll(".group")
 	        .data(graph.groups)
@@ -316,8 +346,13 @@ $parse=$situatieparser->geefElementenInSituatie();
 	        .data(graph.links)
 	       .enter().append("line")
 	        .attr("class", "link")
-	        .attr("marker-end", "url(#standaard)")
-	        .attr("title", function (d) { var title=d.type; if(d.extraInfo!=null){title=title+d.extraInfo}if(d.note!=null){title=title+"\n"+d.note}return title;});
+	        .attr("marker-end", "url(#standaard)");
+
+	    var linktooltip = svg.selectAll(".linktooltip")
+	        .data(graph.links)
+	       .enter().append("line")
+	        .attr("class","linktooltip")
+   	        .attr("title", function (d) { var title=d.type; if(d.extraInfo!=null){title=title+d.extraInfo}if(d.note!=null){title=title+"\n"+d.note}return title;});
 
 	    var node = svg.selectAll(".node")
 	         .data(graph.nodes)
@@ -335,6 +370,7 @@ $parse=$situatieparser->geefElementenInSituatie();
 	        .enter().append("text")
 	         .attr("class", function (d) {return "label label"+d.type})
 	         .text(function (d) { return d.name; })
+	         .attr("title", function (d) { return d.heading;})
 		     .call(force.drag);
 
 	    node.append("title")
