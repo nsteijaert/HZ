@@ -5,6 +5,7 @@
  */
 require_once(__DIR__.'/php/php-emont/JSON_EMontParser.class.php');
 require_once(__DIR__.'/php/SPARQLConnection.class.php');
+require_once(__DIR__.'/php/dex.php');
 ?>
 <!DOCTYPE html>
 <html>
@@ -96,103 +97,9 @@ require_once(__DIR__.'/php/SPARQLConnection.class.php');
 		}
 	</style>
 </head>
-<!-- Start van gekopieerde DeltaExpertise-code. Verwijderen bij integratie. -->
-<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Waterkering_VN skin-deltaskin action-view">
-<div id="canvas">
-<script src="js/jquery-2.1.3.js"></script>
-<script src="js/d3.v3.js"></script>
-<script src="js/cola.v3.min.js"></script>
-	<div class="banner" style="background-image: url('http://195.93.238.49/wiki/deltaexpertise/wiki/skins/deltaskin/img/banners/banner-small-waterveiligheid.jpg');"><span></span></div>
-	<header id="mainHeader" >
-				
-		<a href="#" id="toggleMenu" class="icon-menu"><span>Toon menu</span></a>
-		
-		<a href="#" id="toggleSearch" class="icon-menu"><span>Zoeken</span></a>
-			
-		<h1 id="idTag">
-			<span title="DeltaExpertise - voor een leefbare delta">
-		<a href='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Home'>DeltaExpertise - voor een leefbare delta</a>					</span>
-		</h1>
-		
-						
-		<nav>
-			<ul>
-				<li ><a href="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Home">Home</a></li>
-				<li ><a href="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Over%20ons">Over ons</a></li>
-				<li ><a href="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Help">Help</a></li>
-				<li ><a href="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Contact">Contact</a></li>
-				<li ><a href="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Sitemap">Sitemap</a></li>
-				<li class="login"><a href="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/Speciaal:Aanmelden" data-icon="o" title="Aanmelden"><span>Aanmelden</span></a></li>
-			</ul>
-		</nav>
-		<div id="searchBoxFront">
-			<form action="http://195.93.238.49/wiki/deltaexpertise/wiki/index.php" id="searchform">
-				<fieldset>
-					<input type='hidden' name="title" value="Speciaal:Zoeken" />
-					<input type="search" name="search" placeholder="Zoeken" title="Zoeken in DeltaExpertise - voor een leefbare delta [f]" accesskey="f" id="searchInput" autocomplete="off" />							<button data-icon="q"><span></span></button>
-				</fieldset>
-				<ul class="suggestions">
-		        </ul>
-			</form>
-		</div>
-	</header>
-	<!--  //////////  BEGIN SECTION NAVIGATIE  ///////////  -->
-	
-	<div id="sectionNav">
-		<nav>
-			<a href="#" id="sectionNavButton">Secties</a>
-			<ul>
-				<li class="quadrant">
-					<a href="#" class="icon-right-open-big"><span>Begrippen</span></a>
-					<div class="navPanel">
-					</div>
-				</li>
-				<li class="quadrant">
-					<a href="#" class="icon-right-open-big"><span>Processen</span></a>
-					<div class="navPanel">
-					</div>
-				</li>
-				<li class="quadrant">
-					<a href="#" class="icon-right-open-big"><span>Praktijk</span></a>
-					<div class="navPanel">
-					</div>
-				</li>
-			</ul>
-		</nav>
-	</div>
-	<!--  //////////  END SECTION NAVIGATIE  ///////////  -->						
-
-<div id="body">
-<!-- Einde van de gekopieerde DeltaExpertise-code -->
 <?php
 $standaard_context_uri='emmwiki:Building_with_Nature-2Dinterventies_op_het_systeem';
 
-$l1modellen=JSON_EMontParser::geefL1modellen();
-$l2cases=JSON_EMontParser::geefL2cases();
-
-echo '<form method="post" action="testMichael.php">L1: <select name="context">';
-
-foreach ($l1modellen as $l1model)
-{
-	echo '<option ';
-	if ($l1model->getUri()==$standaard_context_uri)
-		echo 'selected="selected" ';
-	echo 'value="'.$l1model->getUri().'">'.Uri::SMWuriNaarLeesbareTitel($l1model->getUri()).'</option>';
-}
-?>
-</select><input type="submit" value="Opvragen" /></form>
-<form method="post" action="testMichael.php">
-L2: <select name="context">
-<?php
-foreach($l2cases as $l2case)
-{
-	echo '<option value="'.$l2case->getUri().'">'.Uri::SMWuriNaarLeesbareTitel($l2case->getUri()).'</option>';
-}
-?>
-</select>
-<input type="submit" value="Opvragen" />
-</form>
-<?php
 if(!empty($_POST))
 {
 	$context_uri=$_POST['context'];
@@ -201,6 +108,21 @@ else
 {
 	$context_uri=$standaard_context_uri;
 }
+
+toonDexPrePagina();
+
+$kruimels=array();
+$kruimels[]=array('url'=>'modelselectie.php','titel'=>'Modellen');
+
+if (JSON_EMontParser::isPractice($context_uri))
+{
+	$kruimels[]=array('url'=>'modelselectie.php#practices','titel'=>'Practices');
+}
+elseif (JSON_EMontParser::isExperience($context_uri))
+{
+	$kruimels[]=array('url'=>'modelselectie.php#experiences','titel'=>'Experiences');
+}
+toonBroodkruimels($kruimels);
 
 $connectie=new SPARQLConnection();
 
@@ -402,7 +324,6 @@ function OpenInNewTab(url) {
 		label.each(insertLinebreaks);
 	}
 </script>
-</div>
-</div>
+<?php toonDexPostPagina(); ?>
 </body>
 </html>

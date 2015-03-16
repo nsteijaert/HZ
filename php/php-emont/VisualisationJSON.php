@@ -106,6 +106,7 @@ foreach ($post['groups'] as $index=>$inhoud)
 	$post['groups'][$index]['titel']=Uri::SMWuriNaarLeesbareTitel(implode("",array_slice($contextindex,$index,1)));
 }
 
+// Teken groepen met meer nodes eerst
 usort($post['groups'], 'subgroupsizecmp'); 
 
 function subgroupsizecmp($a,$b)
