@@ -19,34 +19,28 @@ $l2cases=JSON_EMontParser::geefL2cases();
 <body>
 <?php toonDexPrePagina(); ?>
 <h1>Modellen</h1>
-<h2 name="practices">Practices (L1)</h2>
-<p>Kies een practice om weer te geven.</p>
-<form method="post" action="visualisatie.php">
-	<select size="10" name="context">';
-	<?php
-	foreach ($l1modellen as $l1model)
-	{
-		echo '<option ';
-		if ($l1model->getUri()==$standaard_context_uri)
-			echo 'selected="selected" ';
-		echo 'value="'.$l1model->getUri().'">'.Uri::SMWuriNaarLeesbareTitel($l1model->getUri()).'</option>';
-	}
-	?>
-	</select><br />
-	<input type="submit" value="Deze practice opvragen" />
-</form>
-<h2 name="experiences">Experiences (L2, cases)</h2>
-<p>Kies een experience om weer te geven.</p>
-<form method="post" action="visualisatie.php">
-	<select size="10" name="context">
-	<?php
-	foreach($l2cases as $l2case)
-	{
-		echo '<option value="'.$l2case->getUri().'">'.Uri::SMWuriNaarLeesbareTitel($l2case->getUri()).'</option>';
-	}
-	?>
-	</select><br />
-	<input type="submit" value="Deze experience opvragen" />
+<h2 id="practices">Practices (L1)</h2>
+<p>Kies een practice om weer te geven:</p>
+<ul>
+<?php
+foreach ($l1modellen as $l1model)
+{
+	echo '<li><a href="visualisatie.php?context='.urlencode($l1model->getUri()).'">'.Uri::SMWuriNaarLeesbareTitel($l1model->getUri()).'</a></li>';
+}
+?>
+</ul>
+<h2 id="experiences">Experiences (L2, cases)</h2>
+<p>Kies een experience om weer te geven:</p>
+<ul>
+<?php
+foreach($l2cases as $l2case)
+{
+	echo '<li><a href="visualisatie.php?context='.urlencode($l2case->getUri()).'">'.Uri::SMWuriNaarLeesbareTitel($l2case->getUri()).'</a></li>';
+}
+?>
+</ul>
+<form>
+	<p>Nieuwe experience aanmaken:</p>
 </form>
 <?php toonDexPostPagina(); ?>
 </body>

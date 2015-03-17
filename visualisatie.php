@@ -100,7 +100,11 @@ require_once(__DIR__.'/php/dex.php');
 <?php
 $standaard_context_uri='emmwiki:Building_with_Nature-2Dinterventies_op_het_systeem';
 
-if(!empty($_POST))
+if(!empty($_GET['context']))
+{
+	$context_uri=urldecode($_GET['context']);
+}
+elseif(!empty($_POST))
 {
 	$context_uri=$_POST['context'];
 }
@@ -126,7 +130,7 @@ toonBroodkruimels($kruimels);
 
 $connectie=new SPARQLConnection();
 
-echo '<h1>Elementen uit de context: "'.Uri::SMWuriNaarLeesbareTitel($context_uri).'"</h1>';
+echo '<h1>'.Uri::SMWuriNaarLeesbareTitel($context_uri).'</h1>';
 
 $situatieparser=new JSON_EMontParser($context_uri);
 $parse=$situatieparser->geefElementenInSituatie();
