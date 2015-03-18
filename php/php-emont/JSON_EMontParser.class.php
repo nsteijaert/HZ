@@ -9,6 +9,7 @@ error_reporting(E_ALL & ~E_NOTICE);
 
 require_once(__DIR__.'/../SPARQLConnection.class.php');
 require_once(__DIR__.'/../Uri.class.php');
+require_once(__DIR__.'/Model.class.php');
 
 require_once(__DIR__.'/Context.class.php');
 require_once(__DIR__.'/IntentionalElement.class.php');
@@ -35,7 +36,7 @@ class JSON_EMontParser
 	{
 		$connectie=new SPARQLConnection();
 
-		$subrollen=self::zoekSubrollen($this->situatie_uri);
+		$subrollen=Model::zoekSubrollen($this->situatie_uri);
 
 		foreach(array_merge(array(Uri::escape_uri($this->situatie_uri)),$subrollen) as $te_doorzoeken_uri)
 		{
@@ -265,123 +266,6 @@ class JSON_EMontParser
 		return array_merge($items,$contexten);
 	}
 
-
-
-	/**
-	 * Staat hier omdat het op URL gaat.
-	 */
-	static function isSituatie($context_uri)
-	{
-		$context_uri=Uri::escape_uri($context_uri);
-		$query="DESCRIBE ?s ?o WHERE {
-			?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3ASelection_link> ".$context_uri."
-			.
-			?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3APractice_back_link> ?o
-			}";
-		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
-
-		if (empty($result['@graph'])) // Leeg resultaat
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
-
-	/**
-	 * @input De context-URI, zonder vishaken (< en >)
-	 */
-	static function zoekSubrollen($context_uri)
-	{
-		$subrollen=array();
-		$context_uri=Uri::escape_uri($context_uri);
-
-		$query='DESCRIBE ?context WHERE { ?context <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3ASupercontext> '.$context_uri.' }';
-		$connectie=new SPARQLConnection();
-		$contexten=$connectie->JSONQueryAsPHPArray($query);
-
-		if(isset($contexten['@graph']))
-		{
-			foreach($contexten['@graph'] as $item)
-			{
-				// Subsituaties moeten niet worden meegenomen.
-				if(!self::isSituatie($item['@id']))
-				{
-					$subrollen[]=$item['@id'];
-					$subrollen=array_merge($subrollen,self::zoekSubrollen($item['@id']));
-				}
-			}
-		}
-		return $subrollen;
-	}
-
-	/**
-	 * Geeft lijst van L1-modellen (situaties)
-	 * TODO: Op een geschiktere plek onderbrengen.
-	 */
-	static function geefL1modellen()
-	{
-		$query='DESCRIBE ?context WHERE {?context <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AContext>}';
-		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
-
-		if(isset($result['@graph']))
-		{
-			$contexten=array();
-
-			foreach($result['@graph'] as $item)
-			{
-				if(self::isPractice($item['@id']))
-				{
-					$context=new Context($item['@id']);
-					$context->setDescription(self::geefContextbeschrijving($item['@id']));
-					$contexten[$item['@id']]=$context;
-				}
-			}
-
-			return $contexten;
-		}
-		else
-		{
-			return NULL;
-		}
-	}
-
-	/**
-	 * Geeft lijst van L2-cases (situaties)
-	 * TODO: Op een geschiktere plek onderbrengen.
-	 */
-	static function geefL2cases()
-	{
-		$query='DESCRIBE ?context WHERE {?context <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AContext>}';
-		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
-
-		if(isset($result['@graph']))
-		{
-			$contexten=array();
-
-			foreach($result['@graph'] as $item)
-			{
-				if(self::isExperience($item['@id']))
-				{
-					$context=new Context($item['@id']);
-					$context->setDescription(self::geefContextbeschrijving($item['@id']));
-					$contexten[$item['@id']]=$context;
-				}
-			}
-
-			return $contexten;
-		}
-		else
-		{
-			return NULL;
-		}
-	}
-
 	static function geefContextbeschrijving($context_uri)
 	{
 		$connectie=new SPARQLConnection();
@@ -434,42 +318,6 @@ class JSON_EMontParser
 		}
 		catch(Exception $e) {}
 		return $object;
-	}
-
-	static function isPractice($context_uri)
-	{
-		$query='DESCRIBE ?practice WHERE {
-			?practice property:Context '.Uri::escape_uri($context_uri).'.
-			?practice property:Practice_type "Practice"}';
-		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
-
-		if (count($result)>1)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	static function isExperience($context_uri)
-	{
-		$query='DESCRIBE ?experience WHERE {
-			?experience property:Context '.Uri::escape_uri($context_uri).'.
-			?experience property:Practice_type "Experience"}';
-		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
-
-		if (count($result)>1)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
 	}
 }
 ?>

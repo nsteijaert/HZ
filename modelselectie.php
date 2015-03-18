@@ -1,8 +1,10 @@
 <?php
 require_once(__DIR__.'/php/dex.php');
 require_once(__DIR__.'/php/php-emont/JSON_EMontParser.class.php');
-$l1modellen=JSON_EMontParser::geefL1modellen();
-$l2cases=JSON_EMontParser::geefL2cases();
+require_once(__DIR__.'/php/php-emont/Model.class.php');
+
+$l1modellen=Model::geefL1modellen();
+$l2cases=Model::geefL2cases();
 ?>
 <!DOCTYPE html>
 <html>
