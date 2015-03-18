@@ -4,13 +4,32 @@
  * @author: Michael Steenbeek
  */
 require_once(__DIR__.'/php/php-emont/JSON_EMontParser.class.php');
+require_once(__DIR__.'/php/php-emont/Model.class.php');
 require_once(__DIR__.'/php/SPARQLConnection.class.php');
 require_once(__DIR__.'/php/dex.php');
+require_once(__DIR__.'/php/Uri.class.php');
+
+$standaard_context_uri='emmwiki:Building_with_Nature-2Dinterventies_op_het_systeem';
+
+if(!empty($_GET['context']))
+{
+	$context_uri=urldecode($_GET['context']);
+}
+elseif(!empty($_POST))
+{
+	$context_uri=$_POST['context'];
+}
+else
+{
+	$context_uri=$standaard_context_uri;
+}
+
+$domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Testpagina voor EMont-parser</title>
+	<title>Visualisatie: <?php echo Uri::SMWuriNaarLeesbareTitel($context_uri); ?></title>
 	<meta charset='utf-8'>
 	<!-- Stylesheets van DeltaExpertise-->
 	<!-- Aangepaste kopie van <link rel="stylesheet" href="http://195.93.238.49/wiki/deltaexpertise/wiki/load.php?debug=false&amp;lang=nl&amp;modules=mediawiki.legacy.commonPrint%2Cshared%7Cskins.deltaskin&amp;only=styles&amp;skin=deltaskin&amp;*" />
@@ -22,6 +41,11 @@ require_once(__DIR__.'/php/dex.php');
 		body, svg {
 			background-color:#eae4d7;
 		}
+		/* Beter dan onzichtbaar */
+		svg{
+			overflow:visible;
+		}
+
 		/* Standaard */
 		.node {
 		    fill: #eee;
@@ -32,15 +56,12 @@ require_once(__DIR__.'/php/dex.php');
 		    fill: #eae4d7;
 		    stroke:#bfac88;
 		}
-		
 		.nodeCondition {
 			fill: #4c97d6;
 		}
-		
 		.nodeBelief {
 			fill: #4c97d6;
 		}
-		
 		.nodeGoal {
 			fill: #ffffff;
 		}
@@ -48,7 +69,7 @@ require_once(__DIR__.'/php/dex.php');
 			fill: #ffffff;
 		    stroke:#bfac88;
 		}
-		
+
 		.link {
 		    stroke:#bfac88;
 		    stroke-width: 1px;
@@ -65,7 +86,7 @@ require_once(__DIR__.'/php/dex.php');
 		.linktooltip:hover {
 			stroke-opacity:0.3;
 		}
-		
+
 		.group {
 		  stroke: #bfac88;
 		  stroke-width: 1px;
@@ -73,7 +94,7 @@ require_once(__DIR__.'/php/dex.php');
 		  fill-opacity:0;
 		  stroke-opacity:1;
 		}
-		
+
 		.label {
 		  	font-size:17px; /* 17px is 13 pt.*/
 			font-family:Open Sans,Arial,Helvetica,sans-serif;
@@ -90,7 +111,7 @@ require_once(__DIR__.'/php/dex.php');
 		.labelOutcome {
 			fill:#4c97d6;
 		}
-		
+
 		marker#standaard {
 			fill:#bfac88;
 			stroke: #bfac88;
@@ -98,31 +119,16 @@ require_once(__DIR__.'/php/dex.php');
 	</style>
 </head>
 <?php
-$standaard_context_uri='emmwiki:Building_with_Nature-2Dinterventies_op_het_systeem';
-
-if(!empty($_GET['context']))
-{
-	$context_uri=urldecode($_GET['context']);
-}
-elseif(!empty($_POST))
-{
-	$context_uri=$_POST['context'];
-}
-else
-{
-	$context_uri=$standaard_context_uri;
-}
-
 toonDexPrePagina();
 
 $kruimels=array();
 $kruimels[]=array('url'=>'modelselectie.php','titel'=>'Modellen');
 
-if (JSON_EMontParser::isPractice($context_uri))
+if (Model::isPractice($context_uri))
 {
 	$kruimels[]=array('url'=>'modelselectie.php#practices','titel'=>'Practices');
 }
-elseif (JSON_EMontParser::isExperience($context_uri))
+elseif (Model::isExperience($context_uri))
 {
 	$kruimels[]=array('url'=>'modelselectie.php#experiences','titel'=>'Experiences');
 }
@@ -144,9 +150,15 @@ $parse=$situatieparser->geefElementenInSituatie();
 </pre>
 </div>
 
-<?php $svgheight=1280;$svgwidth=1600;$nodeheight=30;$nodewidth=100;?>
+<?php
+	$svgheight=1280;
+	$svgwidth=1600;
+	$nodeheight=30;
+	$nodewidth=100;
+?>
 
 <h2 id="visualisatiekop">Visualisatie</h2>
+<p>U kunt elementen verslepen om het overzicht te verbeteren. Dubbelklik op een element om de wikipagina ervan weer te geven.</p>
 <svg id="visualisatie" width="100%" height="<?php echo $svgheight;?>">
 	<defs>
 		<marker id="standaard" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="5" markerHeight="5" orient="auto">
@@ -155,15 +167,11 @@ $parse=$situatieparser->geefElementenInSituatie();
 	</defs>
 </svg>
 <script type="text/javascript">
-/*function prefixReplace(url) {
-}
 
-function OpenInNewTab(url) {
-	url = prefixReplace(url)
+function openInNewTab(url) {
 	var win = window.open(url, '_blank');
 	win.focus();
 }
-*/
 
 	var graph;
 	
@@ -172,7 +180,7 @@ function OpenInNewTab(url) {
 		type : "POST",
 		cache : false,
 		url : "php/php-emont/VisualisationJSON.php",
-		async : false,
+		async : true,
 		dataType: 'json',
 		data:{ context_uri: "<?php echo $context_uri;?>"},
 		success: function(result) {
@@ -189,7 +197,6 @@ function OpenInNewTab(url) {
 		var width = $("#visualisatie").width();
 	    	height = $("#visualisatie").height();
 
-		console.trace();	
 		var force = cola.d3adaptor()
 	    	.linkDistance(120)
 	    	.avoidOverlaps(true)
@@ -297,6 +304,7 @@ function OpenInNewTab(url) {
 	         .attr("class", function (d) {return "label label"+d.type})
 	         .text(function (d) { return d.name; })
 	         .attr("title", function (d) { return d.heading;})
+	         .on('dblclick', function (d) { openInNewTab('<?php echo $domeinprefix.' ';?>'+d.name);})
 		     .call(force.drag);
 
 	    node.append("title")
