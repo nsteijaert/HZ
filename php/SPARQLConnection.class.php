@@ -18,7 +18,7 @@ class SPARQLConnection
 		$this->default_prefixes[]='xsd: <http://www.w3.org/2001/XMLSchema#>';
 
 		$this->default_prefixes[]='property: <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3A>';
-		$this->default_prefixes[]='emmwiki: <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/>';
+		$this->default_prefixes[]='wiki: <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/>';
 	}
 
 	public function JSONQuery($query)
