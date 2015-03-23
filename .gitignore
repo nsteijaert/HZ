@@ -1,7 +1,14 @@
 
 *.prefs
-mediawiki
 diagram/~$$EMM-systeem.~vsd
 GitHub repository.rar
 pieter/Visualisatie.rar
 cyn
+
+!mediawiki/
+
+mediawiki/*
+!mediawiki/extensions/
+
+mediawiki/extensions/*
+!mediawiki/extensions/EMontVisualisator/
