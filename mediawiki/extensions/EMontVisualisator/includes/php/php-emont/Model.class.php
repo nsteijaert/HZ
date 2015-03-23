@@ -164,4 +164,12 @@ class Model
 			return true;
 		}
 	}
+	
+	static function nieuweL2case($naam, $situatie_uri)
+	{
+		if (!isSituatie($situatie_uri))
+			return FALSE;
+		
+		
+	}
 }

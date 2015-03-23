@@ -6,26 +6,36 @@
 require_once(__DIR__.'/php/php-emont/JSON_EMontParser.class.php');
 require_once(__DIR__.'/php/php-emont/Model.class.php');
 require_once(__DIR__.'/php/SPARQLConnection.class.php');
-require_once(__DIR__.'/php/dex.php');
+//require_once(__DIR__.'/php/dex.php');
 require_once(__DIR__.'/php/Uri.class.php');
 
 $standaard_context_uri='emmwiki:Building_with_Nature-2Dinterventies_op_het_systeem';
 
-if(!empty($_GET['context']))
+if($par)
 {
-	$context_uri=urldecode($_GET['context']);
+	$context_uri='wiki:'.$par;
+	$extension_mode=TRUE;
 }
-elseif(!empty($_POST))
-{
-	$context_uri=$_POST['context'];
-}
-else
-{
-	$context_uri=$standaard_context_uri;
+else {
+	if(!empty($_GET['context']))
+	{
+		$context_uri=urldecode($_GET['context']);
+	}
+	elseif(!empty($_POST))
+	{
+		$context_uri=$_POST['context'];
+	}
+	else
+	{
+		$context_uri=$standaard_context_uri;
+	}
 }
 
 $domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
-?>
+
+if (!$extension_mode)
+{
+	?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,11 +46,15 @@ $domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
 		Vervangen bij integreren in DeltaExpertise-->
 	<link rel="stylesheet" href="css/dex1.css"/>
 	<link rel="stylesheet" href="http://195.93.238.49/wiki/deltaexpertise/wiki/extensions/HeaderTabs/skins/ext.headertabs.large.css" />
+<?php } ?>
 	
 	<style>
+	<?php if (!extension_mode)
+	{ echo '
 		body, svg {
 			background-color:#eae4d7;
 		}
+		';}?>
 		/* Beter dan onzichtbaar */
 		svg{
 			overflow:visible;
@@ -117,9 +131,10 @@ $domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
 			stroke: #bfac88;
 		}
 	</style>
-</head>
-<?php
-toonDexPrePagina();
+<?php if(!$extension_mode) echo '</head>';
+
+echo '<script type="text/javascript" src="/mediawiki/extensions/EMontVisualisator/includes/js/d3.v3.js"></script>';
+echo '<script type="text/javascript" src="/mediawiki/extensions/EMontVisualisator/includes/js/cola.v3.min.js"></script>';
 
 $kruimels=array();
 $kruimels[]=array('url'=>'modelselectie.php','titel'=>'Modellen');
@@ -132,7 +147,7 @@ elseif (Model::isExperience($context_uri))
 {
 	$kruimels[]=array('url'=>'modelselectie.php#experiences','titel'=>'Experiences');
 }
-toonBroodkruimels($kruimels);
+//toonBroodkruimels($kruimels);
 
 $connectie=new SPARQLConnection();
 
@@ -146,7 +161,7 @@ $parse=$situatieparser->geefElementenInSituatie();
 <div id="dump" style="display:none;">
 <h2>Dump</h2>
 <pre>
-<?php var_dump($parse); ?>
+<?php //var_dump($parse); ?>
 </pre>
 </div>
 
@@ -179,7 +194,7 @@ function openInNewTab(url) {
 	$.ajax({
 		type : "POST",
 		cache : false,
-		url : "php/php-emont/VisualisationJSON.php",
+		url : "/mediawiki/extensions/EMontVisualisator/includes/php/php-emont/VisualisationJSON.php",
 		async : true,
 		dataType: 'json',
 		data:{ context_uri: "<?php echo $context_uri;?>"},
@@ -336,6 +351,11 @@ function openInNewTab(url) {
 		label.each(insertLinebreaks);
 	}
 </script>
-<?php toonDexPostPagina(); ?>
+<?php 
+if (!$extension_mode)
+{
+	toonDexPostPagina();
+}
+?>
 </body>
 </html>
