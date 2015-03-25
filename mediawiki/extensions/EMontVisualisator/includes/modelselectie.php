@@ -1,10 +1,20 @@
 <?php
-require_once(__DIR__.'/php/dex.php');
 require_once(__DIR__.'/php/php-emont/JSON_EMontParser.class.php');
 require_once(__DIR__.'/php/php-emont/Model.class.php');
 
 $l1modellen=Model::geefL1modellen();
 $l2cases=Model::geefL2cases();
+
+if($_POST['titel']!=null)
+{
+	$titleObj = Title::newFromText($_POST['titel']);
+	$articleObj = new Article($titleObj);
+
+	if($articleObj)
+	{
+		$articleObj->doEdit( 'Hello world!', 'Pagina aangemaakt via EMontVisualisator.');
+	}
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -19,8 +29,7 @@ $l2cases=Model::geefL2cases();
 
 </head>
 <body>
-<?php toonDexPrePagina(); ?>
-<h1>Modellen</h1>
+
 <h2 id="practices">Practices (L1)</h2>
 <p>Kies een practice om weer te geven:</p>
 <ul>
@@ -41,9 +50,10 @@ foreach($l2cases as $l2case)
 }
 ?>
 </ul>
-<form>
+<form method="post">
 	<p>Nieuwe experience aanmaken:</p>
+	<input type="text" name="titel" />
+	<input type="submit" value="Aanmaken" />
 </form>
-<?php toonDexPostPagina(); ?>
 </body>
 </html>

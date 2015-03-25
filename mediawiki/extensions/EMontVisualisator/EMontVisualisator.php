@@ -17,22 +17,22 @@ $wgExtensionCredits['validextensionclass'][] = array(
     'version'  => 1.0,
     'license-name' => "CC-BY-NC-SA",   // Short name of the license, links LICENSE or COPYING file if existing - string, added in 1.23.0
 );
+$wgResourceLoaderDebug = true;
 
-$wgHooks['BeforePageDisplay'][] = 'wgAddVisualisationScripts';
 
-function wgAddVisualisationScripts(&$parser, &$text) {
-
-  global $addVisualisationScripts;
-  //if ($addVisualisationScripts === true) return true;
-
-  $parser->addScript('<script type="text/javascript" src="/mediawiki/extensions/EMontVisualisator/includes/js/d3.v3.js"></script>');
-  $parser->addScript('<script type="text/javascript" src="/mediawiki/extensions/EMontVisualisator/includes/js/cola.v3.min.js"></script>');
-
-  $addVisualisationScripts = true;
-
-  return true;
-
-}
+$wgResourceModules['ext.EMontVisualisator'] = array(
+	// JavaScript and CSS styles. To combine multiple files, just list them as an array.
+	'scripts' => array( 'js/cola.v3.min.js', 'js/d3.v3.js' ),
+	'position' => 'top',
+	//'styles' => 'css/ext.myExtension.css',
+ 
+	// You need to declare the base path of the file paths in 'scripts' and 'styles'
+	'localBasePath' => __DIR__.'/includes',
+	// ... and the base from the browser as well. For extensions this is made easy,
+	// you can use the 'remoteExtPath' property to declare it relative to where the wiki
+	// has $wgExtensionAssetsPath configured:
+	'remoteExtPath' => 'EMontVisualisator'
+);
 
 $wgAutoloadClasses['SpecialEMontVisualisator'] = __DIR__ . '/SpecialEMontVisualisator.php'; # Location of the SpecialEMontVisualisator class (Tell MediaWiki to load this file)
 $wgSpecialPages['EMontVisualisator'] = 'SpecialEMontVisualisator'; # Tell MediaWiki about the new special page and its class name

@@ -6,55 +6,28 @@
 require_once(__DIR__.'/php/php-emont/JSON_EMontParser.class.php');
 require_once(__DIR__.'/php/php-emont/Model.class.php');
 require_once(__DIR__.'/php/SPARQLConnection.class.php');
-//require_once(__DIR__.'/php/dex.php');
 require_once(__DIR__.'/php/Uri.class.php');
 
-$standaard_context_uri='emmwiki:Building_with_Nature-2Dinterventies_op_het_systeem';
+$standaard_context_uri='wiki:Building_with_Nature-2Dinterventies_op_het_systeem';
 
-if($par)
-{
-	$context_uri='wiki:'.$par;
-	$extension_mode=TRUE;
+if($par) {
+	$context_uri='wiki:'.$pars[1];
+}
+elseif(!empty($_GET['context'])) {
+		$context_uri=urldecode($_GET['context']);
+}
+elseif(!empty($_POST['context'])) {
+		$context_uri=$_POST['context'];
 }
 else {
-	if(!empty($_GET['context']))
-	{
-		$context_uri=urldecode($_GET['context']);
-	}
-	elseif(!empty($_POST))
-	{
-		$context_uri=$_POST['context'];
-	}
-	else
-	{
-		$context_uri=$standaard_context_uri;
-	}
+	$context_uri=$standaard_context_uri;
 }
 
 $domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
 
-if (!$extension_mode)
-{
-	?>
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Visualisatie: <?php echo Uri::SMWuriNaarLeesbareTitel($context_uri); ?></title>
-	<meta charset='utf-8'>
-	<!-- Stylesheets van DeltaExpertise-->
-	<!-- Aangepaste kopie van <link rel="stylesheet" href="http://195.93.238.49/wiki/deltaexpertise/wiki/load.php?debug=false&amp;lang=nl&amp;modules=mediawiki.legacy.commonPrint%2Cshared%7Cskins.deltaskin&amp;only=styles&amp;skin=deltaskin&amp;*" />
-		Vervangen bij integreren in DeltaExpertise-->
-	<link rel="stylesheet" href="css/dex1.css"/>
-	<link rel="stylesheet" href="http://195.93.238.49/wiki/deltaexpertise/wiki/extensions/HeaderTabs/skins/ext.headertabs.large.css" />
-<?php } ?>
-	
+?>
+
 	<style>
-	<?php if (!extension_mode)
-	{ echo '
-		body, svg {
-			background-color:#eae4d7;
-		}
-		';}?>
 		/* Beter dan onzichtbaar */
 		svg{
 			overflow:visible;
@@ -131,45 +104,20 @@ if (!$extension_mode)
 			stroke: #bfac88;
 		}
 	</style>
-<?php if(!$extension_mode) echo '</head>';
-
+<?php
+//TODO NA: als ResourceLoader-modules toevoegen
 echo '<script type="text/javascript" src="/mediawiki/extensions/EMontVisualisator/includes/js/d3.v3.js"></script>';
 echo '<script type="text/javascript" src="/mediawiki/extensions/EMontVisualisator/includes/js/cola.v3.min.js"></script>';
 
-$kruimels=array();
-$kruimels[]=array('url'=>'modelselectie.php','titel'=>'Modellen');
-
-if (Model::isPractice($context_uri))
-{
-	$kruimels[]=array('url'=>'modelselectie.php#practices','titel'=>'Practices');
-}
-elseif (Model::isExperience($context_uri))
-{
-	$kruimels[]=array('url'=>'modelselectie.php#experiences','titel'=>'Experiences');
-}
-//toonBroodkruimels($kruimels);
-
 $connectie=new SPARQLConnection();
-
-echo '<h1>'.Uri::SMWuriNaarLeesbareTitel($context_uri).'</h1>';
 
 $situatieparser=new JSON_EMontParser($context_uri);
 $parse=$situatieparser->geefElementenInSituatie();
-?>
-<a href="#visualisatiekop">Spring naar de visualisatie</a><br />
-<button onclick="document.getElementById('dump').style.display='block'">Dump tonen</button>
-<div id="dump" style="display:none;">
-<h2>Dump</h2>
-<pre>
-<?php //var_dump($parse); ?>
-</pre>
-</div>
 
-<?php
-	$svgheight=1280;
-	$svgwidth=1600;
-	$nodeheight=30;
-	$nodewidth=100;
+$svgheight=1280;
+$svgwidth=1600;
+$nodeheight=30;
+$nodewidth=100;
 ?>
 
 <h2 id="visualisatiekop">Visualisatie</h2>
@@ -188,174 +136,169 @@ function openInNewTab(url) {
 	win.focus();
 }
 
-	var graph;
-	
-	// Haal de gegevens op
-	$.ajax({
-		type : "POST",
-		cache : false,
-		url : "/mediawiki/extensions/EMontVisualisator/includes/php/php-emont/VisualisationJSON.php",
-		async : true,
-		dataType: 'json',
-		data:{ context_uri: "<?php echo $context_uri;?>"},
-		success: function(result) {
-			graph=result;
-			tekenDiagram();
-		}
+var graph;
+
+// Haal de gegevens op
+$.ajax({
+	type : "POST",
+	cache : false,
+	url : "/mediawiki/extensions/EMontVisualisator/includes/php/php-emont/VisualisationJSON.php",
+	async : true,
+	dataType: 'json',
+	data:{ context_uri: "<?php echo $context_uri;?>"},
+	success: function(result) {
+		graph=result;
+		tekenDiagram();
+	}
+});
+
+function tekenDiagram()
+{
+	// Selecteer de visualisatie-container
+    var svg = d3.select('#visualisatie');
+
+	var width = $("#visualisatie").width();
+    	height = $("#visualisatie").height();
+
+	var force = cola.d3adaptor()
+    	.linkDistance(120)
+    	.avoidOverlaps(true)
+		.size([width, height])
+        .handleDisconnected(false)
+        .symmetricDiffLinkLengths(30)
+    	.nodes(graph.nodes)
+    	.links(graph.links)
+    	.constraints(graph.constraints)
+    	.groups(graph.groups);
+    var margin = 5, pad = 10;
+
+	// Teken de pijlen
+	force.on("tick", function () {
+		node.each(function (d) {
+                d.innerBounds = d.bounds.inflate(- margin);
+            });
+        link.each(function (d) {
+                cola.vpsc.makeEdgeBetween(d, d.source.innerBounds, d.target.innerBounds, 0);
+            });
+
+        link.attr("x1", function (d) { return d.sourceIntersection.x; })
+            .attr("y1", function (d) { return d.sourceIntersection.y; })
+            .attr("x2", function (d) { return d.arrowStart.x; })
+            .attr("y2", function (d) { return d.arrowStart.y; });
+
+        linktooltip.each(function (d) {
+                cola.vpsc.makeEdgeBetween(d, d.source.innerBounds, d.target.innerBounds, 0);
+            });
+
+        linktooltip.attr("x1", function (d) { return d.sourceIntersection.x; })
+            .attr("y1", function (d) { return d.sourceIntersection.y; })
+            .attr("x2", function (d) { return d.arrowStart.x; })
+            .attr("y2", function (d) { return d.arrowStart.y; });
+
+        label.each(function (d) {
+            var b = this.getBBox();
+            d.width = b.width + 2 * pad;
+            d.height = b.height + 2 * pad;
+        });
+
+        node.attr("x", function (d) { return d.innerBounds.x; })
+            .attr("y", function (d) { return d.innerBounds.y; })
+            .attr("width", function (d) { return d.innerBounds.width(); })
+            .attr("height", function (d) { return d.innerBounds.height(); });
+
+        group.attr("x", function (d) { return d.bounds.x+margin; })
+             .attr("y", function (d) { return d.bounds.y+margin; })
+            .attr("width", function (d) { return d.bounds.width()-pad;})
+            .attr("height", function (d) { return d.bounds.height()-pad;});
+
+        //groupTitles.attr("x",function(d,i) {return group(i).bounds.x+10;});
+
+        label.attr("transform", function (d) {
+            return "translate(" + (d.x - pad/2) + "," + (d.y + pad/1.5 - d.height/2) + ")";
+        });
 	});
 
-	function tekenDiagram()
-	{
-		// Selecteer de visualisatie-container
-	    var svg = d3.select('#visualisatie');
+	// De force layout zet alles automatisch op zijn plek
+	force.start(80,160,100000);
+	//force.start();
 
-		var width = $("#visualisatie").width();
-	    	height = $("#visualisatie").height();
+    var group = svg.selectAll(".group")
+        .data(graph.groups)
+       .enter().append("rect")
+        .attr("rx", 10).attr("ry", 10)
+        .attr("class", "group")
+        .attr('width',<?php echo $nodewidth;?>)
+	    .attr('height',<?php echo $nodeheight;?>);
 
-		var force = cola.d3adaptor()
-	    	.linkDistance(120)
-	    	.avoidOverlaps(true)
-			.size([width, height])
-	        .handleDisconnected(false)
-	        .symmetricDiffLinkLengths(30)
-	    	.nodes(graph.nodes)
-	    	.links(graph.links)
-	    	.constraints(graph.constraints)
-	    	.groups(graph.groups);
-	    var margin = 5, pad = 10;
+    /*var groupTitles = svg.selectAll(".groupTitles")
+    	 .data(graph.groups)
+        .enter().append("rect")
+ 	     .attr("class", "groupTitles")
+         .attr('width',100)
+         .attr('height',15)
+         .style("fill","#ff0000");*/
 
-		// Teken de pijlen
-		force.on("tick", function () {
-			node.each(function (d) {
-	                d.innerBounds = d.bounds.inflate(- margin);
-	            });
-	        link.each(function (d) {
-	                cola.vpsc.makeEdgeBetween(d, d.source.innerBounds, d.target.innerBounds, 0);
-	            });
+    var link = svg.selectAll(".link")
+        .data(graph.links)
+       .enter().append("line")
+        .attr("class", "link")
+        .attr("marker-end", "url(#standaard)");
 
-            link.attr("x1", function (d) { return d.sourceIntersection.x; })
-                .attr("y1", function (d) { return d.sourceIntersection.y; })
-                .attr("x2", function (d) { return d.arrowStart.x; })
-                .attr("y2", function (d) { return d.arrowStart.y; });
+    var linktooltip = svg.selectAll(".linktooltip")
+        .data(graph.links)
+       .enter().append("line")
+        .attr("class","linktooltip")
+        .attr("title", function (d) { var title=d.type; if(d.extraInfo!=null){title=title+d.extraInfo}if(d.note!=null){title=title+"\n"+d.note}return title;});
 
-	        linktooltip.each(function (d) {
-	                cola.vpsc.makeEdgeBetween(d, d.source.innerBounds, d.target.innerBounds, 0);
-	            });
+    var node = svg.selectAll(".node")
+         .data(graph.nodes)
+       .enter().append("rect")
+         .attr("class", function (d) {return "node node"+d.type})
+           .attr("rx", function (d) { if (d.type=="Condition" || d.type=="Goal" || d.type=="Belief") {return 40;}else{return 10;} })
+           .attr("ry", 10)
+           .attr('width',<?php echo $nodewidth;?>)
+	       .attr('height',<?php echo $nodeheight;?>)
+         .call(force.drag);
 
-            linktooltip.attr("x1", function (d) { return d.sourceIntersection.x; })
-                .attr("y1", function (d) { return d.sourceIntersection.y; })
-                .attr("x2", function (d) { return d.arrowStart.x; })
-                .attr("y2", function (d) { return d.arrowStart.y; });
+	// Titels
+    var label = svg.selectAll(".label")
+        .data(graph.nodes)
+        .enter().append("text")
+         .attr("class", function (d) {return "label label"+d.type})
+         .text(function (d) { return d.name; })
+         .attr("title", function (d) { return d.heading;})
+         .on('dblclick', function (d) { openInNewTab('<?php echo $domeinprefix.' ';?>'+d.name);})
+	     .call(force.drag);
 
-            label.each(function (d) {
-                var b = this.getBBox();
-                d.width = b.width + 2 * pad;
-                d.height = b.height + 2 * pad;
-            });
+    node.append("title")
+        .text(function (d) { return d.heading; });
 
-            node.attr("x", function (d) { return d.innerBounds.x; })
-                .attr("y", function (d) { return d.innerBounds.y; })
-                .attr("width", function (d) { return d.innerBounds.width(); })
-                .attr("height", function (d) { return d.innerBounds.height(); });
+    var insertLinebreaks = function (d) {
+        var el = d3.select(this);
+        var words = d.name.split(' ');
+        el.text('');
 
-            group.attr("x", function (d) { return d.bounds.x+margin; })
-                 .attr("y", function (d) { return d.bounds.y+margin; })
-                .attr("width", function (d) { return d.bounds.width()-pad;})
-                .attr("height", function (d) { return d.bounds.height()-pad;});
+		var rows=[''];
+		var row_number = 0;
+        for (var i = 0; i < words.length; i++) {
+        	if (rows[row_number].length>20)
+        	{
+        		rows.push('');
+        		row_number++;
+        	}
+        	rows[row_number]=rows[row_number]+' '+words[i];
+		}
 
-            //groupTitles.attr("x",function(d,i) {return group(i).bounds.x+10;});
-
-            label.attr("transform", function (d) {
-                return "translate(" + (d.x - pad/2) + "," + (d.y + pad/1.5 - d.height/2) + ")";
-            });
-		});
-
-		// De force layout zet alles automatisch op zijn plek
-		force.start(80,160,100000);
-		//force.start();
-
-	    var group = svg.selectAll(".group")
-	        .data(graph.groups)
-	       .enter().append("rect")
-	        .attr("rx", 10).attr("ry", 10)
-	        .attr("class", "group")
-	        .attr('width',<?php echo $nodewidth;?>)
-		    .attr('height',<?php echo $nodeheight;?>);
-
-	    /*var groupTitles = svg.selectAll(".groupTitles")
-	    	 .data(graph.groups)
-	        .enter().append("rect")
-     	     .attr("class", "groupTitles")
-	         .attr('width',100)
-	         .attr('height',15)
-	         .style("fill","#ff0000");*/
-
-	    var link = svg.selectAll(".link")
-	        .data(graph.links)
-	       .enter().append("line")
-	        .attr("class", "link")
-	        .attr("marker-end", "url(#standaard)");
-
-	    var linktooltip = svg.selectAll(".linktooltip")
-	        .data(graph.links)
-	       .enter().append("line")
-	        .attr("class","linktooltip")
-   	        .attr("title", function (d) { var title=d.type; if(d.extraInfo!=null){title=title+d.extraInfo}if(d.note!=null){title=title+"\n"+d.note}return title;});
-
-	    var node = svg.selectAll(".node")
-	         .data(graph.nodes)
-	       .enter().append("rect")
-	         .attr("class", function (d) {return "node node"+d.type})
-	           .attr("rx", function (d) { if (d.type=="Condition" || d.type=="Goal" || d.type=="Belief") {return 40;}else{return 10;} })
-	           .attr("ry", 10)
-	           .attr('width',<?php echo $nodewidth;?>)
-		       .attr('height',<?php echo $nodeheight;?>)
-	         .call(force.drag);
-
-		// Titels
-	    var label = svg.selectAll(".label")
-	        .data(graph.nodes)
-	        .enter().append("text")
-	         .attr("class", function (d) {return "label label"+d.type})
-	         .text(function (d) { return d.name; })
-	         .attr("title", function (d) { return d.heading;})
-	         .on('dblclick', function (d) { openInNewTab('<?php echo $domeinprefix.' ';?>'+d.name);})
-		     .call(force.drag);
-
-	    node.append("title")
-	        .text(function (d) { return d.heading; });
-
-	    var insertLinebreaks = function (d) {
-	        var el = d3.select(this);
-	        var words = d.name.split(' ');
-	        el.text('');
-
-			var rows=[''];
-			var row_number = 0;
-	        for (var i = 0; i < words.length; i++) {
-	        	if (rows[row_number].length>20)
-	        	{
-	        		rows.push('');
-	        		row_number++;
-	        	}
-	        	rows[row_number]=rows[row_number]+' '+words[i];
-			}
-
-			for (var i = 0; i < rows.length; i++) {      	 
-	            var tspan = el.append('tspan').text(rows[i]);
-	            tspan.attr('x', margin).attr('dy', 15)
-	                 .attr("font-size", "12")
-	                 .attr("style","fill:inherit;");
-	        }
-	    };
-		label.each(insertLinebreaks);
-	}
-</script>
-<?php 
-if (!$extension_mode)
-{
-	toonDexPostPagina();
+		for (var i = 0; i < rows.length; i++) {      	 
+            var tspan = el.append('tspan').text(rows[i]);
+            tspan.attr('x', margin).attr('dy', 15)
+                 .attr("font-size", "12")
+                 .attr("style","fill:inherit;");
+        }
+    };
+	label.each(insertLinebreaks);
 }
-?>
-</body>
-</html>
+</script>
+<!--
+<?php //var_dump($parse); ?>
+-->
