@@ -129,5 +129,21 @@ class Uri
 		// Geef het resultaat terug als associatieve array
 		return json_decode($result,TRUE);
 	}
+
+	public static function stripSMWuriPadEnPrefixes($uri)
+	{
+		$name_array=preg_split("/URIResolver\//", $uri);
+		if($name_array[1])
+		{
+			return $name_array[1];
+		}
+		else
+		{
+			//Verwijder de prefix: het gedeelte tot en met de eerste(!) dubbele punt.
+			$name_array=array_slice(explode(':',$uri),1);
+			return implode(':',$name_array);
+		}
+	}
+
 }
 ?>

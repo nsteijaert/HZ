@@ -31,22 +31,20 @@ if($_POST['titel']!=null)
 <body>
 
 <h2 id="practices">Practices (L1)</h2>
-<p>Kies een practice om weer te geven:</p>
 <ul>
 <?php
 foreach ($l1modellen as $l1model)
 {
-	echo '<li><a href="visualisatie.php?context='.urlencode($l1model->getUri()).'">'.Uri::SMWuriNaarLeesbareTitel($l1model->getUri()).'</a></li>';
+	echo '<li><a href="Speciaal%3AEMontVisualisator/toon/'.Uri::stripSMWuriPadEnPrefixes($l1model->getUri()).'">'.Uri::SMWuriNaarLeesbareTitel($l1model->getUri()).'</a></li>';
 }
 ?>
 </ul>
 <h2 id="experiences">Experiences (L2, cases)</h2>
-<p>Kies een experience om weer te geven:</p>
 <ul>
 <?php
 foreach($l2cases as $l2case)
 {
-	echo '<li><a href="visualisatie.php?context='.urlencode($l2case->getUri()).'">'.Uri::SMWuriNaarLeesbareTitel($l2case->getUri()).'</a></li>';
+	echo '<li><a href="Speciaal%3AEMontVisualisator/toon/'.Uri::stripSMWuriPadEnPrefixes($l2case->getUri()).'">'.Uri::SMWuriNaarLeesbareTitel($l2case->getUri()).'</a></li>';
 }
 ?>
 </ul>
