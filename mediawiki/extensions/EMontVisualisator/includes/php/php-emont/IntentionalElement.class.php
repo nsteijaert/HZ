@@ -9,7 +9,7 @@ class IntentionalElement implements PHPEMontVisitee
 
 	private $heading;
 	// An enum
-	private $decompositionType;
+	private $decompositionType='';
 
 	// A Context object
 	private $context;

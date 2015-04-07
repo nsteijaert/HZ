@@ -8,23 +8,27 @@ require_once(__DIR__.'/php/php-emont/Model.class.php');
 require_once(__DIR__.'/php/SPARQLConnection.class.php');
 require_once(__DIR__.'/php/Uri.class.php');
 
-$standaard_context_uri='wiki:Building_with_Nature-2Dinterventies_op_het_systeem';
+$standaard_model_uri='wiki:Building_with_Nature-2Dinterventies_op_het_systeem_practice';
 
 if($par) {
-	$context_uri='wiki:'.$pars[1];
+	$model_uri='wiki:'.$pars[1];
 }
-elseif(!empty($_GET['context'])) {
-		$context_uri=urldecode($_GET['context']);
+elseif(!empty($_GET['model'])) {
+	$model_uri=urldecode($_GET['model']);
 }
-elseif(!empty($_POST['context'])) {
-		$context_uri=$_POST['context'];
+elseif(!empty($_POST['model'])) {
+	$model_uri=$_POST['model'];
 }
 else {
-	$context_uri=$standaard_context_uri;
+	$model_uri=$standaard_model_uri;
+}
+
+if($_POST['titel'])
+{
+	var_dump(Uri::geefIEtype('wiki:'.$_POST['ie']));
 }
 
 $domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
-
 ?>
 
 	<style>
@@ -108,6 +112,8 @@ $domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
 //TODO NA: als ResourceLoader-modules toevoegen
 echo '<script type="text/javascript" src="/mediawiki/extensions/EMontVisualisator/includes/js/d3.v3.js"></script>';
 echo '<script type="text/javascript" src="/mediawiki/extensions/EMontVisualisator/includes/js/cola.v3.min.js"></script>';
+
+$context_uri=Model::geefContextVanModel($model_uri);
 
 $connectie=new SPARQLConnection();
 
@@ -299,6 +305,29 @@ function tekenDiagram()
 	label.each(insertLinebreaks);
 }
 </script>
-<!--
-<?php //var_dump($parse); ?>
--->
+<?php
+if(Model::modelIsExperience($model_uri))
+{
+	$l1model=Model::geefL1modelVanCase($model_uri);
+	$l1hoofdcontext=Model::geefContextVanModel($l1model);
+	$subrollen=Model::zoekSubrollen($l1hoofdcontext);
+	
+	foreach(array_merge(array($l1hoofdcontext),$subrollen) as $te_doorzoeken_uri)
+	{
+		$alle_te_doorzoeken_uris[]=Uri::escape_uri($te_doorzoeken_uri);
+	}
+	
+	$zoekstring=implode(' } UNION { ?ie property:Context ',$alle_te_doorzoeken_uris);
+	
+	$query_inhoud_situatie='DESCRIBE ?ie WHERE {{ ?ie property:Context '.$zoekstring.' }.{?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AIntentional_Element>} UNION {?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AActivity>}}';
+	
+	$data=$connectie->JSONQueryAsPHPArray($query_inhoud_situatie);
+	echo '<form method="post">Beschikbare IE\'s (afkomstig van L1-model "'.Uri::SMWuriNaarLeesbareTitel($l1model).'"):<br /><select name="ie">';
+	
+	foreach($data['@graph'] as $item)
+	{
+		echo '<option value="'.Uri::stripSMWuriPadEnPrefixes($item['@id']).'">'.$item['label'].'</option>';
+	}
+	
+	echo '</select><input type="text" name="titel"/><input type="submit" value="Aanmaken"/></form>';
+}

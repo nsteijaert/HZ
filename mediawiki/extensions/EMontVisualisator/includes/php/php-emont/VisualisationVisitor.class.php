@@ -41,7 +41,7 @@ class VisualisationVisitor implements PHPEMontVisitor
 			}
 			foreach($visitee->getDepends() as $link)
 			{
-				$links[]=array('source'=>$uri,'type'=>'depends','target'=>$link->getLink()->getUri(),'note'=>$link->getLinkNote());
+				$links[]=array('source'=>$uri,'type'=>'depends','target'=>$link->getLink()->getUri(),'note'=>$link->getLinkNote(),'extraInfo'=>'');
 			}
 			foreach($visitee->getContext() as $link)
 			{

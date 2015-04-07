@@ -145,5 +145,14 @@ class Uri
 		}
 	}
 
+	public static function geefIEtype($ie_uri)
+	{
+		$query='SELECT ?type WHERE {
+			'.Uri::escape_uri($ie_uri).' property:Intentional_Element_type ?type}';
+		$connectie=new SPARQLConnection();
+		$result=$connectie->JSONQueryAsPHPArray($query);
+		
+		return $result['results']['bindings'][0]['type']['value'];
+	}
 }
 ?>

@@ -31,7 +31,7 @@ $wgResourceModules['ext.EMontVisualisator'] = array(
 	// ... and the base from the browser as well. For extensions this is made easy,
 	// you can use the 'remoteExtPath' property to declare it relative to where the wiki
 	// has $wgExtensionAssetsPath configured:
-	'remoteExtPath' => 'EMontVisualisator'
+	'remoteExtPath' => 'EMontVisualisator'.'/includes'
 );
 
 $wgAutoloadClasses['SpecialEMontVisualisator'] = __DIR__ . '/SpecialEMontVisualisator.php'; # Location of the SpecialEMontVisualisator class (Tell MediaWiki to load this file)

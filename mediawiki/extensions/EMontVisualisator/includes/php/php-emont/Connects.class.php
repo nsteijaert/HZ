@@ -6,10 +6,10 @@ class Connects
 	//An Activity
 	private $link;
 	//An enum
-	private $connectionType;
+	private $connectionType='';
 	//Strings
-	private $linkCondition;
-	private $linkNote;
+	private $linkCondition='';
+	private $linkNote='';
 	
 	public function __construct()
 	{

@@ -38,7 +38,7 @@ class JSON_EMontParser
 
 		$subrollen=Model::zoekSubrollen($this->situatie_uri);
 
-		foreach(array_merge(array(Uri::escape_uri($this->situatie_uri)),$subrollen) as $te_doorzoeken_uri)
+		foreach(array_merge(array($this->situatie_uri),$subrollen) as $te_doorzoeken_uri)
 		{
 			$alle_te_doorzoeken_uris[]=Uri::escape_uri($te_doorzoeken_uri);
 		}

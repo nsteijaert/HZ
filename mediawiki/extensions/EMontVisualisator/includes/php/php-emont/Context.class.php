@@ -9,7 +9,7 @@ require_once(__DIR__.'/PHPEMontVisitee.interface.php');
 class Context
 {
 	private $uri;
-	private $description;
+	private $description='';
 
 	// An SplObjectStorage of Context objects
 	private $supercontext;

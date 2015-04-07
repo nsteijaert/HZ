@@ -6,7 +6,7 @@ class Depends
 	//An IntentionalElement
 	private $link;
 	//A string
-	private $note;
+	private $note='';
 	
 	public function __construct()
 	{

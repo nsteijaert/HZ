@@ -38,11 +38,11 @@ class Model
 	}
 
 	/**
-	 * Geeft lijst van L1-modellen (situaties), in de vorm van context-uri's
+	 * Geeft lijst van L1-modellen (situaties)
 	 */
 	static function geefL1modellen()
 	{
-		$query='DESCRIBE ?context WHERE {?context <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AContext>}';
+		$query='DESCRIBE ?practice WHERE {?practice property:Practice_type "Practice"}';
 		$connectie=new SPARQLConnection();
 		$result=$connectie->JSONQueryAsPHPArray($query);
 
@@ -52,12 +52,7 @@ class Model
 
 			foreach($result['@graph'] as $item)
 			{
-				if(self::isPractice($item['@id']))
-				{
-					$context=new Context($item['@id']);
-					$context->setDescription(JSON_EMontParser::geefContextbeschrijving($item['@id']));
-					$contexten[$item['@id']]=$context;
-				}
+					$contexten[$item['@id']]=strtr(Uri::SMWuriNaarLeesbareTitel($item['@id']),array(' practice'=>''));
 			}
 
 			return $contexten;
@@ -73,7 +68,7 @@ class Model
 	 */
 	static function geefL2cases()
 	{
-		$query='DESCRIBE ?context WHERE {?context <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AContext>}';
+		$query='DESCRIBE ?experience WHERE {?experience property:Practice_type "Experience"}';
 		$connectie=new SPARQLConnection();
 		$result=$connectie->JSONQueryAsPHPArray($query);
 
@@ -83,12 +78,7 @@ class Model
 
 			foreach($result['@graph'] as $item)
 			{
-				if(self::isExperience($item['@id']))
-				{
-					$context=new Context($item['@id']);
-					$context->setDescription(JSON_EMontParser::geefContextbeschrijving($item['@id']));
-					$contexten[$item['@id']]=$context;
-				}
+					$contexten[$item['@id']]=strtr(Uri::SMWuriNaarLeesbareTitel($item['@id']),array(' experience'=>''));
 			}
 
 			return $contexten;
@@ -142,6 +132,75 @@ class Model
 	}
 
 	/**
+	 * Bepaalt of een model een practice (L1-model) is.
+	 */
+	static function modelIsPractice($model_uri)
+	{		
+		$query='DESCRIBE ?practice WHERE {
+			?practice property:Practice_type "Practice" .
+			FILTER (?practice = '.Uri::escape_uri($model_uri).')}';
+
+		$connectie=new SPARQLConnection();
+		$result=$connectie->JSONQueryAsPHPArray($query);
+
+		if (count($result)>1)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * Bepaalt of een model een experience (L2-case) is.
+	 */
+	static function modelIsExperience($model_uri)
+	{
+		$query='DESCRIBE ?practice WHERE {
+			?practice property:Practice_type "Experience" .
+			FILTER (?practice = '.Uri::escape_uri($model_uri).')}';
+
+		$connectie=new SPARQLConnection();
+		$result=$connectie->JSONQueryAsPHPArray($query);
+
+		if (count($result)>1)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	static function geefContextVanModel($model_uri)
+	{
+		$query='SELECT ?context WHERE {
+			'.Uri::escape_uri($model_uri).' property:Context ?context}';
+		$connectie=new SPARQLConnection();
+		$result=$connectie->JSONQueryAsPHPArray($query);
+		
+		return strtr($result['results']['bindings'][0]['context']['value'],array('http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'=>'wiki:'));
+	}
+	
+	static function geefL1modelVanCase($l2_uri)
+	{
+		if (!self::modelIsExperience($l2_uri))
+		{
+			return null;
+		}
+		
+		$query='SELECT ?model WHERE {
+			'.Uri::escape_uri($l2_uri).' property:Part_of ?model}';
+		$connectie=new SPARQLConnection();
+		$result=$connectie->JSONQueryAsPHPArray($query);
+		
+		return strtr($result['results']['bindings'][0]['model']['value'],array('http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'=>'wiki:'));
+	}
+
+	/**
 	 *  Bepaalt of een bepaalde uri een situatie is (en bijvoorbeeld geen rol).
 	 */
 	static function isSituatie($context_uri)
@@ -165,11 +224,9 @@ class Model
 		}
 	}
 	
-	static function nieuweL2case($naam, $situatie_uri)
+	static function nieuweL2case($naam, $l1model)
 	{
 		if (!isSituatie($situatie_uri))
-			return FALSE;
-		
-		
+			return FALSE;		
 	}
 }

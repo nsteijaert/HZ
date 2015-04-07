@@ -6,9 +6,9 @@ class Contributes
 	//An IntentionalElement
 	private $link;
 	//An enum
-	private $contributionValue;
+	private $contributionValue='';
 	//A string
-	private $linkNote;
+	private $linkNote='';
 	
 	public function __construct()
 	{

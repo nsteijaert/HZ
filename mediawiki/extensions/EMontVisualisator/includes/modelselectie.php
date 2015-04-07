@@ -1,18 +1,53 @@
 <?php
 require_once(__DIR__.'/php/php-emont/JSON_EMontParser.class.php');
 require_once(__DIR__.'/php/php-emont/Model.class.php');
+require_once(__DIR__.'/php/Uri.class.php');
+
+// Notices worden voornamelijk bij niet-gedefinieerde eigenschappen gegeven. In productie uitzetten.
+error_reporting(E_ALL & ~E_NOTICE);
+
 
 $l1modellen=Model::geefL1modellen();
 $l2cases=Model::geefL2cases();
 
 if($_POST['titel']!=null)
 {
-	$titleObj = Title::newFromText($_POST['titel']);
-	$articleObj = new Article($titleObj);
+	$l1model=Uri::decodeerSMWnaam($_POST['l1model']);
+	$titel=$_POST['titel'];
+	
+	$contextTitle = Title::newFromText($titel);
+	$contextArticle = new Article($contextTitle);
 
-	if($articleObj)
+	if($contextArticle)
 	{
-		$articleObj->doEdit( 'Hello world!', 'Pagina aangemaakt via EMontVisualisator.');
+		$contextArticleContents='{{Context}}
+{{Heading
+|Heading nl='.$titel.'
+}}
+{{Context query}}';
+		$contextArticle->doEdit($contextArticleContents, 'Pagina aangemaakt via EMontVisualisator.');
+	}
+	
+	$experienceTitle = Title::newFromText($titel.' experience');
+	$experienceArticle = new Article($experienceTitle);
+
+	if($experienceArticle)
+	{
+		$experienceArticleContents='{{Practice
+|Context='.$titel.'
+|Practice type=Experience
+}}
+{{Paragraphs show}}
+{{Heading
+|Heading nl='.$titel.' experience
+}}
+
+{{Practice links
+|Part of='.$l1model.'
+}}
+{{Practice query}}';
+		
+		$experienceArticle->doEdit($experienceArticleContents, 'Pagina aangemaakt via EMontVisualisator.');
 	}
 }
 ?>
@@ -33,25 +68,36 @@ if($_POST['titel']!=null)
 <h2 id="practices">Practices (L1)</h2>
 <ul>
 <?php
-foreach ($l1modellen as $l1model)
+foreach ($l1modellen as $l1uri => $l1beschrijving)
 {
-	echo '<li><a href="Speciaal%3AEMontVisualisator/toon/'.Uri::stripSMWuriPadEnPrefixes($l1model->getUri()).'">'.Uri::SMWuriNaarLeesbareTitel($l1model->getUri()).'</a></li>';
+	echo '<li><a href="Speciaal%3AEMontVisualisator/toon/'.Uri::stripSMWuriPadEnPrefixes($l1uri).'">'.$l1beschrijving.'</a></li>';
 }
 ?>
 </ul>
 <h2 id="experiences">Experiences (L2, cases)</h2>
 <ul>
 <?php
-foreach($l2cases as $l2case)
+foreach($l2cases as $l2uri => $l2beschrijving)
 {
-	echo '<li><a href="Speciaal%3AEMontVisualisator/toon/'.Uri::stripSMWuriPadEnPrefixes($l2case->getUri()).'">'.Uri::SMWuriNaarLeesbareTitel($l2case->getUri()).'</a></li>';
+	echo '<li><a href="Speciaal%3AEMontVisualisator/toon/'.Uri::stripSMWuriPadEnPrefixes($l2uri).'">'.$l2beschrijving.'</a></li>';
 }
 ?>
 </ul>
+<h2>Nieuwe experience aanmaken</h2>
 <form method="post">
-	<p>Nieuwe experience aanmaken:</p>
-	<input type="text" name="titel" />
-	<input type="submit" value="Aanmaken" />
+	<table>
+		<tr><td style="width: 150px;">Gebaseerd op:</td><td> 
+	<select style="width:350px;" name="l1model">
+	<?php
+	foreach ($l1modellen as $l1uri => $l1beschrijving)
+	{
+		echo '<option value="'.Uri::stripSMWuriPadEnPrefixes($l1uri).'">'.$l1beschrijving.'</option>';
+	}
+	?>
+	</select></td></tr>
+	<tr><td>Naam:</td><td><input style="width:342px;" type="text" name="titel" /></td></tr>
+	<tr><td colspan="100%"><input type="submit" value="Aanmaken" /></td></tr>
+	</table>
 </form>
 </body>
 </html>
