@@ -23,10 +23,61 @@ else {
 	$model_uri=$standaard_model_uri;
 }
 
+$context_uri=Model::geefContextVanModel($model_uri);
+
+function geefIEdecompositionType($ie_uri)
+{
+	$query='SELECT ?dectype WHERE {
+		'.Uri::escape_uri($ie_uri).' property:Intentional_Element_decomposition_type ?dectype}';
+	$connectie=new SPARQLConnection();
+	$result=$connectie->JSONQueryAsPHPArray($query);
+	
+	return $result['results']['bindings'][0]['dectype']['value'];
+}
+
 if($_POST['titel'])
 {
-	var_dump(Uri::geefIEtype('wiki:'.$_POST['ie']));
+	if(Uri::geefIEtype('wiki:'.$_POST['ie'])=='Activity')
+	{	
+		$nieuw_ie='{{Activity
+|Context='.Uri::SMWuriNaarLeesbareTitel($context_uri).',
+|Intentional Element decomposition type='.geefIEdecompositionType('wiki:'.$_POST['ie']).'
+}}
+{{Heading
+|Heading nl='.$_POST['titel'].'
+}}
+{{VN query}}
+{{Activity links
+|Instance of='.Uri::SMWuriNaarLeesbareTitel('wiki:'.$_POST['ie']).',
+}}
+{{Intentional Element query}}';
+	}
+	else
+	{
+		$nieuw_ie='{{Intentional Element
+|Context='.Uri::SMWuriNaarLeesbareTitel($context_uri).',
+|Intentional Element type='.Uri::geefIEtype('wiki:'.$_POST['ie']).'
+|Intentional Element decomposition type='.geefIEdecompositionType('wiki:'.$_POST['ie']).'
+}}
+{{Heading
+|Heading nl='.$_POST['titel'].'
+}}
+{{VN query}}
+{{Intentional Element links
+|Instance of='.Uri::SMWuriNaarLeesbareTitel('wiki:'.$_POST['ie']).',
+}}
+{{Intentional Element query}}';
+	}
+	echo $nieuw_ie;
+	
+	$titel=$_POST['titel'];
+
+	$ieTitle = Title::newFromText($titel);
+	$ieArticle = new Article($ieTitle);
+
+	$ieArticle->doEdit($nieuw_ie, 'Pagina aangemaakt via EMontVisualisator.');
 }
+	
 
 $domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
 ?>
@@ -112,8 +163,6 @@ $domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
 //TODO NA: als ResourceLoader-modules toevoegen
 echo '<script type="text/javascript" src="/mediawiki/extensions/EMontVisualisator/includes/js/d3.v3.js"></script>';
 echo '<script type="text/javascript" src="/mediawiki/extensions/EMontVisualisator/includes/js/cola.v3.min.js"></script>';
-
-$context_uri=Model::geefContextVanModel($model_uri);
 
 $connectie=new SPARQLConnection();
 
@@ -225,8 +274,12 @@ function tekenDiagram()
 	});
 
 	// De force layout zet alles automatisch op zijn plek
-	force.start(80,160,100000);
-	//force.start();
+	
+	// Deze manier van aanroepen zorgt voor een oneindige lus bij 1 of 2 IE's, vandaar deze if-constructie.
+	if(graph.nodes.length>2)
+		force.start(80,160,100000);
+	else
+		force.start();
 
     var group = svg.selectAll(".group")
         .data(graph.groups)

@@ -50,6 +50,7 @@ foreach($result as $uri =>$object)
 $post['nodes']=$nodes;
 
 $post['links']=array();
+$post['constraints']=array();
 foreach($links as $link)
 {
 	$post['links'][]=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']],'type'=>$link['type'],'extraInfo'=>$link['extraInfo'],'note'=>$link['note']);
@@ -107,7 +108,8 @@ foreach ($post['groups'] as $index=>$inhoud)
 }
 
 // Teken groepen met meer nodes eerst
-usort($post['groups'], 'subgroupsizecmp'); 
+// Uitgecomment omdat de subgroepid's niet worden meeveranderd
+//usort($post['groups'], 'subgroupsizecmp'); 
 
 function subgroupsizecmp($a,$b)
 {

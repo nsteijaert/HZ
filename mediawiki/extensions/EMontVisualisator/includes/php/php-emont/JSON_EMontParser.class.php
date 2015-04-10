@@ -46,8 +46,13 @@ class JSON_EMontParser
 		$zoekstring=implode(' } UNION { ?ie property:Context ',$alle_te_doorzoeken_uris);
 
 		$query_inhoud_situatie='DESCRIBE ?ie WHERE {{ ?ie property:Context '.$zoekstring.' }.{?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AIntentional_Element>} UNION {?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AActivity>}}';
-
 		$data=$connectie->JSONQueryAsPHPArray($query_inhoud_situatie);
+
+		// Eén resultaat wordt anders teruggeven dan meerdere. Dat wordt hiermee afgevangen.
+		if($data && !$data['@graph'])
+		{
+			$data['@graph'][0]=$data;
+		}
 
 		$items = array();
 		$produces=array();
