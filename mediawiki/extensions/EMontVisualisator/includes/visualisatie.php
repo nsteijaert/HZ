@@ -27,12 +27,7 @@ $context_uri=Model::geefContextVanModel($model_uri);
 
 function geefIEdecompositionType($ie_uri)
 {
-	$query='SELECT ?dectype WHERE {
-		'.Uri::escape_uri($ie_uri).' property:Intentional_Element_decomposition_type ?dectype}';
-	$connectie=new SPARQLConnection();
-	$result=$connectie->JSONQueryAsPHPArray($query);
-	
-	return $result['results']['bindings'][0]['dectype']['value'];
+	return SPARQLConnection::geefEersteResultaat($ie_uri,'property:Intentional_Element_decomposition_type');
 }
 
 if($_POST['titel'])
@@ -77,7 +72,45 @@ if($_POST['titel'])
 
 	$ieArticle->doEdit($nieuw_ie, 'Pagina aangemaakt via EMontVisualisator.');
 }
-	
+
+if($_POST['van'])
+{
+	$van=Uri::SMWuriNaarLeesbareTitel('wiki:'.$_POST['van']);
+	$naar=Uri::SMWuriNaarLeesbareTitel('wiki:'.$_POST['naar']);
+	$titel=$_POST['titel'];
+	$type=$_POST['type'];
+	$subtype=$_POST['subtype'];
+
+	$titel_te_bewerken_artikel=Title::newFromText($van);
+	$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
+	$inhoud=$te_bewerken_artikel->getText();
+
+	// {{Intentional Element query}}, indien aanwezig, moet achteraan blijven.
+	$achtervoegsel='';
+	if(strpos($inhoud,'{{Intentional Element query}}')!==FALSE)
+	{
+		$inhoud=strtr($inhoud,array('{{Intentional Element query}}'=>''));
+		$achtervoegsel='{{Intentional Element query}}';
+	}
+
+	$verband_tekst='{{'.$type.'
+|Element link='.$naar.'
+|Element link note=
+';
+	if($type=='Contributes')
+	{
+		$verband_tekst.='|Element contribution value='.$subtype.'
+';
+	}
+
+	$verband_tekst.='}}
+';
+
+	$nieuwe_inhoud=$inhoud.$verband_tekst.$achtervoegsel;
+	//var_dump($te_bewerken_artikel);
+	var_dump($nieuwe_inhoud);
+	$te_bewerken_artikel->doEdit($nieuwe_inhoud,'Verband toegevoegd via EMontVisualisator',EDIT_UPDATE);
+}
 
 $domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
 ?>
@@ -275,8 +308,8 @@ function tekenDiagram()
 
 	// De force layout zet alles automatisch op zijn plek
 	
-	// Deze manier van aanroepen zorgt voor een oneindige lus bij 1 of 2 IE's, vandaar deze if-constructie.
-	if(graph.nodes.length>2)
+	// Deze manier van aanroepen zorgt voor een oneindige lus bij kleine modellen (van bijv. 1 of 2 IE's), vandaar deze if-constructie.
+	if(graph.nodes.length>10)
 		force.start(80,160,100000);
 	else
 		force.start();
@@ -363,24 +396,33 @@ if(Model::modelIsExperience($model_uri))
 {
 	$l1model=Model::geefL1modelVanCase($model_uri);
 	$l1hoofdcontext=Model::geefContextVanModel($l1model);
-	$subrollen=Model::zoekSubrollen($l1hoofdcontext);
-	
-	foreach(array_merge(array($l1hoofdcontext),$subrollen) as $te_doorzoeken_uri)
-	{
-		$alle_te_doorzoeken_uris[]=Uri::escape_uri($te_doorzoeken_uri);
-	}
-	
-	$zoekstring=implode(' } UNION { ?ie property:Context ',$alle_te_doorzoeken_uris);
-	
-	$query_inhoud_situatie='DESCRIBE ?ie WHERE {{ ?ie property:Context '.$zoekstring.' }.{?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AIntentional_Element>} UNION {?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AActivity>}}';
-	
-	$data=$connectie->JSONQueryAsPHPArray($query_inhoud_situatie);
+
+	$data=Model::geefElementenUitContextEnSubrollen($l1hoofdcontext);
+
+	echo '<h2>Nieuw element</h2>';
 	echo '<form method="post">Beschikbare IE\'s (afkomstig van L1-model "'.Uri::SMWuriNaarLeesbareTitel($l1model).'"):<br /><select name="ie">';
-	
+
 	foreach($data['@graph'] as $item)
 	{
 		echo '<option value="'.Uri::stripSMWuriPadEnPrefixes($item['@id']).'">'.$item['label'].'</option>';
 	}
-	
-	echo '</select><input type="text" name="titel"/><input type="submit" value="Aanmaken"/></form>';
+
+	echo '</select><br />Naam: <input type="text" style="width: 300px;" name="titel"/><input type="submit" value="Aanmaken"/></form>';
+
+	$data=Model::geefElementenUitContextEnSubrollen($context_uri);
+	$ie_lijst='';
+
+	foreach($data['@graph'] as $item)
+	{
+		$ie_lijst.='<option value="'.Uri::stripSMWuriPadEnPrefixes($item['@id']).'">'.$item['label'].'</option>';
+	}
+
+	echo '<h2>Verband aanbrengen</h2>';
+	echo '<form method="post">';
+	echo 'Van: <select name="van">'.$ie_lijst.'</select><br />';
+	echo 'Naar: <select name="naar">'.$ie_lijst.'</select><br />';
+	echo 'Type: <select name="type"><option value="Contributes">Contributes</option><option value="Depends">Depends</option><option value="Connects">Connects</option></select><br />';
+	echo 'Notitie: <input name="note" type="text" style="width:300px;"><br />';
+	echo 'CV/CT: <input name="subtype" type="text" style="width:300px;"/><br />';
+	echo '<input type="submit" value="Aanmaken" /></form>';
 }

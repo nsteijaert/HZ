@@ -223,10 +223,33 @@ class Model
 			return true;
 		}
 	}
-	
+
 	static function nieuweL2case($naam, $l1model)
 	{
 		if (!isSituatie($situatie_uri))
-			return FALSE;		
+			return FALSE;
+	}
+
+	static function geefElementenUitContextEnSubrollen($context_uri)
+	{
+		$alle_te_doorzoeken_uris=self::geefUrisVanContextEnSubrollen($context_uri);
+
+		$zoekstring=implode(' } UNION { ?ie property:Context ',$alle_te_doorzoeken_uris);
+
+		$query_inhoud_situatie='DESCRIBE ?ie WHERE {{ ?ie property:Context '.$zoekstring.' }.{?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AIntentional_Element>} UNION {?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AActivity>}}';
+		$connectie=new SPARQLConnection();
+
+		return $connectie->JSONQueryAsMultidimensionalPHPArray($query_inhoud_situatie);
+	}
+
+	static function geefUrisVanContextEnSubrollen($context_uri)
+	{
+		$subrollen=Model::zoekSubrollen($context_uri);
+
+		foreach(array_merge(array($context_uri),$subrollen) as $te_doorzoeken_uri)
+		{
+			$alle_te_doorzoeken_uris[]=Uri::escape_uri($te_doorzoeken_uri);
+		}
+		return $alle_te_doorzoeken_uris;
 	}
 }

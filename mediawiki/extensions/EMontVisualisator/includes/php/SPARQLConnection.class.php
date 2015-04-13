@@ -33,6 +33,18 @@ class SPARQLConnection
 		return json_decode($json,true);
 	}
 
+	public function JSONQueryAsMultidimensionalPHPArray($query)
+	{
+		$data=self::JSONQueryAsPHPArray($query);
+		// Eén resultaat wordt anders teruggeven dan meerdere. Dat wordt hiermee afgevangen.
+		if($data && !array_key_exists('@graph',$data))
+		{
+			$return['@graph'][0]=$data;
+			return $return;
+		}
+		return $data;
+	}
+
 	public function prefixesIntoQuery($extra_prefixes=array())
 	{
 		$prefixes=array_merge($this->default_prefixes,$extra_prefixes);
@@ -42,6 +54,15 @@ class SPARQLConnection
 			$return.='PREFIX '.$prefix." \n";
 		}
 		return $return;
+	}
+
+	public static function geefEersteResultaat($subject,$predicate)
+	{
+		$query='SELECT ?object WHERE { '.Uri::escape_uri($subject).' '.$predicate.' ?object}';
+		$connectie=new SPARQLConnection();
+		$result=$connectie->JSONQueryAsPHPArray($query);
+
+		return $result['results']['bindings'][0]['object']['value'];
 	}
 }
 ?>

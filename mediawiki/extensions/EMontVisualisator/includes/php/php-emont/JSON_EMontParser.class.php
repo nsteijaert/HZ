@@ -35,31 +35,10 @@ class JSON_EMontParser
 	public function geefElementenInSituatie()
 	{
 		$connectie=new SPARQLConnection();
-
-		$subrollen=Model::zoekSubrollen($this->situatie_uri);
-
-		foreach(array_merge(array($this->situatie_uri),$subrollen) as $te_doorzoeken_uri)
-		{
-			$alle_te_doorzoeken_uris[]=Uri::escape_uri($te_doorzoeken_uri);
-		}
-
-		$zoekstring=implode(' } UNION { ?ie property:Context ',$alle_te_doorzoeken_uris);
-
-		$query_inhoud_situatie='DESCRIBE ?ie WHERE {{ ?ie property:Context '.$zoekstring.' }.{?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AIntentional_Element>} UNION {?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AActivity>}}';
-		$data=$connectie->JSONQueryAsPHPArray($query_inhoud_situatie);
-
-		// Eén resultaat wordt anders teruggeven dan meerdere. Dat wordt hiermee afgevangen.
-		if($data && !$data['@graph'])
-		{
-			$data['@graph'][0]=$data;
-		}
-
 		$items = array();
-		$produces=array();
-		$consumes=array();
-		$ie_context=array();
-		$instanceOf=array();
-		$partOf=array();
+		$verbanden=array();
+
+		$data=Model::geefElementenUitContextEnSubrollen($this->situatie_uri);
 
 		if($data['@graph'])
 		{
@@ -84,7 +63,7 @@ class JSON_EMontParser
 						$obj=new Condition($item['@id']);
 						break;
 					default:
-						$obj = new IntentionalElement($item['@id']);
+						$obj=new IntentionalElement($item['@id']);
 				}
 
 				if($item['Eigenschap-3AHeading_nl']!="")
@@ -102,39 +81,40 @@ class JSON_EMontParser
 
 				foreach ($item as $key => $value)
 				{
-					if(!empty($value))
+					if(is_array($value))
 					{
-						switch($key)
+						foreach($value as $singlevalue)
 						{
-							case 'Eigenschap-3AIntentional_Element_decomposition_type':
-								$obj->setDecompositionType($value);
-								break;
-							case 'Eigenschap-3AProduces':
-								$produces[$item['@id']]=$value;
-								break;
-							case 'Eigenschap-3AConsumes':
-								$consumes[$item['@id']]=$value;
-								break;
-							case 'Eigenschap-3AContext':
-								if (is_array($value))
-								{
-									$ie_context[$item['@id']]=$value;
-								}
-								else
-								{
-									$ie_context[$item['@id']]=array($value);
-								}
-								break;
-							case 'Eigenschap-3APart_of':
-								$partOf[$item['@id']]=$value;
-								break;
-							case 'Eigenschap-3AInstance_of':
-								$instanceOf[$item['@id']]=$value;
-								break;
-							default:
+							$verbanden=self::verwerkIEEigenschap($item, $key, $singlevalue, $verbanden);
+						}
+					}
+					else
+					{
+						if($value=='Eigenschap-3AIntentional_Element_decomposition_type')
+						{
+							$obj->setDecompositionType($value);
+						}
+						else
+						{
+							$verbanden=self::verwerkIEEigenschap($item, $key, $value, $verbanden);
 						}
 					}
 				}
+
+				$query='DESCRIBE ?s WHERE { ?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AElement_back_link> '.Uri::escape_uri($item['@id']).' }';
+				$resultaat=$connectie->JSONQueryAsMultidimensionalPHPArray($query);
+
+				foreach($resultaat as $deelresultaat)
+				{
+					if(@array_key_exists(0,$deelresultaat))
+					{
+						foreach($deelresultaat as $koppeling)
+						{
+							$verbanden['ccd'][]=array('source'=>$item['@id'],'ccdkoppeling'=>$koppeling);
+						}
+					}
+				}
+
 				$items[$item['@id']] = $obj;
 			}
 		}
@@ -142,7 +122,7 @@ class JSON_EMontParser
 		 * Maak voor alle mee te nemen Contexten een object aan
 		 */
 		$contexten=array();
-		foreach($alle_te_doorzoeken_uris as $context_uri)
+		foreach(Model::geefUrisVanContextEnSubrollen($this->situatie_uri) as $context_uri)
 		{
 			$context_uri=Uri::deescape_uri($context_uri);
 			$nieuwecontext=new Context($context_uri);
@@ -155,7 +135,7 @@ class JSON_EMontParser
 		 */
 		foreach($contexten as $context_uri => $context_object)
 		{
-			$supercontexten=$connectie->JSONQueryAsPHPArray('DESCRIBE ?supercontext WHERE { '.Uri::escape_uri($context_uri).' property:Supercontext ?supercontext}');
+			$supercontexten=$connectie->JSONQueryAsMultidimensionalPHPArray('DESCRIBE ?supercontext WHERE { '.Uri::escape_uri($context_uri).' property:Supercontext ?supercontext}');
 
 			if(array_key_exists('@graph',$supercontexten)) // Meerdere resultaten
 			{
@@ -175,97 +155,37 @@ class JSON_EMontParser
 					}
 				}
 			}
-			elseif(!empty($supercontexten)) // Eén resultaat
-			{
-				if(array_key_exists($supercontexten['@id'],$contexten)) // Overslaan als supercontext niet meegenomen moest worden
-				{
-					try
-					{
-						@$context_object->addSupercontext($contexten[$supercontexten['@id']]);
-						$contexten[$context_uri]=$context_object;
-					}
-					catch(Exception $e)
-					{
-						// Supercontext blijkbaar niet in scope
-					}
-				}
-			}
 		}
 
-		foreach ($items as $uri => $item)
+		foreach($verbanden as $type=>$verbanden2)
 		{
-			try
+			foreach($verbanden2 as $verband)
 			{
-				if(array_key_exists($uri,$produces))
-				{
-					@$item->addProduces($items[$produces[$uri]]);
-					$items[$uri]=$item;
-				}
-			}
-			catch(Exception $e) {}
-
-			try
-			{
-				if(array_key_exists($uri,$consumes))
-				{
-					@$item->addConsumes($items[$consumes[$uri]]);
-					$items[$uri]=$item;
-				}
-			}
-			catch(Exception $e) {}
-
-			try
-			{
-				if(array_key_exists($uri,$partOf))
-				{
-					@$item->addPartOf($items[$partOf[$uri]]);
-					$items[$uri]=$item;
-				}
-			}
-			catch(Exception $e) {}
-
-			try
-			{
-				if(array_key_exists($uri,$instanceOf))
-				{
-					@$item->addInstanceOf($items[$instanceOf[$uri]]);
-					$items[$uri]=$item;
-				}
-			}
-			catch(Exception $e) {}
-
-			if(array_key_exists($uri,$ie_context))
-			{
-				foreach($ie_context[$uri] as $context_uri)
-				{
-					try
+				try{
+					switch($type)
 					{
-						@$item->addContext($contexten[$context_uri]);
-					}
-					catch(Exception $e) {}
-				}
-				@$items[$uri]=$item;
-			}
-
-			$query='DESCRIBE ?s WHERE { ?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AElement_back_link> '.Uri::escape_uri($uri).' }';
-			$resultaat=$connectie->JSONQueryAsPHPArray($query);
-
-			if(array_key_exists('@graph',$resultaat))
-			{
-				foreach($resultaat as $deelresultaat)
-				{
-					if(array_key_exists(0,$deelresultaat))
-					{
-						foreach($deelresultaat as $koppeling)
-						{
-							$items[$uri]=self::verwerkKoppeling($koppeling,$items[$uri],$items);
-						}
+						case 'produces':
+							@$items[$verband['source']]->addProduces($items[$verband['target']]);
+							break;
+						case 'consumes':
+							@$items[$verband['source']]->addConsumes($items[$verband['target']]);
+							break;
+						case 'partOf':
+							@$items[$verband['source']]->addPartOf($items[$verband['target']]);
+							break;
+						case 'instanceOf':
+							@$items[$verband['source']]->addInstanceOf($items[$verband['target']]);
+							break;
+						case 'context':
+							@$items[$verband['source']]->addContext($contexten[$verband['target']]);
+							break;
+						case 'ccd':
+							$items[$verband['source']]=self::verwerkKoppeling($verband['ccdkoppeling'],$items[$verband['source']],$items);
+							break;
+						default:
 					}
 				}
-			}
-			else
-			{
-				$items[$uri]=self::verwerkKoppeling($resultaat,$items[$uri],$items);
+				catch(Exception $e) {}
 			}
 		}
 		return array_merge($items,$contexten);
@@ -323,6 +243,30 @@ class JSON_EMontParser
 		}
 		catch(Exception $e) {}
 		return $object;
+	}
+
+	static function verwerkIEEigenschap($item,$key,$value,$verbanden)
+	{
+		switch($key)
+		{
+			case 'Eigenschap-3AProduces':
+				$verbanden['produces'][]=array('source'=>$item['@id'],'target'=>$value);
+				break;
+			case 'Eigenschap-3AConsumes':
+				$verbanden['consumes'][]=array('source'=>$item['@id'],'target'=>$value);
+				break;
+			case 'Eigenschap-3AContext':
+				$verbanden['context'][]=array('source'=>$item['@id'],'target'=>$value);
+				break;
+			case 'Eigenschap-3APart_of':
+				$verbanden['partOf'][]=array('source'=>$item['@id'],'target'=>$value);
+				break;
+			case 'Eigenschap-3AInstance_of':
+				$verbanden['instanceof'][]=array('source'=>$item['@id'],'target'=>$value);
+				break;
+			default:
+		}
+		return $verbanden;
 	}
 }
 ?>
