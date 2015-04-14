@@ -181,7 +181,7 @@ class Model
 			'.Uri::escape_uri($model_uri).' property:Context ?context}';
 		$connectie=new SPARQLConnection();
 		$result=$connectie->JSONQueryAsPHPArray($query);
-		
+
 		return strtr($result['results']['bindings'][0]['context']['value'],array('http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'=>'wiki:'));
 	}
 	
@@ -201,7 +201,7 @@ class Model
 	}
 
 	/**
-	 *  Bepaalt of een bepaalde uri een situatie is (en bijvoorbeeld geen rol).
+	 *  Bepaalt of een context-uri niet toebehoort aan (sub)practice.
 	 */
 	static function isHoofdcontextVanPractice($context_uri)
 	{
