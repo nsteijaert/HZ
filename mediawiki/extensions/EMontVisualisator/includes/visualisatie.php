@@ -397,7 +397,7 @@ if(Model::modelIsExperience($model_uri))
 	$l1model=Model::geefL1modelVanCase($model_uri);
 	$l1hoofdcontext=Model::geefContextVanModel($l1model);
 
-	$data=Model::geefElementenUitContextEnSubrollen($l1hoofdcontext);
+	$data=Model::geefElementenUitContextEnSubcontexten($l1hoofdcontext);
 
 	echo '<h2>Nieuw element</h2>';
 	echo '<form method="post">Beschikbare IE\'s (afkomstig van L1-model "'.Uri::SMWuriNaarLeesbareTitel($l1model).'"):<br /><select name="ie">';
@@ -409,7 +409,7 @@ if(Model::modelIsExperience($model_uri))
 
 	echo '</select><br />Naam: <input type="text" style="width: 300px;" name="titel"/><input type="submit" value="Aanmaken"/></form>';
 
-	$data=Model::geefElementenUitContextEnSubrollen($context_uri);
+	$data=Model::geefElementenUitContextEnSubcontexten($context_uri);
 	$ie_lijst='';
 
 	foreach($data['@graph'] as $item)

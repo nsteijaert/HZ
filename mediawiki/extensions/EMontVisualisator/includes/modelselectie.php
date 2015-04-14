@@ -12,43 +12,9 @@ $l2cases=Model::geefL2cases();
 
 if($_POST['titel']!=null)
 {
-	$l1model=Uri::decodeerSMWnaam($_POST['l1model']);
+	$practice_uri=$_POST['l1model'];
 	$titel=$_POST['titel'];
-	
-	$contextTitle = Title::newFromText($titel);
-	$contextArticle = new Article($contextTitle);
-
-	if($contextArticle)
-	{
-		$contextArticleContents='{{Context}}
-{{Heading
-|Heading nl='.$titel.'
-}}
-{{Context query}}';
-		$contextArticle->doEdit($contextArticleContents, 'Pagina aangemaakt via EMontVisualisator.');
-	}
-	
-	$experienceTitle = Title::newFromText($titel.' experience');
-	$experienceArticle = new Article($experienceTitle);
-
-	if($experienceArticle)
-	{
-		$experienceArticleContents='{{Practice
-|Context='.$titel.'
-|Practice type=Experience
-}}
-{{Paragraphs show}}
-{{Heading
-|Heading nl='.$titel.' experience
-}}
-
-{{Practice links
-|Part of='.$l1model.'
-}}
-{{Practice query}}';
-		
-		$experienceArticle->doEdit($experienceArticleContents, 'Pagina aangemaakt via EMontVisualisator.');
-	}
+	Model::nieuweL2case($titel,$practice_uri);
 }
 ?>
 <!DOCTYPE html>
@@ -91,7 +57,7 @@ foreach($l2cases as $l2uri => $l2beschrijving)
 	<?php
 	foreach ($l1modellen as $l1uri => $l1beschrijving)
 	{
-		echo '<option value="'.Uri::stripSMWuriPadEnPrefixes($l1uri).'">'.$l1beschrijving.'</option>';
+		echo '<option value="'.$l1uri.'">'.$l1beschrijving.'</option>';
 	}
 	?>
 	</select></td></tr>

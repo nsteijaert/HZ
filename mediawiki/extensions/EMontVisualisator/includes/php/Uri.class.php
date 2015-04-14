@@ -94,41 +94,6 @@ class Uri
 		'\)' => ')',
 		'\/' => '/'));
 	}
-	
-	/**
-	 * Verstuurt een verzoek via POST, en geeft het antwoord terug.
-	 */
-	public static function getPostData($url,$parameters)
-	{
-		// JSON levert de meest bruikbare resultaten terug (bruikbaarder dan format=php(!))
-		$fields_string='format=json&';
-		
-		// Codeer alle parameters en hun waardes als HTML-parameters
-		foreach($parameters as $key=>$value)
-		{
-			$fields_string .= urlencode($key).'='.urlencode($value).'&';
-		}
-		rtrim($fields_string,'&');
-		
-		$ch = curl_init();
-		$settings['cookiefile']=dirname(__FILE__).'cookies.tmp';
-		
-		curl_setopt($ch, CURLOPT_VERBOSE, true);
-		curl_setopt($ch, CURLOPT_COOKIEFILE, $settings['cookiefile']);
-        curl_setopt($ch, CURLOPT_COOKIEJAR, $settings['cookiefile']);
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_POST, count($fields));
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
-		curl_setopt($ch, CURLOPT_USERAGENT, "PHPEmontVisualisatie/1.0 (http://www.deltaexpertise.nl/)");
-		// Geeft het resultaat als variable in plaats van het direct weer te geveb
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		
-		$result=curl_exec($ch);
-		curl_close($ch);
-		
-		// Geef het resultaat terug als associatieve array
-		return json_decode($result,TRUE);
-	}
 
 	public static function stripSMWuriPadEnPrefixes($uri)
 	{
@@ -147,12 +112,7 @@ class Uri
 
 	public static function geefIEtype($ie_uri)
 	{
-		$query='SELECT ?type WHERE {
-			'.Uri::escape_uri($ie_uri).' property:Intentional_Element_type ?type}';
-		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
-		
-		return $result['results']['bindings'][0]['type']['value'];
+		return SPARQLConnection::geefEersteResultaat($ie_uri,'property:Intentional_Element_type');
 	}
 }
 ?>

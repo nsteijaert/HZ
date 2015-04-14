@@ -224,10 +224,46 @@ class Model
 		}
 	}
 
-	static function nieuweL2case($naam, $l1model)
+	/**
+	 *  Maakt een experience en hoofdcontext voor een nieuwe case aan, gebaseerd op een bestaande practice
+	 */
+	static function nieuweL2case($titel, $practice_uri)
 	{
-		if (!isHoofdcontextVanPractice($situatie_uri))
-			return FALSE;
+		$l1model=Uri::SMWuriNaarLeesbareTitel($practice_uri);
+
+		$contextTitle = Title::newFromText($titel);
+		$contextArticle = new Article($contextTitle);
+
+		if($contextArticle)
+		{
+			$contextArticleContents='{{Context}}
+{{Heading
+|Heading nl='.$titel.'
+}}
+{{Context query}}';
+			$contextArticle->doEdit($contextArticleContents, 'Pagina aangemaakt via EMontVisualisator.');
+		}
+
+		$experienceTitle = Title::newFromText($titel.' experience');
+		$experienceArticle = new Article($experienceTitle);
+
+		if($experienceArticle)
+		{
+			$experienceArticleContents='{{Practice
+|Context='.$titel.'
+|Practice type=Experience
+}}
+{{Paragraphs show}}
+{{Heading
+|Heading nl='.$titel.' experience
+}}
+
+{{Practice links
+|Part of='.$l1model.'
+}}
+{{Practice query}}';
+			$experienceArticle->doEdit($experienceArticleContents, 'Pagina aangemaakt via EMontVisualisator.');
+		}
 	}
 
 	static function geefElementenUitContextEnSubcontexten($context_uri)
