@@ -287,4 +287,81 @@ class Model
 		}
 		return $alle_te_doorzoeken_uris;
 	}
+
+	static function nieuwIE($instanceOf,$context_uri,$titel)
+	{
+		$ie_type=SPARQLConnection::geefEersteResultaat($instanceOf,'property:Intentional_Element_type');
+		$ie_decomposition_type=SPARQLConnection::geefEersteResultaat(Uri::escape_uri($instanceOf),'property:Intentional_Element_decomposition_type');
+
+		if($ie_type=='Activity')
+		{
+			$nieuw_ie='{{Activity
+|Context='.Uri::SMWuriNaarLeesbareTitel($context_uri).',
+|Intentional Element decomposition type='.$ie_decomposition_type.'
+}}
+{{Heading
+|Heading nl='.$_POST['titel'].'
+}}
+{{VN query}}
+{{Activity links
+|Instance of='.Uri::SMWuriNaarLeesbareTitel($instanceOf).',
+}}
+{{Intentional Element query}}';
+		}
+		else
+		{
+			$nieuw_ie='{{Intentional Element
+|Context='.Uri::SMWuriNaarLeesbareTitel($context_uri).',
+|Intentional Element type='.$ie_type.'
+|Intentional Element decomposition type='.$ie_decomposition_type.'
+}}
+{{Heading
+|Heading nl='.$titel.'
+}}
+{{VN query}}
+{{Intentional Element links
+|Instance of='.Uri::SMWuriNaarLeesbareTitel($instanceOf).',
+}}
+{{Intentional Element query}}';
+		}
+
+		$ieTitle = Title::newFromText($titel);
+		$ieArticle = new Article($ieTitle);
+
+		$ieArticle->doEdit($nieuw_ie, 'Pagina aangemaakt via EMontVisualisator.');
+	}
+
+	static function maakVerband($van,$naar,$type,$subtype,$notitie)
+	{
+		$van=Uri::SMWuriNaarLeesbareTitel($van);
+		$naar=Uri::SMWuriNaarLeesbareTitel($naar);
+
+		$titel_te_bewerken_artikel=Title::newFromText($van);
+		$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
+		$inhoud=$te_bewerken_artikel->getText();
+
+		// {{Intentional Element query}}, indien aanwezig, moet achteraan blijven.
+		$achtervoegsel='';
+		if(strpos($inhoud,'{{Intentional Element query}}')!==FALSE)
+		{
+			$inhoud=strtr($inhoud,array('{{Intentional Element query}}'=>''));
+			$achtervoegsel='{{Intentional Element query}}';
+		}
+
+		$verband_tekst='{{'.$type.'
+|Element link='.$naar.'
+|Element link note='.$notitie.'
+';
+		if($type=='Contributes')
+		{
+			$verband_tekst.='|Element contribution value='.$subtype.'
+';
+		}
+
+		$verband_tekst.='}}
+';
+		$nieuwe_inhoud=$inhoud.$verband_tekst.$achtervoegsel;
+
+		$te_bewerken_artikel->doEdit($nieuwe_inhoud,'Verband toegevoegd via EMontVisualisator',EDIT_UPDATE);
+	}
 }

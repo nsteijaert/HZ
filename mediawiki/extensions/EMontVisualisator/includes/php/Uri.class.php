@@ -109,10 +109,5 @@ class Uri
 			return implode(':',$name_array);
 		}
 	}
-
-	public static function geefIEtype($ie_uri)
-	{
-		return SPARQLConnection::geefEersteResultaat($ie_uri,'property:Intentional_Element_type');
-	}
 }
 ?>

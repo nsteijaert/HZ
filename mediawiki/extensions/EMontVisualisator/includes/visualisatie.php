@@ -25,91 +25,14 @@ else {
 
 $context_uri=Model::geefContextVanModel($model_uri);
 
-function geefIEdecompositionType($ie_uri)
-{
-	return SPARQLConnection::geefEersteResultaat($ie_uri,'property:Intentional_Element_decomposition_type');
-}
-
 if($_POST['titel'])
 {
-	if(Uri::geefIEtype('wiki:'.$_POST['ie'])=='Activity')
-	{	
-		$nieuw_ie='{{Activity
-|Context='.Uri::SMWuriNaarLeesbareTitel($context_uri).',
-|Intentional Element decomposition type='.geefIEdecompositionType('wiki:'.$_POST['ie']).'
-}}
-{{Heading
-|Heading nl='.$_POST['titel'].'
-}}
-{{VN query}}
-{{Activity links
-|Instance of='.Uri::SMWuriNaarLeesbareTitel('wiki:'.$_POST['ie']).',
-}}
-{{Intentional Element query}}';
-	}
-	else
-	{
-		$nieuw_ie='{{Intentional Element
-|Context='.Uri::SMWuriNaarLeesbareTitel($context_uri).',
-|Intentional Element type='.Uri::geefIEtype('wiki:'.$_POST['ie']).'
-|Intentional Element decomposition type='.geefIEdecompositionType('wiki:'.$_POST['ie']).'
-}}
-{{Heading
-|Heading nl='.$_POST['titel'].'
-}}
-{{VN query}}
-{{Intentional Element links
-|Instance of='.Uri::SMWuriNaarLeesbareTitel('wiki:'.$_POST['ie']).',
-}}
-{{Intentional Element query}}';
-	}
-	echo $nieuw_ie;
-	
-	$titel=$_POST['titel'];
-
-	$ieTitle = Title::newFromText($titel);
-	$ieArticle = new Article($ieTitle);
-
-	$ieArticle->doEdit($nieuw_ie, 'Pagina aangemaakt via EMontVisualisator.');
+	Model::nieuwIE($_POST['ie'],$context_uri,$_POST['titel']);
 }
 
 if($_POST['van'])
 {
-	$van=Uri::SMWuriNaarLeesbareTitel('wiki:'.$_POST['van']);
-	$naar=Uri::SMWuriNaarLeesbareTitel('wiki:'.$_POST['naar']);
-	$titel=$_POST['titel'];
-	$type=$_POST['type'];
-	$subtype=$_POST['subtype'];
-
-	$titel_te_bewerken_artikel=Title::newFromText($van);
-	$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
-	$inhoud=$te_bewerken_artikel->getText();
-
-	// {{Intentional Element query}}, indien aanwezig, moet achteraan blijven.
-	$achtervoegsel='';
-	if(strpos($inhoud,'{{Intentional Element query}}')!==FALSE)
-	{
-		$inhoud=strtr($inhoud,array('{{Intentional Element query}}'=>''));
-		$achtervoegsel='{{Intentional Element query}}';
-	}
-
-	$verband_tekst='{{'.$type.'
-|Element link='.$naar.'
-|Element link note=
-';
-	if($type=='Contributes')
-	{
-		$verband_tekst.='|Element contribution value='.$subtype.'
-';
-	}
-
-	$verband_tekst.='}}
-';
-
-	$nieuwe_inhoud=$inhoud.$verband_tekst.$achtervoegsel;
-	//var_dump($te_bewerken_artikel);
-	var_dump($nieuwe_inhoud);
-	$te_bewerken_artikel->doEdit($nieuwe_inhoud,'Verband toegevoegd via EMontVisualisator',EDIT_UPDATE);
+	Model::maakVerband($_POST['van'],$_POST['naar'],$_POST['type'],$_POST['subtype'],$_POST['notitie']);
 }
 
 $domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
@@ -404,7 +327,7 @@ if(Model::modelIsExperience($model_uri))
 
 	foreach($data['@graph'] as $item)
 	{
-		echo '<option value="'.Uri::stripSMWuriPadEnPrefixes($item['@id']).'">'.$item['label'].'</option>';
+		echo '<option value="'.$item['@id'].'">'.$item['label'].'</option>';
 	}
 
 	echo '</select><br />Naam: <input type="text" style="width: 300px;" name="titel"/><input type="submit" value="Aanmaken"/></form>';
@@ -414,7 +337,7 @@ if(Model::modelIsExperience($model_uri))
 
 	foreach($data['@graph'] as $item)
 	{
-		$ie_lijst.='<option value="'.Uri::stripSMWuriPadEnPrefixes($item['@id']).'">'.$item['label'].'</option>';
+		$ie_lijst.='<option value="'.$item['@id'].'">'.$item['label'].'</option>';
 	}
 
 	echo '<h2>Verband aanbrengen</h2>';
@@ -422,7 +345,7 @@ if(Model::modelIsExperience($model_uri))
 	echo 'Van: <select name="van">'.$ie_lijst.'</select><br />';
 	echo 'Naar: <select name="naar">'.$ie_lijst.'</select><br />';
 	echo 'Type: <select name="type"><option value="Contributes">Contributes</option><option value="Depends">Depends</option><option value="Connects">Connects</option></select><br />';
-	echo 'Notitie: <input name="note" type="text" style="width:300px;"><br />';
+	echo 'Notitie: <input name="notitie" type="text" style="width:300px;"><br />';
 	echo 'CV/CT: <input name="subtype" type="text" style="width:300px;"/><br />';
 	echo '<input type="submit" value="Aanmaken" /></form>';
 }

@@ -6,7 +6,6 @@ require_once(__DIR__.'/php/Uri.class.php');
 // Notices worden voornamelijk bij niet-gedefinieerde eigenschappen gegeven. In productie uitzetten.
 error_reporting(E_ALL & ~E_NOTICE);
 
-
 $l1modellen=Model::geefL1modellen();
 $l2cases=Model::geefL2cases();
 
@@ -17,20 +16,6 @@ if($_POST['titel']!=null)
 	Model::nieuweL2case($titel,$practice_uri);
 }
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Modelselectie</title>
-	<meta charset='utf-8'>
-	<!-- Stylesheets van DeltaExpertise-->
-	<!-- Aangepaste kopie van <link rel="stylesheet" href="http://195.93.238.49/wiki/deltaexpertise/wiki/load.php?debug=false&amp;lang=nl&amp;modules=mediawiki.legacy.commonPrint%2Cshared%7Cskins.deltaskin&amp;only=styles&amp;skin=deltaskin&amp;*" />
-		Vervangen bij integreren in DeltaExpertise-->
-	<link rel="stylesheet" href="css/dex1.css"/>
-	<link rel="stylesheet" href="http://195.93.238.49/wiki/deltaexpertise/wiki/extensions/HeaderTabs/skins/ext.headertabs.large.css" />
-
-</head>
-<body>
-
 <h2 id="practices">Practices (L1)</h2>
 <ul>
 <?php
@@ -65,5 +50,3 @@ foreach($l2cases as $l2uri => $l2beschrijving)
 	<tr><td colspan="100%"><input type="submit" value="Aanmaken" /></td></tr>
 	</table>
 </form>
-</body>
-</html>
