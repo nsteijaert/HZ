@@ -10,10 +10,10 @@ class Model
 	private function __construct() {}
 
 	/**
-	 * Zoekt alle subrollen bij een bepaalde context (slaat subsituaties over).
+	 * Zoekt alle subsituaties en subrollen bij een bepaalde context (slaat subpractices over).
 	 * @input De context-URI, zonder vishaken (< en >)
 	 */
-	static function zoekSubrollen($context_uri)
+	static function zoekSubcontexten($context_uri)
 	{
 		$subrollen=array();
 		$context_uri=Uri::escape_uri($context_uri);
@@ -27,10 +27,10 @@ class Model
 			foreach($contexten['@graph'] as $item)
 			{
 				// Subsituaties moeten niet worden meegenomen.
-				if(!self::isSituatie($item['@id']))
+				if(!self::isHoofdcontextVanPractice($item['@id']))
 				{
 					$subrollen[]=$item['@id'];
-					$subrollen=array_merge($subrollen,self::zoekSubrollen($item['@id']));
+					$subrollen=array_merge($subrollen,self::zoekSubcontexten($item['@id']));
 				}
 			}
 		}
@@ -203,7 +203,7 @@ class Model
 	/**
 	 *  Bepaalt of een bepaalde uri een situatie is (en bijvoorbeeld geen rol).
 	 */
-	static function isSituatie($context_uri)
+	static function isHoofdcontextVanPractice($context_uri)
 	{
 		$context_uri=Uri::escape_uri($context_uri);
 		$query="DESCRIBE ?s ?o WHERE {
@@ -226,25 +226,24 @@ class Model
 
 	static function nieuweL2case($naam, $l1model)
 	{
-		if (!isSituatie($situatie_uri))
+		if (!isHoofdcontextVanPractice($situatie_uri))
 			return FALSE;
 	}
 
-	static function geefElementenUitContextEnSubrollen($context_uri)
+	static function geefElementenUitContextEnSubcontexten($context_uri)
 	{
-		$alle_te_doorzoeken_uris=self::geefUrisVanContextEnSubrollen($context_uri);
+		$alle_te_doorzoeken_uris=self::geefUrisVanContextEnSubcontexten($context_uri);
 
 		$zoekstring=implode(' } UNION { ?ie property:Context ',$alle_te_doorzoeken_uris);
-
 		$query_inhoud_situatie='DESCRIBE ?ie WHERE {{ ?ie property:Context '.$zoekstring.' }.{?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AIntentional_Element>} UNION {?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AActivity>}}';
-		$connectie=new SPARQLConnection();
 
+		$connectie=new SPARQLConnection();
 		return $connectie->JSONQueryAsMultidimensionalPHPArray($query_inhoud_situatie);
 	}
 
-	static function geefUrisVanContextEnSubrollen($context_uri)
+	static function geefUrisVanContextEnSubcontexten($context_uri)
 	{
-		$subrollen=Model::zoekSubrollen($context_uri);
+		$subrollen=Model::zoekSubcontexten($context_uri);
 
 		foreach(array_merge(array($context_uri),$subrollen) as $te_doorzoeken_uri)
 		{

@@ -38,7 +38,7 @@ class JSON_EMontParser
 		$items = array();
 		$verbanden=array();
 
-		$data=Model::geefElementenUitContextEnSubrollen($this->situatie_uri);
+		$data=Model::geefElementenUitContextEnSubcontexten($this->situatie_uri);
 
 		if($data['@graph'])
 		{
@@ -122,7 +122,7 @@ class JSON_EMontParser
 		 * Maak voor alle mee te nemen Contexten een object aan
 		 */
 		$contexten=array();
-		foreach(Model::geefUrisVanContextEnSubrollen($this->situatie_uri) as $context_uri)
+		foreach(Model::geefUrisVanContextEnSubcontexten($this->situatie_uri) as $context_uri)
 		{
 			$context_uri=Uri::deescape_uri($context_uri);
 			$nieuwecontext=new Context($context_uri);

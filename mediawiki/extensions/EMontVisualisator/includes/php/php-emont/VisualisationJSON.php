@@ -86,6 +86,7 @@ foreach($contexten as $uri=>$description)
 		$contextindex[]=$uri;
 	}
 }
+$gebruikteSubcontexten=array();
 
 foreach($contextLinks as $contextLink)
 {
@@ -94,9 +95,10 @@ foreach($contextLinks as $contextLink)
 	$contextnr=array_search($context,$contextindex);
 	$supercontextnr=array_search($supercontext,$contextindex);
 
-	if($contextnr!==FALSE && $supercontextnr!==FALSE && !empty($post['groups'][$contextnr]))
+	if($contextnr!==FALSE && $supercontextnr!==FALSE && !empty($post['groups'][$contextnr])&& !$gebruikteSubcontexten[$contextnr])
 	{
 		$post['groups'][$supercontextnr]['groups'][]=$contextnr;
+		$gebruikteSubcontexten[$contextnr]=TRUE;
 	}
 }
 // Kan waarschijnlijk efficiënter
