@@ -103,14 +103,14 @@ function runQuery(query, selection) {
 		}
 
 		$('pre code').each(function(i, e) {
-			hljs.highlightBlock(e);
+			//hljs.highlightBlock(e);
 		});
 
 		$.post("php/VisualisationScript.php", {
 			do : "parse",
 			data : result
 		}, function(data) {
-			return data
+			return data;
 		});
 	}).fail(function(result) {
 		$('.result').html("<p><b style='color:red'>Error retrieving data...</b></p><pre>" + result.responseText + "</pre>");

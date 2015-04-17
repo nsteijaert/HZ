@@ -128,10 +128,6 @@ function init() {
 			"target" : 4,
 			"type" : "sibling"
 		}, {
-			"source" : 4,
-			"target" : 9,
-			"type" : "sibling"
-		}, {
 			"source" : 9,
 			"target" : 11,
 			"type" : "parent"
@@ -157,7 +153,6 @@ function init() {
 			"type" : "child"
 		}]
 	};
-
 	// Set visualisation variables
 	var WIDTH = $(window).width();
 	HEIGHT = $(window).height();
@@ -204,52 +199,55 @@ function init() {
 	var force = d3.layout.force3d().nodes( sort_data = []).links( links = []).size([50, 50]).gravity(0.3).charge(-400);
 	var DISTANCE = 1;
 
-	// create a point light
-	var pointLight1 = new THREE.PointLight(0xFFFFFF);
-	var pointLight2 = new THREE.PointLight(0xFFFFFF);
-	var pointLight3 = new THREE.PointLight(0xFFFFFF);
-	var pointLight4 = new THREE.PointLight(0xFFFFFF);
-	var pointLight5 = new THREE.PointLight(0xFFFFFF);
+	//mouse event variables
+	var projector = new THREE.Projector(), 
+    mouse_vector = new THREE.Vector3(),
+    mouse = { x: 0, y: 0, z: 1 },
+    ray = new THREE.Raycaster( new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0) ),
+    intersects = [];
 
-	// set its position
-	pointLight1.position.x = 0;
-	pointLight1.position.y = 50;
-	pointLight1.position.z = 500;
+		// create a point light
+		var pointLight1 = new THREE.PointLight(0xFFFFFF);
+		var pointLight2 = new THREE.PointLight(0xFFFFFF);
+		var pointLight3 = new THREE.PointLight(0xFFFFFF);
+		var pointLight4 = new THREE.PointLight(0xFFFFFF);
+		var pointLight5 = new THREE.PointLight(0xFFFFFF);
 
-	pointLight2.position.x = 0;
-	pointLight2.position.y = 500;
-	pointLight2.position.z = -500;
+		// set its position
+		pointLight1.position.x = 0;
+		pointLight1.position.y = 50;
+		pointLight1.position.z = 500;
 
-	pointLight3.position.x = 500;
-	pointLight3.position.y = 500;
-	pointLight3.position.z = 0;
+		pointLight2.position.x = 0;
+		pointLight2.position.y = 500;
+		pointLight2.position.z = -500;
 
-	pointLight4.position.x = -500;
-	pointLight4.position.y = 50;
-	pointLight4.position.z = 0;
+		pointLight3.position.x = 500;
+		pointLight3.position.y = 500;
+		pointLight3.position.z = 0;
 
-	pointLight4.position.x = 0;
-	pointLight4.position.y = -100;
-	pointLight4.position.z = 0;
+		pointLight4.position.x = -500;
+		pointLight4.position.y = 50;
+		pointLight4.position.z = 0;
 
-	// add to the scene
-	scene.add(pointLight1);
-	scene.add(pointLight2);
-	scene.add(pointLight3);
-	scene.add(pointLight4);
+		pointLight4.position.x = 0;
+		pointLight4.position.y = -100;
+		pointLight4.position.z = 0;
+
+		// add to the scene
+		scene.add(pointLight1);
+		scene.add(pointLight2);
+		scene.add(pointLight3);
+		scene.add(pointLight4);
 
 	//initControls();
 	createNodes();
 	initForce3D();
 	animate();
-
-	// Picking stuff
-	projector = new THREE.Projector();
-	mouseVector = new THREE.Vector3();
-	// User interaction
-	window.addEventListener('mousemove', onMouseMove, false);
-	window.addEventListener('resize', onWindowResize, false);
-
+	
+	//we add the even listener function to the domElement
+    renderer.domElement.addEventListener( 'mousedown', onMouseDown );
+	
 	function createNodes() {
 		for (var i = 0; i < data.nodes.length; i++) {
 			sort_data.push({
@@ -269,8 +267,7 @@ function init() {
 			});
 
 			var sphere = new THREE.Mesh(new THREE.SphereGeometry(radius, segments, rings), sphereMaterial);
-			sphere.name = data.nodes[i].label;
-			console.log(sphere);
+
 			spheres.push(sphere);
 
 			// add the sphere to the scene
@@ -296,32 +293,59 @@ function init() {
 
 			scene.add(mesh1);
 		}
+
 		for (var i = 0; i < data.links.length; i++) {
 			links.push({
 				target : sort_data[data.links[i].target],
-				source : sort_data[data.links[i].source],
-				type : sort_data[data.links[i].type]
+				source : sort_data[data.links[i].source]
 			});
-			var origin = new THREE.Vector3(0, 0, 0);
-			var terminus = new THREE.Vector3(20, 20, 20);
-			var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
-			var distance = origin.distanceTo(terminus);
-			var color = new THREE.Color("rgb(0,0,0)");
-			var headLength = 10;
-			var headWidth = 5;
-			var arrow = new THREE.ArrowHelper(direction, origin, distance, color, headLength, headWidth);
-			//arrows.push(arrow);
-			//console.log(distance);
-			console.log(arrow);
-			scene.add(arrow);
-			arrow.userData = {
+			var type = data.links[i].type;
+			switch(type) {
+			case "sibling":
+				var material = new THREE.LineBasicMaterial({
+					color : "green",
+					linewidth : 3
+				});
+				break;
+			case "parent":
+				var material = new THREE.LineBasicMaterial({
+					color : "red",
+					linewidth : 3
+				});
+				break;
+			case "child":
+				var material = new THREE.LineBasicMaterial({
+					color : "blue",
+					linewidth : 3
+				});
+				break;
+			case "analogy":
+				var material = new THREE.LineBasicMaterial({
+					color : "yellow",
+					linewidth : 3
+				});
+				break;
+			default:
+				var material = new THREE.LineBasicMaterial({
+					color : "black",
+					linewidth : 3
+				});
+			}
+			var geometry = new THREE.Geometry();
+
+			geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+			geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+			var line = new THREE.Line(geometry, material);
+			line.userData = {
 				source : data.links[i].source,
 				target : data.links[i].target
 			};
-			three_links.push(arrow);
-			scene.add(arrow);
+			three_links.push(line);
+			scene.add(line);
+
+			force.start(); 
 		}
-		force.start();
+
 	}
 
 	function initForce3D() {
@@ -336,26 +360,20 @@ function init() {
 				labels[i].position.set(x(sort_data[i].x) * 40 - 40, y(sort_data[i].y) * 40 - 40, z(sort_data[i].z) * 40 - 40);
 
 				for (var j = 0; j < three_links.length; j++) {
-					var arrow = three_links[j];
-					if (arrow.userData.source === i) {
-						var x_arrow = x(sort_data[i].x) * 40 - 40;
-						var y_arrow = y(sort_data[i].y) * 40 - 40;
-						var z_arrow = z(sort_data[i].z) * 40 - 40;
-						var new_origin = new THREE.Vector3(x_arrow, y_arrow, z_arrow);
-						arrow.position = new_origin;
+					var line = three_links[j];
+					var vi = -1;
+					if (line.userData.source === i) {
+						vi = 0;
 					}
-					if (arrow.userData.target === i) {
-						var x_arrow_cur = arrow.position.x;
-						var y_arrow_cur = arrow.position.y;
-						var z_arrow_cur = arrow.position.z;
-						var cur_pos= new THREE.Vector3(x_arrow_cur, y_arrow_cur, z_arrow_cur);
-						var x_arrow_tar = x(sort_data[i].x) * 40 - 40;
-						var y_arrow_tar = y(sort_data[i].y) * 40 - 40;
-						var z_arrow_tar = z(sort_data[i].z) * 40 - 40;
-						var newTarget = new THREE.Vector3(x_arrow_tar, y_arrow_tar, z_arrow_tar);
-						var direction = new THREE.Vector3().sub(newTarget, cur_pos);
-						arrow.setDirection(direction.normalize());
-						arrow.setLength(cur_pos.distanceTo(newTarget)-5, 10, 5);
+					if (line.userData.target === i) {
+						vi = 1;
+					}
+
+					if (vi >= 0) {
+						line.geometry.vertices[vi].x = x(sort_data[i].x) * 40 - 40;
+						line.geometry.vertices[vi].y = y(sort_data[i].y) * 40 - 40;
+						line.geometry.vertices[vi].z = y(sort_data[i].z) * 40 - 40;
+						line.geometry.verticesNeedUpdate = true;
 					}
 				}
 			}
@@ -378,56 +396,39 @@ function init() {
 	function render() {
 
 	}
-
-	function onMouseMove(e) {
-
-		mouseVector.x = 2 * (e.clientX / WIDTH) - 1;
-		mouseVector.y = 1 - 2 * (e.clientY / HEIGHT);
-		var raycaster = projector.pickingRay(mouseVector.clone(), camera),
-		    intersects;
-		var intersects = raycaster.intersectObjects(spheres);
-		for (var i = 0; i < intersects.length; i++) {
-			var intersection = intersects[i],
-			    obj = intersection.object;
-			obj.material.color.set("red");
-			console.log(obj.name);
-		}
-	}
-
-	function onWindowResize(e) {
-		WIDTH = $(window).width();
-		HEIGHT = $(window).height();
-		renderer.setSize(WIDTH, HEIGHT);
-		camera.aspect = WIDTH / HEIGHT;
-		camera.updateProjectionMatrix();
-	}
-
-	function convertVectorsToDist(source, target) {
-
-		var dx = source.x - target.x;
-		var dy = source.y - target.y;
-		var dz = source.z - target.z;
-		return sqrt(dx * dx + dy * dy + dz * dz);
-	}
-
-	function convertVectorsToDir(source, target) {
-
-		var dx = source.x - target.x;
-		var dy = source.y - target.y;
-		var dz = source.z - target.z;
-		return sqrt(dx * dx + dy * dy + dz * dz);
-	}
-
-	function constructArrowHelper(source, target) {
-		var origin = new THREE.Vector3(50, 100, 50);
-		var terminus = new THREE.Vector3(75, 75, 75);
-		var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
-		var distance = origin.distanceTo(terminus);
-		var arrow = new THREE.ArrowHelper(direction, origin, distance, 0x884400);
-		//arrows.push(arrow);
-		console.log(distance);
-		console.log(arrow);
-		scene.add(arrow);
-	}
+	//event listener
+function onMouseDown( event_info ) {
+	console.log(spheres.children);
+    //stop any other event listener from recieving this event
+    event_info.preventDefault();  
+    
+    //this where begin to transform the mouse cordinates to three,js cordinates
+    mouse.x = ( event_info.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( event_info.clientY / window.innerHeight ) * 2 + 1;
+    
+    //this vector caries the mouse click cordinates
+    mouse_vector.set( mouse.x, mouse.y, mouse.z );
+    
+    //the final step of the transformation process, basically this method call
+    //creates a point in 3d space where the mouse click occurd
+    projector.unprojectVector( mouse_vector, camera );
+    
+    var direction = mouse_vector.sub( camera.position ).normalize();
+    
+    //ray = new THREE.Raycaster( camera.position, direction );
+    ray.set( camera.position, direction );
+    
+    //asking the raycaster if the mouse click touched the sphere object
+    intersects = ray.intersectObject();
+    
+    //the ray will return an array with length of 1 or greater if the mouse click
+    //does touch the sphere object
+    if( intersects.length ) {
+        
+        alert( "hit" );
+        
+    }
+    
+}
 
 }

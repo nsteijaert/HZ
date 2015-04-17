@@ -100,7 +100,7 @@ function runQuery(query, selection) {
 		}
 
 		$('pre code').each(function(i, e) {
-			hljs.highlightBlock(e);
+			//hljs.highlightBlock(e);
 		});
 
 		$.post("php/AST/ASTParser.php", {

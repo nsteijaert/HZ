@@ -40,7 +40,7 @@ $(document).ready(function() {
 			data : {
 				concept : concept,
 				depth : depth.toString(),
-				relations : relations
+				relations : relationsx
 			}
 		}).done(function(data) {
 			loadOptions(depth, relations);
@@ -48,6 +48,12 @@ $(document).ready(function() {
 			var links = JSON.parse(data);
 
 			var nodes = {};
+			
+			console.log(nodes);
+			
+			$.each(nodes, function(key, value) {
+				alert(key + ' ' + value);
+			});
 
 			// Compute the distinct nodes from the links.
 			links.forEach(function(link) {
@@ -60,6 +66,8 @@ $(document).ready(function() {
 					url : link.urltarget
 				});
 			});
+			
+			//console.log(links);
 
 			//var width = 960, height = 500;
 			center = [width / 2, height / 2];
