@@ -4,12 +4,14 @@
 //Wait for document to finish loading
 $(document).ready(function() {
 
+	var debug = true;
+
 	function load() {
 		$('.visualisationResult').append('<div class="bar"></div>');
 		$bar = $('.bar');
 		$bar.animate({
 			width : '100%'
-		}, 1000, "swing", function() {
+		}, 600, "swing", function() {
 
 		});
 	}
@@ -22,8 +24,8 @@ $(document).ready(function() {
 
 	function visualize(concept, depth, relations) {
 		// Set visualisation variables
-		var WIDTH = $(window).width();
-		HEIGHT = $(window).height();
+		var WIDTH = 600;
+		HEIGHT = 500;
 		COLOR = "steelblue";
 		LINK_COLOR = "#cccccc";
 
@@ -60,8 +62,8 @@ $(document).ready(function() {
 
 		// Create arrays for spheres and links
 		var spheres = [],
-			three_links = [];
-			labels = [];
+		    three_links = [];
+		labels = [];
 
 		// Define the 3d force
 		var force = d3.layout.force3d().nodes( sort_data = []).links( links = []).size([50, 50]).gravity(0.3).charge(-400);
@@ -152,7 +154,7 @@ $(document).ready(function() {
 			});
 
 			console.log(Object.keys(nodes).length);
-			
+
 			//initControls();
 			createNodes();
 			initForce3D();
@@ -161,78 +163,84 @@ $(document).ready(function() {
 			// Functions
 			function createNodes() {
 				console.log("createNodes called");
-				
+				console.log(spheres);
 				for (var key in nodes) {
 					if (nodes.hasOwnProperty(key)) {
 						var val = nodes[key];
-						nodes[key].x = 0;
-						nodes[key].y = 0;
-						nodes[key].z = 0;
-						console.log(val);
+						nodes[key].x = Math.floor((Math.random() * 100) + 1);
+						;
+						nodes[key].y = Math.floor((Math.random() * 100) + 1);
+						;
+						nodes[key].z = Math.floor((Math.random() * 100) + 1);
+						;
+						//console.log(val);
 
-					// set up the sphere vars
-					var radius = 5,
-						segments = 32,
-						rings = 32;
+						// set up the sphere vars
+						var radius = 5,
+						    segments = 32,
+						    rings = 32;
 
-					// create the sphere's material
-					var sphereMaterial = new THREE.MeshLambertMaterial({
-						color : COLOR
-					});
+						// create the sphere's material
+						var sphereMaterial = new THREE.MeshLambertMaterial({
+							color : COLOR
+						});
 
-					var sphere = new THREE.Mesh(new THREE.SphereGeometry(radius, segments, rings), sphereMaterial);
-					sphere.name = nodes[key].name;
-					console.log(sphere);
-					spheres.push(sphere);
+						var sphere = new THREE.Mesh(new THREE.SphereGeometry(radius, segments, rings), sphereMaterial);
+						sphere.name = nodes[key].name;
+						console.log(sphere);
+						spheres[key] = sphere;
+						console.log(spheres);
+						//spheres.push(sphere);
 
-					// add the sphere to the scene
-					scene.add(sphere);
+						// add the sphere to the scene
+						scene.add(sphere);
 
-					var canvas1 = document.createElement('canvas');
-					var context1 = canvas1.getContext('2d');
-					context1.font = "Bold 30px Arial";
-					context1.fillStyle = "rba(0,0,0,0.95)";
-					context1.fillText(nodes[key].name, 0, 20);
-					var texture1 = new THREE.Texture(canvas1);
-					texture1.needsUpdate = true;
-					texture1.magFilter = THREE.NearestFilter;
-					texture1.minFilter = THREE.LinearMipMapLinearFilter;
-					var material1 = new THREE.MeshBasicMaterial({
-						map : texture1,
-						side : THREE.DoubleSide
-					});
-					material1.transparent = true;
-					var mesh1 = new THREE.Mesh(new THREE.PlaneGeometry(40, 15), material1);
+						var canvas1 = document.createElement('canvas');
+						var context1 = canvas1.getContext('2d');
+						context1.font = "Bold 30px Arial";
+						context1.fillStyle = "rba(0,0,0,0.95)";
+						context1.fillText(nodes[key].name, 0, 20);
+						var texture1 = new THREE.Texture(canvas1);
+						texture1.needsUpdate = true;
+						texture1.magFilter = THREE.NearestFilter;
+						texture1.minFilter = THREE.LinearMipMapLinearFilter;
+						var material1 = new THREE.MeshBasicMaterial({
+							map : texture1,
+							side : THREE.DoubleSide
+						});
+						material1.transparent = true;
+						var mesh1 = new THREE.Mesh(new THREE.PlaneGeometry(40, 15), material1);
 
-					labels.push(mesh1);
+						labels[key] = mesh1;
+						//labels.push(mesh1);
 
-					scene.add(mesh1);
-				}
+						scene.add(mesh1);
+					}
 				}
 				// for (var i = 0; i < data.links.length; i++) {
-					// links.push({
-						// target : sort_data[data.links[i].target],
-						// source : sort_data[data.links[i].source],
-						// type : sort_data[data.links[i].type]
-					// });
-					// var origin = new THREE.Vector3(0, 0, 0);
-					// var terminus = new THREE.Vector3(20, 20, 20);
-					// var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
-					// var distance = origin.distanceTo(terminus);
-					// var color = new THREE.Color("rgb(0,0,0)");
-					// var headLength = 10;
-					// var headWidth = 5;
-					// var arrow = new THREE.ArrowHelper(direction, origin, distance, color, headLength, headWidth);
-					// //arrows.push(arrow);
-					// //console.log(distance);
-					// console.log(arrow);
-					// scene.add(arrow);
-					// arrow.userData = {
-						// source : data.links[i].source,
-						// target : data.links[i].target
-					// };
-					// three_links.push(arrow);
-					// scene.add(arrow);
+				// links.push({
+				// target : sort_data[data.links[i].target],
+				// source : sort_data[data.links[i].source],
+				// type : sort_data[data.links[i].type]
+				// });
+				// var origin = new THREE.Vector3(0, 0, 0);
+				// var terminus = new THREE.Vector3(20, 20, 20);
+				// var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
+				// var distance = origin.distanceTo(terminus);
+				// var color = new THREE.Color("rgb(0,0,0)");
+				// var headLength = 10;
+				// var headWidth = 5;
+				// var arrow = new THREE.ArrowHelper(direction, origin, distance, color, headLength, headWidth);
+				// //arrows.push(arrow);
+				// //console.log(distance);
+				// console.log(arrow);
+				// scene.add(arrow);
+				// arrow.userData = {
+				// source : data.links[i].source,
+				// target : data.links[i].target
+				// };
+				// three_links.push(arrow);
+				// scene.add(arrow);
 				// }
 				force.start();
 			}
@@ -247,6 +255,10 @@ $(document).ready(function() {
 			}
 
 			function initForce3D() {
+				if (debug) {
+					console.log('debug enabled');
+				}
+
 				console.log('force 3D initializing');
 				// set up the axes
 				var x = d3.scale.linear().domain([0, 350]).range([0, 10]),
@@ -254,33 +266,34 @@ $(document).ready(function() {
 				    z = d3.scale.linear().domain([0, 350]).range([0, 10]);
 
 				force.on("tick", function(e) {
-					for (var i = 0; i < sort_data.length; i++) {
-						console.log(spheres);
-						spheres[i].position.set(x(nodes[key].x) * 40 - 40, y(nodes[key].y) * 40 - 40, z(nodes[key].z) * 40 - 40);
-						labels[i].position.set(x(nodes[key].x) * 40 - 40, y(nodes[key].y) * 40 - 40, z(nodes[key].z) * 40 - 40);
+					//console.log(spheres);
+					for (var key in nodes) {
+						//console.log(spheres);
+						spheres[key].position.set(x(nodes[key].x) * 40 - 40, y(nodes[key].y) * 40 - 40, z(nodes[key].z) * 40 - 40);
+						labels[key].position.set(x(nodes[key].x) * 40 - 40, y(nodes[key].y) * 40 - 40, z(nodes[key].z) * 40 - 40);
 
 						// for (var j = 0; j < three_links.length; j++) {
-							// var arrow = three_links[j];
-							// if (arrow.userData.source === i) {
-								// var x_arrow = x(nodes[key].x) * 40 - 40;
-								// var y_arrow = y(nodes[key].y) * 40 - 40;
-								// var z_arrow = z(nodes[key].z) * 40 - 40;
-								// var new_origin = new THREE.Vector3(x_arrow, y_arrow, z_arrow);
-								// arrow.position = new_origin;
-							// }
-							// if (arrow.userData.target === i) {
-								// var x_arrow_cur = arrow.position.x;
-								// var y_arrow_cur = arrow.position.y;
-								// var z_arrow_cur = arrow.position.z;
-								// var cur_pos = new THREE.Vector3(x_arrow_cur, y_arrow_cur, z_arrow_cur);
-								// var x_arrow_tar = x(sort_data[i].x) * 40 - 40;
-								// var y_arrow_tar = y(sort_data[i].y) * 40 - 40;
-								// var z_arrow_tar = z(sort_data[i].z) * 40 - 40;
-								// var newTarget = new THREE.Vector3(x_arrow_tar, y_arrow_tar, z_arrow_tar);
-								// var direction = new THREE.Vector3().sub(newTarget, cur_pos);
-								// arrow.setDirection(direction.normalize());
-								// arrow.setLength(cur_pos.distanceTo(newTarget) - 5, 10, 5);
-							// }
+						// var arrow = three_links[j];
+						// if (arrow.userData.source === i) {
+						// var x_arrow = x(nodes[key].x) * 40 - 40;
+						// var y_arrow = y(nodes[key].y) * 40 - 40;
+						// var z_arrow = z(nodes[key].z) * 40 - 40;
+						// var new_origin = new THREE.Vector3(x_arrow, y_arrow, z_arrow);
+						// arrow.position = new_origin;
+						// }
+						// if (arrow.userData.target === i) {
+						// var x_arrow_cur = arrow.position.x;
+						// var y_arrow_cur = arrow.position.y;
+						// var z_arrow_cur = arrow.position.z;
+						// var cur_pos = new THREE.Vector3(x_arrow_cur, y_arrow_cur, z_arrow_cur);
+						// var x_arrow_tar = x(sort_data[i].x) * 40 - 40;
+						// var y_arrow_tar = y(sort_data[i].y) * 40 - 40;
+						// var z_arrow_tar = z(sort_data[i].z) * 40 - 40;
+						// var newTarget = new THREE.Vector3(x_arrow_tar, y_arrow_tar, z_arrow_tar);
+						// var direction = new THREE.Vector3().sub(newTarget, cur_pos);
+						// arrow.setDirection(direction.normalize());
+						// arrow.setLength(cur_pos.distanceTo(newTarget) - 5, 10, 5);
+						// }
 						//}
 					}
 
@@ -293,8 +306,8 @@ $(document).ready(function() {
 				renderer.render(scene, camera);
 				controls.update();
 
-				for (var i = 0; i < labels.length; i++) {
-					labels[i].lookAt(camera.position);
+				for (var label in labels) {
+					labels[label].lookAt(camera.position);
 				}
 				render();
 			}
@@ -342,17 +355,17 @@ $(document).ready(function() {
 				return sqrt(dx * dx + dy * dy + dz * dz);
 			}
 
-			// function constructArrowHelper(source, target) {
-				// var origin = new THREE.Vector3(50, 100, 50);
-				// var terminus = new THREE.Vector3(75, 75, 75);
-				// var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
-				// var distance = origin.distanceTo(terminus);
-				// var arrow = new THREE.ArrowHelper(direction, origin, distance, 0x884400);
-				// //arrows.push(arrow);
-				// //console.log(distance)
-				// //console.log(arrow);
-				// scene.add(arrow);
-			// }
+			function constructArrowHelper(source, target) {
+				var origin = new THREE.Vector3(50, 100, 50);
+				var terminus = new THREE.Vector3(75, 75, 75);
+				var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
+				var distance = origin.distanceTo(terminus);
+				var arrow = new THREE.ArrowHelper(direction, origin, distance, 0x884400);
+				//arrows.push(arrow);
+				//console.log(distance)
+				//console.log(arrow);
+				scene.add(arrow);
+			}
 
 
 			d3.selection.prototype.moveToFront = function() {
