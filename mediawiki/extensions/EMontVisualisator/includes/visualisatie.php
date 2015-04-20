@@ -93,6 +93,12 @@ $domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
 		  stroke-opacity:1;
 		}
 
+		.grouplabelrect
+		{
+			fill:#fff;
+			fill-opacity:0.5;
+		}
+
 		.label {
 		  	font-size:17px; /* 17px is 13 pt.*/
 			font-family:Open Sans,Arial,Helvetica,sans-serif;
@@ -212,6 +218,10 @@ function tekenDiagram()
             d.height = b.height + 2 * pad;
         });
 
+		group.each(function (d) {
+            d.padding=25;
+        });
+
         node.attr("x", function (d) { return d.innerBounds.x; })
             .attr("y", function (d) { return d.innerBounds.y; })
             .attr("width", function (d) { return d.innerBounds.width(); })
@@ -222,11 +232,23 @@ function tekenDiagram()
             .attr("width", function (d) { return d.bounds.width()-pad;})
             .attr("height", function (d) { return d.bounds.height()-pad;});
 
-        //groupTitles.attr("x",function(d,i) {return group(i).bounds.x+10;});
+        grouplabelrect.attr("x", function (d) { return d.bounds.x+margin; })
+             .attr("y", function (d) { return d.bounds.y+margin; })
+            .attr("width", function (d) { return d.bounds.width()-margin;})
+            .attr("height", 50);
 
         label.attr("transform", function (d) {
             return "translate(" + (d.x - pad/2) + "," + (d.y + pad/1.5 - d.height/2) + ")";
         });
+
+        grouplabel.attr("transform", function (d) {
+            return "translate(" + (d.bounds.x+margin+pad) + "," + (d.bounds.y+(margin*4)) + ")";
+        });
+
+        grouplabelcliprect.attr("x",function (d) {return d.bounds.x;})
+        				.attr("y",function (d) {return d.bounds.y;})
+        				.attr("width",function (d) { return d.bounds.width()-margin;})
+        				.attr("height", 25);
 	});
 
 	// De force layout zet alles automatisch op zijn plek
@@ -242,16 +264,8 @@ function tekenDiagram()
        .enter().append("rect")
         .attr("rx", 10).attr("ry", 10)
         .attr("class", "group")
-        .attr('width',<?php echo $nodewidth;?>)
-	    .attr('height',<?php echo $nodeheight;?>);
-
-    /*var groupTitles = svg.selectAll(".groupTitles")
-    	 .data(graph.groups)
-        .enter().append("rect")
- 	     .attr("class", "groupTitles")
-         .attr('width',100)
-         .attr('height',15)
-         .style("fill","#ff0000");*/
+         .attr('width',<?php echo $nodewidth+20;?>)
+	    .attr('height',<?php echo $nodeheight+20;?>);
 
     var link = svg.selectAll(".link")
         .data(graph.links)
@@ -284,6 +298,37 @@ function tekenDiagram()
          .attr("title", function (d) { return d.heading;})
          .on('dblclick', function (d) { openInNewTab('<?php echo $domeinprefix.' ';?>'+d.name);})
 	     .call(force.drag);
+
+	// Groeptitels
+    var grouplabel = svg.selectAll(".grouplabel")
+        .data(graph.groups)
+        .enter().append("g")
+        .attr("class", function (d) {return "grouplabel";})
+        .attr("style",function (d,i){return "clip-path: url(#clip"+i+");"})
+        .call(force.drag)
+        .append("text")
+         .attr("class", function (d) {return "grouplabeltext";})
+         .text(function (d) { return d.bijschrift; });
+
+    var grouplabelrect = svg.selectAll('grouplabelrect')
+    	.data(graph.groups)
+    	.enter().append("rect")
+         .attr("class", function (d) {return "grouplabelrect";})
+         .attr("style",function (d,i){return "clip-path: url(#clip"+i+");"})
+         .attr("rx", 10).attr("ry", 10)
+         .call(force.drag);
+
+	var grouplabelclip = svg.selectAll('.grouplabelclip')
+		.data(graph.groups)
+		.enter().append("clipPath")
+		 .attr("class", "grouplabelclip")
+		 .attr("id",function (d,i) {return "clip"+i})
+		 .call(force.drag)
+
+	var grouplabelcliprect = grouplabelclip.append("rect")
+		 .attr("class","grouplabelcliprect")
+		 .attr("style",function (d,i){return "clip-path: url(#clip"+i+");"})
+         .attr("rx", 10).attr("ry", 10);
 
     node.append("title")
         .text(function (d) { return d.heading; });

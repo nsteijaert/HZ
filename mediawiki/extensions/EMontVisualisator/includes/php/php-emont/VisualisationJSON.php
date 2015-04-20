@@ -72,7 +72,7 @@ foreach($ies_contexten as $context=>$ies)
 	foreach ($ies as $ie)
 	{
 		$index=array_search($ie,$nodeindex);
-		$leaves[]=$index;	
+		$leaves[]=$index;
 	}
 	$post['groups'][]['leaves']=$leaves;
 	$contextindex[]=$context;
@@ -98,15 +98,27 @@ foreach($contextLinks as $contextLink)
 	if($contextnr!==FALSE && $supercontextnr!==FALSE && !empty($post['groups'][$contextnr])&& !$gebruikteSubcontexten[$contextnr])
 	{
 		$post['groups'][$supercontextnr]['groups'][]=$contextnr;
-		$gebruikteSubcontexten[$contextnr]=TRUE;
 	}
+	if(!$gebruikteSubcontexten[$contextnr])
+		$gebruikteSubcontexten[$contextnr]=array();
+
+	$gebruikteSubcontexten[$contextnr][]=$supercontextnr;
 }
+
 // Kan waarschijnlijk efficiënter
 foreach ($post['groups'] as $index=>$inhoud)
 {
 	// Gebruik de uri om een titel toe te voegen aan de context. Deze komen uit een array, en moeten daarna worden omgezet in
 	// een string om ze vervolgens om te zetten in een leesbare titel.
 	$post['groups'][$index]['titel']=Uri::SMWuriNaarLeesbareTitel(implode("",array_slice($contextindex,$index,1)));
+	$post['groups'][$index]['bijschrift']="";
+
+	foreach($gebruikteSubcontexten[$index] as $supercontextindex)
+	{
+		if($post['groups'][$index]['bijschrift'])
+			$post['groups'][$index]['bijschrift'].=", ";
+		$post['groups'][$index]['bijschrift'].=Uri::SMWuriNaarLeesbareTitel(implode("",array_slice($contextindex,$supercontextindex,1))).': '.$post['groups'][$index]['titel'];
+	}
 }
 
 // Teken groepen met meer nodes eerst

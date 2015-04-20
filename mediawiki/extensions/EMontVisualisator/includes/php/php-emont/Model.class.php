@@ -331,6 +331,10 @@ class Model
 		$ieArticle->doEdit($nieuw_ie, 'Pagina aangemaakt via EMontVisualisator.');
 	}
 
+	/**
+	 * Voegt een verband toe tussen twee IE's
+	 * TODO: bewerken mogelijk maken
+	 */
 	static function maakVerband($van,$naar,$type,$subtype,$notitie)
 	{
 		$van=Uri::SMWuriNaarLeesbareTitel($van);
@@ -363,5 +367,20 @@ class Model
 		$nieuwe_inhoud=$inhoud.$verband_tekst.$achtervoegsel;
 
 		$te_bewerken_artikel->doEdit($nieuwe_inhoud,'Verband toegevoegd via EMontVisualisator',EDIT_UPDATE);
+	}
+
+	/**
+	 * Verwijdert een verband tussen twee IE's, indien aanwezig.
+	 */
+	static function verwijderVerband($van,$naar)
+	{
+		$van=Uri::SMWuriNaarLeesbareTitel($van);
+		$naar=Uri::SMWuriNaarLeesbareTitel($naar);
+
+		$titel_te_bewerken_artikel=Title::newFromText($van);
+		$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
+		$inhoud=$te_bewerken_artikel->getText();
+
+		$te_bewerken_artikel->doEdit($inhoud,'Verband verwijderd via EMontVisualisator',EDIT_UPDATE);
 	}
 }
