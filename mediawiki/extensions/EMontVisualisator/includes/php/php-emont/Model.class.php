@@ -90,48 +90,6 @@ class Model
 	}
 
 	/**
-	 * Bepaalt of een context-uri aan een practice (L1-model) toebehoort.
-	 */
-	static function isPractice($context_uri)
-	{
-		$query='DESCRIBE ?practice WHERE {
-			?practice property:Context '.Uri::escape_uri($context_uri).'.
-			?practice property:Practice_type "Practice"}';
-		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
-
-		if (count($result)>1)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	/**
-	 * Bepaalt of een context-uri aan een experience (L2-case) toebehoort.
-	 */
-	static function isExperience($context_uri)
-	{
-		$query='DESCRIBE ?experience WHERE {
-			?experience property:Context '.Uri::escape_uri($context_uri).'.
-			?experience property:Practice_type "Experience"}';
-		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
-
-		if (count($result)>1)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	/**
 	 * Bepaalt of een model een practice (L1-model) is.
 	 */
 	static function modelIsPractice($model_uri)
