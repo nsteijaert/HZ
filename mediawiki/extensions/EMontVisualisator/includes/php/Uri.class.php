@@ -71,11 +71,15 @@ class Uri
 		{
 			return $name_array[1];
 		}
-		else
+		elseif(strpos($uri,':'))
 		{
 			//Verwijder de prefix: het gedeelte tot en met de eerste(!) dubbele punt.
 			$name_array=array_slice(explode(':',self::decodeerSMWNaam($uri)),1);
 			return implode(':',$name_array);
+		}
+		else
+		{
+			return $uri;
 		}
 	}
 
