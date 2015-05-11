@@ -19,9 +19,11 @@ if($_POST['titel']!=null)
 <h2 id="practices">Practices (L1)</h2>
 <ul>
 <?php
+$urlpad=rtrim($_SERVER['REQUEST_URI'],'/');
+
 foreach ($l1modellen as $l1uri => $l1beschrijving)
 {
-	echo '<li><a href="Speciaal%3AEMontVisualisator/toon/'.Uri::stripSMWuriPadEnPrefixes($l1uri).'">'.$l1beschrijving.'</a></li>';
+	echo '<li><a href="'.$urlpad.'/toon/'.Uri::stripSMWuriPadEnPrefixes($l1uri).'">'.$l1beschrijving.'</a></li>';
 }
 ?>
 </ul>
@@ -30,7 +32,7 @@ foreach ($l1modellen as $l1uri => $l1beschrijving)
 <?php
 foreach($l2cases as $l2uri => $l2beschrijving)
 {
-	echo '<li><a href="Speciaal%3AEMontVisualisator/toon/'.Uri::stripSMWuriPadEnPrefixes($l2uri).'">'.$l2beschrijving.'</a></li>';
+	echo '<li><a href="'.$urlpad.'/toon/'.Uri::stripSMWuriPadEnPrefixes($l2uri).'">'.$l2beschrijving.'</a></li>';
 }
 ?>
 </ul>
