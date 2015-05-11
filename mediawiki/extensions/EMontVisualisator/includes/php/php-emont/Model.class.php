@@ -291,9 +291,8 @@ class Model
 
 	/**
 	 * Voegt een verband toe tussen twee IE's
-	 * TODO: bewerken mogelijk maken
 	 */
-	static function maakVerband($van,$naar,$type,$subtype,$notitie)
+	static function maakVerband($van,$naar,$type,$extra_informatie)
 	{
 		$van=Uri::SMWuriNaarLeesbareTitel($van);
 		$naar=Uri::SMWuriNaarLeesbareTitel($naar);
@@ -312,11 +311,10 @@ class Model
 
 		$verband_tekst='{{'.$type.'
 |Element link='.$naar.'
-|Element link note='.$notitie.'
 ';
-		if($type=='Contributes')
+		foreach($extra_informatie as $eigenschap=>$waarde)
 		{
-			$verband_tekst.='|Element contribution value='.$subtype.'
+			$verband_tekst.='|'.$eigenschap.'='.$waarde.'
 ';
 		}
 
@@ -329,8 +327,9 @@ class Model
 
 	/**
 	 * Verwijdert een verband tussen twee IE's, indien aanwezig.
+	 * @type: Met beginhoofdletter, zoals in wikiartikel, na {{
 	 */
-	static function verwijderVerband($van,$naar)
+	static function verwijderVerband($van,$naar,$type)
 	{
 		$van=Uri::SMWuriNaarLeesbareTitel($van);
 		$naar=Uri::SMWuriNaarLeesbareTitel($naar);
@@ -339,6 +338,107 @@ class Model
 		$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
 		$inhoud=$te_bewerken_artikel->getText();
 
-		$te_bewerken_artikel->doEdit($inhoud,'Verband verwijderd via EMontVisualisator',EDIT_UPDATE);
+		$verbandaanwezig=self::vindVerband($van,$naar,$type);
+
+		if ($verbandaanwezig===FALSE)
+			return;
+
+		$blockstring='{{'.$type;
+		$eindstring='}}';
+		$posblock=0;
+
+		while(TRUE)
+		{
+			$posblock=strpos($inhoud,$blockstring,$posblock);
+			$posnaar=strpos($inhoud,$naar,$posblock);
+			$posvolgendeblock=strpos($inhoud,$blockstring,$posblock+1);
+			//echo $posblock.' '.$posnaar.' '.$posvolgendeblock.'<br />';
+			
+			if($posnaar<$posvolgendeblock || $posvolgendeblock===FALSE)
+			{
+				$poseind=strpos($inhoud,$eindstring,$posnaar);
+				break;
+			}
+			// Om te voorkomen dat hetzelfde blok opnieuw wordt gevonden wordt de positie met 1 verhoogd.
+			$posblock++;
+		}
+		$nieuwe_inhoud=substr($inhoud,0,$posblock).trim(substr($inhoud,$poseind+strlen($eindstring)));
+
+		$te_bewerken_artikel->doEdit($nieuwe_inhoud,'Verband verwijderd via EMontVisualisator',EDIT_UPDATE);
+	}
+
+	/**
+	 * Wijzigt een verband.
+	 * @param $nieuwe_eigenschappen: Alle eigenschappen, inclusief de eigenschappen die niet veranderd zijn. 
+	 */
+	static function wijzigVerband($van,$naar,$type,$nieuwe_eigenschappen)
+	{
+		$verband=self::vindVerband($van,$naar,$type);
+		if ($verband===FALSE)
+			return;
+
+		self::verwijderVerband($van,$naar,$type);
+		self::maakVerband($van,$naar,$type,$nieuwe_eigenschappen);
+	}
+
+	/**
+	 * Vindt een verband.
+	 * @return: Het gevonden verband als array, of FALSE als het niet is gevonden.
+	 */
+	static function vindVerband($van,$naar,$type)
+	{
+		$inhoud=self::geefArtikelTekst($van);
+		$elementen=self::elementenNaarArrays($inhoud);
+
+		foreach($elementen as $element)
+		{
+			if($element['type']==$type && $element['Element link']==$naar)
+			{
+				return $element;
+			}
+		}
+		return FALSE;
+	}
+
+	/**
+	 * Zet alle eigenschappen uit {{}}-blokjes in een tekst (uit een wiki-artikel) om in een array.
+	 */
+	static function elementenNaarArrays($tekst)
+	{
+		// Tekens die buiten de {{}}-blokken staan, inclusief spaties worden weggefilterd.
+		// Daarnaast worden de eerste {{ en laatste }} in de tekst weggefilterd, zodat explode()
+		// kan splitsen op }}{{.
+		$tekst=preg_replace('/^(.*)\{\{/','',$tekst,1);
+		$tekst=substr($tekst, 0, strrpos( $tekst, '}}'));
+		$tekst=preg_replace("/\}\}([^\{\{]+)\{\{/",'}}{{',$tekst);
+		
+		$elementen=explode('}}{{',$tekst);
+		
+		$returnelementen=array();
+		foreach($elementen as $element)
+		{
+			// Eigenschappen zijn gescheiden dmv een verticale streep. Overbodige spaties rondom de eigenschappen
+			// en hun waardes worden weggefilterd.
+			$returneigenschappen=array();
+			$elementeigenschappen=explode('|',$element);
+			$returneigenschappen['type']=trim($elementeigenschappen[0]);
+			array_shift($elementeigenschappen);
+			foreach($elementeigenschappen as $elementeigenschap)
+			{
+				$eigenschapdelen=explode('=',$elementeigenschap);
+				$returneigenschappen[trim($eigenschapdelen[0])]=trim($eigenschapdelen[1]);
+			}
+			$returnelementen[]=$returneigenschappen;
+		}
+		return $returnelementen;
+	}
+
+	static function geefArtikelTekst($artikel)
+	{
+		$artikel=Uri::SMWuriNaarLeesbareTitel($artikel);
+		
+		$titel_op_te_vragen_artikel=Title::newFromText($artikel);
+		$op_te_vragen_artikel=new WikiPage($titel_op_te_vragen_artikel);
+		return $op_te_vragen_artikel->getText();
 	}
 }

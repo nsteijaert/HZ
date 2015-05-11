@@ -32,10 +32,26 @@ if($_POST['titel'])
 
 if($_POST['van'])
 {
-	Model::maakVerband($_POST['van'],$_POST['naar'],$_POST['type'],$_POST['subtype'],$_POST['notitie']);
+	$eigenschappen=array();
+
+	if($_POST['notitie'])
+		$eigenschappen['Element link note']=$_POST['notitie'];
+	if($_POST['type']=='Contributes')
+		$eigenschappen['Element contribution value']=$_POST['subtype'];
+	if($_POST['type']=='Connects')
+		$eigenschappen['Element connection type']=$_POST['subtype'];
+
+	Model::maakVerband($_POST['van'],$_POST['naar'],$_POST['type'],$eigenschappen);
 }
 
-$domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
+if($_POST['verwijder-verband'])
+{
+	$waardes=explode('|',$_POST['verwijder-verband']);
+	Model::verwijderVerband($waardes[0],$waardes[2],$waardes[1]);
+}
+
+//$domeinprefix='http://195.93.238.49/wiki/deltaexpertise/wiki/index.php/';
+$domeinprefix='http://127.0.0.1/mediawiki/index.php/';
 ?>
 
 	<style>
@@ -379,18 +395,36 @@ if(Model::modelIsExperience($model_uri))
 
 	$data=Model::geefElementenUitContextEnSubcontexten($context_uri);
 	$ie_lijst='';
+	$verbandenlijst=array();
 
 	foreach($data['@graph'] as $item)
 	{
 		$ie_lijst.='<option value="'.$item['@id'].'">'.$item['label'].'</option>';
+		$elementen=Model::elementenNaarArrays(Model::geefArtikelTekst($item['@id']));
+
+		foreach($elementen as $element)
+		{
+			if($element['Element link'])
+			{
+				$verbandenlijst[]=array('van'=>$item['label'],'type'=>$element['type'],'naar'=>$element['Element link']);
+			}
+		}
 	}
 
-	echo '<h2>Verband aanbrengen</h2>';
+	echo '<h2>Nieuw verband aanbrengen</h2>';
 	echo '<form method="post">';
 	echo 'Van: <select name="van">'.$ie_lijst.'</select><br />';
 	echo 'Naar: <select name="naar">'.$ie_lijst.'</select><br />';
-	echo 'Type: <select name="type"><option value="Contributes">Contributes</option><option value="Depends">Depends</option><option value="Connects">Connects</option></select><br />';
+	echo 'Type: <select name="type"><option value="Contributes">Contributes</option><option value="Depends">Depends</option><option value="Connects">Connects</option><option value="Produces">Produces</option><option value="Consumes">Consumes</option></select><br />';
 	echo 'Notitie: <input name="notitie" type="text" style="width:300px;"><br />';
 	echo 'CV/CT: <input name="subtype" type="text" style="width:300px;"/><br />';
 	echo '<input type="submit" value="Aanmaken" /></form>';
+
+	echo '<h2>Verband verwijderen</h2>';
+	echo '<form method="post">';
+	foreach($verbandenlijst as $verband)
+	{
+		echo '<input type="radio" name="verwijder-verband" value="'.$verband['van'].'|'.$verband['type'].'|'.$verband['naar'].'"/>'.$verband['van'].' '.$verband['type'].' '.$verband['naar'].'<br />';
+	}
+	echo '<input type="submit" value="Verwijderen"></form>';
 }
