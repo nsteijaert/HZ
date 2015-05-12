@@ -1,0 +1,81 @@
+/* Beter dan onzichtbaar */
+svg{
+	overflow:visible;
+}
+
+/* Standaard */
+.node {
+    fill: #eee;
+    stroke-width: 1px;
+    cursor: move;
+}
+.nodeActivity {
+    fill: #eae4d7;
+    stroke:#bfac88;
+}
+.nodeCondition {
+	fill: #4c97d6;
+}
+.nodeBelief {
+	fill: #4c97d6;
+}
+.nodeGoal {
+	fill: #ffffff;
+}
+.nodeOutcome {
+	fill: #ffffff;
+    stroke:#bfac88;
+}
+
+.link {
+    stroke:#bfac88;
+    stroke-width: 1px;
+    marker-end:#standaard;
+}
+
+.linktooltip
+{
+	stroke:#222;
+	stroke-opacity:0;
+	stroke-width:7px;
+    cursor: help;
+}
+.linktooltip:hover {
+	stroke-opacity:0.3;
+}
+
+.group {
+  stroke: #bfac88;
+  stroke-width: 1px;
+  fill: #eae4d7;
+  fill-opacity:0;
+  stroke-opacity:1;
+}
+
+.grouplabelrect
+{
+	fill:#fff;
+	fill-opacity:0.5;
+}
+
+.label {
+  	font-size:17px; /* 17px is 13 pt.*/
+	font-family:Open Sans,Arial,Helvetica,sans-serif;
+	fill:#222;
+    cursor: move;
+    text-anchor:middle;
+}
+.labelBelief {
+	fill: #fff;
+}
+.labelGoal {
+	fill:#4c97d6;
+}
+.labelOutcome {
+	fill:#4c97d6;
+}
+
+marker#standaard {
+	fill:#bfac88;
+	stroke: #bfac88;
+}
