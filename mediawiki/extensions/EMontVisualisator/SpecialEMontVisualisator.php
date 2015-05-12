@@ -3,20 +3,19 @@ require_once(__DIR__.'/includes/php/php-emont/Model.class.php');
 
 class SpecialEMontVisualisator extends SpecialPage
 {
-	function __construct() {
+	function __construct()
+	{
 		parent::__construct('EMontVisualisator');
 	}
- 
-	function execute( $par ) {
-		$request = $this->getRequest();
-		$output = $this->getOutput();
-		$this->setHeaders('HolderDeBolder');
- 
-		# Get request data from, e.g.
-		$param = $request->getText( 'param' );
-		$pars=explode('/',$par); 
 
-		// Bij geen parameters het overzicht tonen		
+	function execute($par)
+	{
+		$output = $this->getOutput();
+
+		// Parameters uit url
+		$pars=explode('/',$par);
+
+		// Bij geen parameters het overzicht tonen
 		if(!$par)
 		{
 			require_once(__DIR__.'/includes/php/Modelselectie.class.php');
