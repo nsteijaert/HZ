@@ -1,4 +1,7 @@
 <?php
+// Het uitspugen van een simpele notice of warning is al genoeg om de visualisatie op zijn gat te gooien.
+ini_set('display_errors','0');
+
 require_once(__DIR__.'/VisualisationVisitor.class.php');
 require_once(__DIR__.'/JSON_EMontParser.class.php');
 require_once(__DIR__.'/../SPARQLConnection.class.php');
