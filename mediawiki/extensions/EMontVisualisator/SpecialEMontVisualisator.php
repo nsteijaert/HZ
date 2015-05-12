@@ -1,7 +1,9 @@
 <?php
+require_once(__DIR__.'/includes/php/php-emont/Model.class.php');
+
 class SpecialEMontVisualisator extends SpecialPage
 {
-function __construct() {
+	function __construct() {
 		parent::__construct('EMontVisualisator');
 	}
  
@@ -17,20 +19,23 @@ function __construct() {
 		// Bij geen parameters het overzicht tonen		
 		if(!$par)
 		{
-			ob_start();
-			require_once(__DIR__.'/includes/modelselectie.php');
+			require_once(__DIR__.'/includes/php/Modelselectie.class.php');
+			$modelselectie=new Modelselectie();
+
 			$output->setPageTitle('Modellen');
-			$output->addHTML(ob_get_contents());
-			ob_end_clean();
+			$output->addHTML($modelselectie->geefInhoud());
 		}
 		else
 		{
+			$model_uri='wiki:'.$pars[1];
+			$context_uri=Model::geefContextVanModel($model_uri);
+
+			require_once(__DIR__.'/includes/php/Visualisatiepagina.class.php');
+			$output->setPageTitle(Uri::SMWuriNaarLeesbareTitel($context_uri));
 			$output->addModules('ext.EMontVisualisator');
-			ob_start();
-			require_once(__DIR__.'/includes/visualisatie.php');
-			$output->setPageTitle(Uri::SMWuriNaarLeesbareTitel($context_uri));	
-			$output->addHTML(ob_get_contents());
-			ob_end_clean();
+
+			$visualisatiepagina=new Visualisatiepagina($model_uri);
+			$output->addHTML($visualisatiepagina->geefInhoud());
 		}
 	}
 }
