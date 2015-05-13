@@ -15,26 +15,53 @@ class Model
 	 */
 	static function zoekSubcontexten($context_uri)
 	{
-		$subrollen=array();
+		$subcontexten=array();
+		if(!$context_uri)
+			return $subcontexten;
+
 		$context_uri=Uri::escape_uri($context_uri);
 
-		$query='DESCRIBE ?context WHERE { ?context <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3ASupercontext> '.$context_uri.' }';
+		$query='DESCRIBE ?context WHERE { ?context property:Supercontext '.$context_uri.' }';
 		$connectie=new SPARQLConnection();
-		$contexten=$connectie->JSONQueryAsPHPArray($query);
+		$contexten=$connectie->JSONQueryAsMultidimensionalPHPArray($query);
 
 		if(isset($contexten['@graph']))
 		{
 			foreach($contexten['@graph'] as $item)
 			{
-				// Subsituaties moeten niet worden meegenomen.
-				if(!self::isHoofdcontextVanPractice($item['@id']))
+				if($item['@id'])
 				{
-					$subrollen[]=$item['@id'];
-					$subrollen=array_merge($subrollen,self::zoekSubcontexten($item['@id']));
+					// Subcases moeten niet worden meegenomen.
+					if(!self::isHoofdcontextVanPractice($item['@id']))
+					{
+						$subcontexten[]=$item['@id'];
+						$subcontexten=array_merge($subcontexten,self::zoekSubcontexten($item['@id']));
+					}
 				}
 			}
 		}
-		return $subrollen;
+		return $subcontexten;
+	}
+
+	static function zoekSupercontexten($context_uri)
+	{
+		$subrollen=array();
+		$context_uri=Uri::escape_uri($context_uri);
+
+		$query='DESCRIBE ?supercontext WHERE { '.$context_uri.' property:Supercontext ?supercontext }';
+		$connectie=new SPARQLConnection();
+		$contexten=$connectie->JSONQueryAsMultidimensionalPHPArray($query);
+
+		$return=array();
+		if(isset($contexten['@graph']))
+		{
+			foreach($contexten['@graph'] as $item)
+			{
+				if($item['@id'])
+					$return[]=$item['@id'];
+			}
+		}
+		return $return;
 	}
 
 	/**
@@ -93,7 +120,7 @@ class Model
 	 * Bepaalt of een model een practice (L1-model) is.
 	 */
 	static function modelIsPractice($model_uri)
-	{		
+	{
 		$query='DESCRIBE ?practice WHERE {
 			?practice property:Practice_type "Practice" .
 			FILTER (?practice = '.Uri::escape_uri($model_uri).')}';
@@ -132,7 +159,7 @@ class Model
 			return false;
 		}
 	}
-	
+
 	static function geefContextVanModel($model_uri)
 	{
 		$query='SELECT ?context WHERE {
@@ -142,19 +169,19 @@ class Model
 
 		return strtr($result['results']['bindings'][0]['context']['value'],array('http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'=>'wiki:'));
 	}
-	
+
 	static function geefL1modelVanCase($l2_uri)
 	{
 		if (!self::modelIsExperience($l2_uri))
 		{
 			return null;
 		}
-		
+
 		$query='SELECT ?model WHERE {
 			'.Uri::escape_uri($l2_uri).' property:Part_of ?model}';
 		$connectie=new SPARQLConnection();
 		$result=$connectie->JSONQueryAsPHPArray($query);
-		
+
 		return strtr($result['results']['bindings'][0]['model']['value'],array('http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'=>'wiki:'));
 	}
 
@@ -189,17 +216,19 @@ class Model
 	{
 		$l1model=Uri::SMWuriNaarLeesbareTitel($practice_uri);
 
-		$contextTitle = Title::newFromText($titel);
-		$contextArticle = new Article($contextTitle);
+		self::nieuweContext($titel);
 
-		if($contextArticle)
+		$vnTitle = Title::newFromText($titel.' VN');
+		$vnArticle = new Article($vnTitle);
+
+		if($vnArticle)
 		{
-			$contextArticleContents='{{Context}}
-{{Heading
-|Heading nl='.$titel.'
+			$vnArticleContents='{{Context VN
+|Model link='.$titel.'
 }}
-{{Context query}}';
-			$contextArticle->doEdit($contextArticleContents, 'Pagina aangemaakt via EMontVisualisator.');
+{{Intentional Element VN set links}}
+{{Intentional Element VN show}}';
+			$vnArticle->doEdit($vnArticleContents, 'Pagina aangemaakt via EMontVisualisator.');
 		}
 
 		$experienceTitle = Title::newFromText($titel.' experience');
@@ -353,7 +382,7 @@ class Model
 			$posnaar=strpos($inhoud,$naar,$posblock);
 			$posvolgendeblock=strpos($inhoud,$blockstring,$posblock+1);
 			//echo $posblock.' '.$posnaar.' '.$posvolgendeblock.'<br />';
-			
+
 			if($posnaar<$posvolgendeblock || $posvolgendeblock===FALSE)
 			{
 				$poseind=strpos($inhoud,$eindstring,$posnaar);
@@ -369,7 +398,7 @@ class Model
 
 	/**
 	 * Wijzigt een verband.
-	 * @param $nieuwe_eigenschappen: Alle eigenschappen, inclusief de eigenschappen die niet veranderd zijn. 
+	 * @param $nieuwe_eigenschappen: Alle eigenschappen, inclusief de eigenschappen die niet veranderd zijn.
 	 */
 	static function wijzigVerband($van,$naar,$type,$nieuwe_eigenschappen)
 	{
@@ -411,9 +440,9 @@ class Model
 		$tekst=preg_replace('/^(.*)\{\{/','',$tekst,1);
 		$tekst=substr($tekst, 0, strrpos( $tekst, '}}'));
 		$tekst=preg_replace("/\}\}([^\{\{]+)\{\{/",'}}{{',$tekst);
-		
+
 		$elementen=explode('}}{{',$tekst);
-		
+
 		$returnelementen=array();
 		foreach($elementen as $element)
 		{
@@ -436,9 +465,179 @@ class Model
 	static function geefArtikelTekst($artikel)
 	{
 		$artikel=Uri::SMWuriNaarLeesbareTitel($artikel);
-		
+
 		$titel_op_te_vragen_artikel=Title::newFromText($artikel);
 		$op_te_vragen_artikel=new WikiPage($titel_op_te_vragen_artikel);
 		return $op_te_vragen_artikel->getText();
+	}
+
+	static function nieuweContext($naam)
+	{
+		$contextTitle = Title::newFromText($naam);
+		$contextArticle = new Article($contextTitle);
+
+		if($contextArticle)
+		{
+			$contextArticleContents='{{Context}}
+{{Heading
+|Heading nl='.$naam.'
+}}
+{{Context query}}';
+			$contextArticle->doEdit($contextArticleContents, 'Pagina aangemaakt via EMontVisualisator.');
+		}
+	}
+
+	static function extraSupercontext($context,$supercontext_uri)
+	{
+		$titel_te_bewerken_artikel=Title::newFromText($context);
+		$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
+		$inhoud=$te_bewerken_artikel->getText();
+
+		$blockstring='{{Context';
+		$eindstring='}}';
+
+		$posblock=strpos($inhoud,$beginblocklockstring);
+		$poseind=strpos($inhoud,$eindstring,$posblock+1);
+
+		$preblock=substr($inhoud,0,$posblock);
+		// De eindstring }} zit in het postblock!
+		$postblock=trim(substr($inhoud,$poseind));
+		$block=substr($inhoud,$posblock,$poseind);
+
+		if(!strpos($block,'Supercontext'))
+		{
+			$block.='|Supercontext='.Uri::SMWuriNaarLeesbareTitel($supercontext_uri).',';
+		}
+		else
+		{
+			$supconblockintro='Supercontext=';
+			$supconblockoutro='|';
+
+			$posintro=strpos($block,$supconblockintro);
+			$posoutro=strpos($block,$supconblockoutro,$posintro);
+
+			$supconpreblock=substr($block,0,$posintro);
+
+			if($posoutro)
+			{
+				$supconblock=substr($block,$posintro,$posoutro);
+				$supconpostblock=substr($block,$posoutro);
+			}
+			else
+			{
+				$supconblock=substr($block,$posintro);
+				$supconpostblock='';
+			}
+
+			if(substr($supconblock,-1,1)!=',')
+				$supconblock.=',';
+
+			$supconblock.=Uri::SMWuriNaarLeesbareTitel($supercontext_uri).',';
+			$block=$supconpreblock.$supconblock.$subconpostblock;
+		}
+
+		$nieuwe_inhoud=$preblock.$block.$postblock;
+
+		$te_bewerken_artikel->doEdit($nieuwe_inhoud,'Supercontext toegevoegd via EMontVisualisator',EDIT_UPDATE);
+	}
+
+	static function supercontextVerwijderen($context,$supercontext)
+	{
+		$titel_te_bewerken_artikel=Title::newFromText($context);
+		$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
+		$inhoud=$te_bewerken_artikel->getText();
+
+		$blockstring='{{Context';
+		$eindstring='}}';
+
+		$posblock=strpos($inhoud,$blockstring);
+		$poseind=strpos($inhoud,$eindstring,$posblock+1);
+
+		$preblock=substr($inhoud,0,$posblock);
+		// De eindstring }} zit in het postblock!
+		$postblock=trim(substr($inhoud,$poseind));
+		$block=substr($inhoud,$posblock,$poseind);
+
+		$supconblockintro='Supercontext=';
+		$supconblockoutro='|';
+
+		$posintro=strpos($block,$supconblockintro);
+		$posoutro=strpos($block,$supconblockoutro,$posintro);
+
+		$supconpreblock=substr($block,0,$posintro);
+
+		if($posoutro)
+		{
+			$supconblock=substr($block,$posintro,$posoutro);
+			$supconpostblock=substr($block,$posoutro);
+		}
+		else
+		{
+			$supconblock=substr($block,$posintro);
+			$supconpostblock='';
+		}
+
+		$supconblock=strtr($supconblock,array($supercontext=>''));
+		$supconblock=strtr($supconblock,array(',,'=>','));
+
+		$block=$supconpreblock.$supconblock.$supconpostblock;
+		$nieuwe_inhoud=$preblock.$block.$postblock;
+
+		$te_bewerken_artikel->doEdit($nieuwe_inhoud,'Supercontext verwijderd via EMontVisualisator',EDIT_UPDATE);
+	}
+
+	static function contextToevoegenAanIE($ie,$context)
+	{
+		$titel_te_bewerken_artikel=Title::newFromText($ie);
+		$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
+		$inhoud=$te_bewerken_artikel->getText();
+
+		//$ie_type=SPARQLConnection::geefEersteResultaat('wiki:'.Uri::codeerSMWnaam($ie),'property:Intentional_Element_type');
+		$blockstring='{{';//.$ie_type;
+		$eindstring='}}';
+
+		$posblock=strpos($inhoud,$blockstring);
+		$poseind=strpos($inhoud,$eindstring,$posblock+1);
+
+		$preblock=substr($inhoud,0,$posblock);
+		// De eindstring }} zit in het postblock!
+		$postblock=trim(substr($inhoud,$poseind));
+		$block=substr($inhoud,$posblock,($poseind-$posblock));
+
+		if(!strpos($block,'Context'))
+		{
+			$block.='|Context='.$context.',';
+		}
+		else
+		{
+			$conblockintro='Context=';
+			$conblockoutro='|';
+
+			$posintro=strpos($block,$conblockintro);
+			$posoutro=strpos($block,$conblockoutro,$posintro);
+
+			$conpreblock=substr($block,0,$posintro);
+
+			if($posoutro)
+			{
+				$conblock=substr($block,$posintro,($posoutro-$posintro));
+				$conpostblock=substr($block,$posoutro);
+			}
+			else
+			{
+				$conblock=substr($block,$posintro);
+				$conpostblock='';
+			}
+
+			if(substr($conblock,-1,1)!=',')
+				$conblock.=',';
+
+			$conblock.=$context.',';
+			$block=$conpreblock.$conblock.$conpostblock;
+		}
+
+		$nieuwe_inhoud=$preblock.$block.$postblock;
+
+		$te_bewerken_artikel->doEdit($nieuwe_inhoud,'Context toegevoegd via EMontVisualisator',EDIT_UPDATE);
 	}
 }
