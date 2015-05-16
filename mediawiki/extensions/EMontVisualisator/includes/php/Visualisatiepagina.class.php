@@ -31,14 +31,14 @@ if($_POST)
 
 			if($context!=$supercontext)
 			{
-				Model::extraSupercontext(Uri::SMWuriNaarLeesbareTitel($context),$supercontext);
+				Model::extraSupercontext($context,$supercontext);
 			}
 		}
 		elseif($actie=='supercontextverwijderen')
 		{
 			list($context,$supercontext)=explode('|',$_POST['verwijder-supercontexten']);
 
-			Model::supercontextVerwijderen(Uri::SMWuriNaarLeesbareTitel($context),Uri::SMWuriNaarLeesbareTitel($supercontext));
+			Model::supercontextVerwijderen($context,$supercontext);
 		}
 	}
 	elseif($type=='ie')
@@ -48,35 +48,33 @@ if($_POST)
 			$ie=$_POST['ie'];
 			$context=$_POST['context'];
 
-			Model::contextToevoegenAanIE(Uri::SMWuriNaarLeesbareTitel($ie),Uri::SMWuriNaarLeesbareTitel($context));
+			Model::contextToevoegenAanIE($ie,$context);
+		}
+		elseif($actie=='nieuw')
+		{
+			Model::nieuwIE($_POST['ie'],$context_uri,$_POST['titel']);
+		}
+		elseif($actie=='maakverband')
+		{
+			$eigenschappen=array();
+
+			if($_POST['notitie'])
+				$eigenschappen['Element link note']=$_POST['notitie'];
+			if($_POST['type']=='Contributes')
+				$eigenschappen['Element contribution value']=$_POST['subtype'];
+			if($_POST['type']=='Connects')
+				$eigenschappen['Element connection type']=$_POST['subtype'];
+
+			Model::maakVerband($_POST['van'],$_POST['naar'],$_POST['type'],$eigenschappen);
+		}
+		elseif(actie=='verwijderverband')
+		{
+			$waardes=explode('|',$_POST['verwijder-verband']);
+			Model::verwijderVerband($waardes[0],$waardes[2],$waardes[1]);
 		}
 	}
 }
 
-if($_POST['titel'])
-{
-	Model::nieuwIE($_POST['ie'],$context_uri,$_POST['titel']);
-}
-
-if($_POST['van'])
-{
-	$eigenschappen=array();
-
-	if($_POST['notitie'])
-		$eigenschappen['Element link note']=$_POST['notitie'];
-	if($_POST['type']=='Contributes')
-		$eigenschappen['Element contribution value']=$_POST['subtype'];
-	if($_POST['type']=='Connects')
-		$eigenschappen['Element connection type']=$_POST['subtype'];
-
-	Model::maakVerband($_POST['van'],$_POST['naar'],$_POST['type'],$eigenschappen);
-}
-
-if($_POST['verwijder-verband'])
-{
-	$waardes=explode('|',$_POST['verwijder-verband']);
-	Model::verwijderVerband($waardes[0],$waardes[2],$waardes[1]);
-}
 /* Einde manipulatiecode */
 
 class Visualisatiepagina
@@ -105,12 +103,13 @@ class Visualisatiepagina
 			$data=Model::geefElementenUitContextEnSubcontexten($l1hoofdcontext);
 
 			$this->inhoud.= '<h2>Nieuw Intentional Element</h2>';
-			$this->inhoud.= '<form method="post">Beschikbare IE\'s (afkomstig van L1-model "'.Uri::SMWuriNaarLeesbareTitel($l1model).'"):<br /><select name="ie">';
+			$this->inhoud.= '<form action="?actie=nieuw&amp;type=ie" method="post">Beschikbare IE\'s (afkomstig van L1-model "'.Uri::SMWuriNaarLeesbareTitel($l1model).'"):<br /><select name="ie">';
 
 			foreach($data['@graph'] as $item)
 			{
 				$this->inhoud.= '<option value="'.$item['@id'].'">'.$item['label'].'</option>';
 			}
+			$this->inhoud.='Contextkeuze!';
 
 			$this->inhoud.= '</select><br />Naam: <input type="text" style="width: 300px;" name="titel"/><input type="submit" value="Aanmaken"/></form>';
 
@@ -138,7 +137,7 @@ class Visualisatiepagina
 			}
 
 			$this->inhoud.='<h2>Nieuw verband aanbrengen</h2>';
-			$this->inhoud.='<form method="post"><table>';
+			$this->inhoud.='<form method="post" action="?actie=maakverband&amp;type=ie"><table>';
 			$this->inhoud.='<tr><th>Van:</th><th>Type:</th><th>Naar:</th><tr>';
 			$this->inhoud.='<tr><td><select name="van">'.$ie_lijst.'</select></td>';
 			$this->inhoud.='<td><select name="type"><option value="Contributes">Contributes</option><option value="Depends">Depends</option><option value="Connects">Connects</option><option value="Produces">Produces</option><option value="Consumes">Consumes</option></select></td>';
@@ -148,7 +147,7 @@ class Visualisatiepagina
 			$this->inhoud.='</table><input type="submit" value="Aanmaken" /></form>';
 
 			$this->inhoud.='<h2>Verband verwijderen</h2>';
-			$this->inhoud.='<form method="post"><table>';
+			$this->inhoud.='<form method="post" action="?actie=verwijderverband&amp;type=ie"><table>';
 			foreach($verbandenlijst as $verband)
 			{
 				$this->inhoud.='<tr><td><input type="radio" name="verwijder-verband" value="'.$verband['van'].'|'.$verband['type'].'|'.$verband['naar'].'"/>&nbsp;</td><td>'.$verband['van'].'&nbsp;</td><td>'.$verband['type'].'&nbsp;</td><td>'.$verband['naar'].'</td></tr>';

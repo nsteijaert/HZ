@@ -40,7 +40,7 @@ class Model
 				}
 			}
 		}
-		return $subcontexten;
+		return array_unique($subcontexten);
 	}
 
 	static function zoekSupercontexten($context_uri)
@@ -487,113 +487,42 @@ class Model
 		}
 	}
 
-	static function extraSupercontext($context,$supercontext_uri)
+	static function extraSupercontext($context_uri,$supercontext_uri)
 	{
-		$titel_te_bewerken_artikel=Title::newFromText($context);
-		$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
-		$inhoud=$te_bewerken_artikel->getText();
+		$context=Uri::SMWuriNaarLeesbareTitel($context_uri);
+		$supercontext=Uri::SMWuriNaarLeesbareTitel($supercontext_uri);
 
-		$blockstring='{{Context';
-		$eindstring='}}';
-
-		$posblock=strpos($inhoud,$beginblocklockstring);
-		$poseind=strpos($inhoud,$eindstring,$posblock+1);
-
-		$preblock=substr($inhoud,0,$posblock);
-		// De eindstring }} zit in het postblock!
-		$postblock=trim(substr($inhoud,$poseind));
-		$block=substr($inhoud,$posblock,$poseind);
-
-		if(!strpos($block,'Supercontext'))
-		{
-			$block.='|Supercontext='.Uri::SMWuriNaarLeesbareTitel($supercontext_uri).',';
-		}
-		else
-		{
-			$supconblockintro='Supercontext=';
-			$supconblockoutro='|';
-
-			$posintro=strpos($block,$supconblockintro);
-			$posoutro=strpos($block,$supconblockoutro,$posintro);
-
-			$supconpreblock=substr($block,0,$posintro);
-
-			if($posoutro)
-			{
-				$supconblock=substr($block,$posintro,$posoutro);
-				$supconpostblock=substr($block,$posoutro);
-			}
-			else
-			{
-				$supconblock=substr($block,$posintro);
-				$supconpostblock='';
-			}
-
-			if(substr($supconblock,-1,1)!=',')
-				$supconblock.=',';
-
-			$supconblock.=Uri::SMWuriNaarLeesbareTitel($supercontext_uri).',';
-			$block=$supconpreblock.$supconblock.$subconpostblock;
-		}
-
-		$nieuwe_inhoud=$preblock.$block.$postblock;
-
-		$te_bewerken_artikel->doEdit($nieuwe_inhoud,'Supercontext toegevoegd via EMontVisualisator',EDIT_UPDATE);
+		self::voegToeAanBlokargumentVanArtikel($context,'Context','Supercontext',$supercontext_uri,'Supercontext toegevoegd via EMontVisualisator');
 	}
 
-	static function supercontextVerwijderen($context,$supercontext)
+	static function supercontextVerwijderen($context_uri,$supercontext_uri)
 	{
-		$titel_te_bewerken_artikel=Title::newFromText($context);
-		$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
-		$inhoud=$te_bewerken_artikel->getText();
+		$context=Uri::SMWuriNaarLeesbareTitel($context_uri);
+		$supercontext=Uri::SMWuriNaarLeesbareTitel($supercontext_uri);
 
-		$blockstring='{{Context';
-		$eindstring='}}';
-
-		$posblock=strpos($inhoud,$blockstring);
-		$poseind=strpos($inhoud,$eindstring,$posblock+1);
-
-		$preblock=substr($inhoud,0,$posblock);
-		// De eindstring }} zit in het postblock!
-		$postblock=trim(substr($inhoud,$poseind));
-		$block=substr($inhoud,$posblock,$poseind);
-
-		$supconblockintro='Supercontext=';
-		$supconblockoutro='|';
-
-		$posintro=strpos($block,$supconblockintro);
-		$posoutro=strpos($block,$supconblockoutro,$posintro);
-
-		$supconpreblock=substr($block,0,$posintro);
-
-		if($posoutro)
-		{
-			$supconblock=substr($block,$posintro,$posoutro);
-			$supconpostblock=substr($block,$posoutro);
-		}
-		else
-		{
-			$supconblock=substr($block,$posintro);
-			$supconpostblock='';
-		}
-
-		$supconblock=strtr($supconblock,array($supercontext=>''));
-		$supconblock=strtr($supconblock,array(',,'=>','));
-
-		$block=$supconpreblock.$supconblock.$supconpostblock;
-		$nieuwe_inhoud=$preblock.$block.$postblock;
-
-		$te_bewerken_artikel->doEdit($nieuwe_inhoud,'Supercontext verwijderd via EMontVisualisator',EDIT_UPDATE);
+		self::verwijderUitBlokargumentVanArtikel($context,'Context','Supercontext',$supercontext_uri,'Supercontext verwijderd via EMontVisualisator');
 	}
 
-	static function contextToevoegenAanIE($ie,$context)
+	static function contextToevoegenAanIE($ie_uri,$context_uri)
 	{
-		$titel_te_bewerken_artikel=Title::newFromText($ie);
+		$ie=Uri::SMWuriNaarLeesbareTitel($ie_uri);
+		$context=Uri::SMWuriNaarLeesbareTitel($context_uri);
+		$ie_type=SPARQLConnection::geefEersteResultaat($ie_uri,'property:Intentional_Element_type');
+
+		self::voegToeAanBlokargumentVanArtikel($ie,$ie_type,'Context',$context,'Context toegevoegd via EMontVisualisator');
+	}
+
+	/**
+	 * Voegt een waarde uit een argument toe aan een blok op een wiki-pagina.
+	 * Bijvoorbeeld {{Context|Supercontext=bestaande_waarde,toe_te_voegen_waarde}}
+	 */
+	static function voegToeAanBlokargumentVanArtikel($artikel,$bloknaam,$argument,$toe_te_voegen_inhoud,$samenvatting)
+	{
+		$titel_te_bewerken_artikel=Title::newFromText($artikel);
 		$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
 		$inhoud=$te_bewerken_artikel->getText();
 
-		//$ie_type=SPARQLConnection::geefEersteResultaat('wiki:'.Uri::codeerSMWnaam($ie),'property:Intentional_Element_type');
-		$blockstring='{{';//.$ie_type;
+		$blockstring='{{'.$bloknaam;
 		$eindstring='}}';
 
 		$posblock=strpos($inhoud,$blockstring);
@@ -604,40 +533,89 @@ class Model
 		$postblock=trim(substr($inhoud,$poseind));
 		$block=substr($inhoud,$posblock,($poseind-$posblock));
 
-		if(!strpos($block,'Context'))
+		if(!strpos($block,$argument))
 		{
-			$block.='|Context='.$context.',';
+			$block.='|'.$argument.'='.$toe_te_voegen_inhoud.',';
 		}
 		else
 		{
-			$conblockintro='Context=';
-			$conblockoutro='|';
+			$argumentblockintro=$argument.'=';
+			$argumentblockoutro='|';
 
-			$posintro=strpos($block,$conblockintro);
-			$posoutro=strpos($block,$conblockoutro,$posintro);
+			$posintro=strpos($block,$argumentblockintro);
+			$posoutro=strpos($block,$argumentblockoutro,$posintro);
 
-			$conpreblock=substr($block,0,$posintro);
+			$argumentpreblock=substr($block,0,$posintro);
 
 			if($posoutro)
 			{
-				$conblock=substr($block,$posintro,($posoutro-$posintro));
-				$conpostblock=substr($block,$posoutro);
+				$argumentblock=trim(substr($block,$posintro,($posoutro-$posintro)));
+				$argumentpostblock="\n".substr($block,$posoutro);
 			}
 			else
 			{
-				$conblock=substr($block,$posintro);
-				$conpostblock='';
+				$argumentblock=trim(substr($block,$posintro));
+				$argumentpostblock="\n";
 			}
 
-			if(substr($conblock,-1,1)!=',')
-				$conblock.=',';
+			if(substr($argumentblock,-1,1)!=',')
+				$argumentblock.=',';
 
-			$conblock.=$context.',';
-			$block=$conpreblock.$conblock.$conpostblock;
+			$argumentblock.=$toe_te_voegen_inhoud.',';
+			$block=$argumentpreblock.$argumentblock.$argumentpostblock;
 		}
 
 		$nieuwe_inhoud=$preblock.$block.$postblock;
 
-		$te_bewerken_artikel->doEdit($nieuwe_inhoud,'Context toegevoegd via EMontVisualisator',EDIT_UPDATE);
+		$te_bewerken_artikel->doEdit($nieuwe_inhoud,$samenvatting,EDIT_UPDATE);
+	}
+
+	/**
+	 * Verwijdert een waarde uit een argument van een blok op een wiki-pagina.
+	 * Bijvoorbeeld {{Context|Supercontext=te_verwijderen_waarde}}
+	 */
+	static function verwijderUitBlokargumentVanArtikel($artikel,$bloknaam,$argument,$toe_te_voegen_inhoud,$samenvatting)
+	{
+		$titel_te_bewerken_artikel=Title::newFromText($artikel);
+		$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
+		$inhoud=$te_bewerken_artikel->getText();
+
+		$blockstring='{{'.$bloknaam;
+		$eindstring='}}';
+
+		$posblock=strpos($inhoud,$blockstring);
+		$poseind=strpos($inhoud,$eindstring,$posblock+1);
+
+		$preblock=substr($inhoud,0,$posblock);
+		// De eindstring }} zit in het postblock!
+		$postblock=trim(substr($inhoud,$poseind));
+		$block=substr($inhoud,$posblock,$poseind);
+
+		$argumentblockintro=$argument.'=';
+		$argumentblockoutro='|';
+
+		$posintro=strpos($block,$argumentblockintro);
+		$posoutro=strpos($block,$argumentblockoutro,$posintro);
+
+		$argumentpreblock=substr($block,0,$posintro);
+
+		if($posoutro)
+		{
+			$argumentblock=substr($block,$posintro,$posoutro);
+			$argumentpostblock=substr($block,$posoutro);
+		}
+		else
+		{
+			$argumentblock=substr($block,$posintro);
+			$argumentpostblock='';
+		}
+
+		$argumentblock=strtr($argumentblock,array($toe_te_voegen_inhoud=>''));
+		$argumentblock=strtr($argumentblock,array(',,'=>','));
+
+		$block=$argumentpreblock.$argumentblock.$argumentpostblock;
+		$nieuwe_inhoud=$preblock.$block.$postblock;
+
+		$te_bewerken_artikel->doEdit($nieuwe_inhoud,$samenvatting,EDIT_UPDATE);
 	}
 }

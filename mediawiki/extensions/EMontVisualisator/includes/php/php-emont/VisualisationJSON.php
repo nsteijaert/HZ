@@ -68,6 +68,7 @@ foreach($links as $link)
 }
 
 $contextindex=array();
+$gebruikteLeaves=array();
 
 foreach($ies_contexten as $context=>$ies)
 {
@@ -75,9 +76,17 @@ foreach($ies_contexten as $context=>$ies)
 	foreach ($ies as $ie)
 	{
 		$index=array_search($ie,$nodeindex);
-		$leaves[]=$index;
+
+		// IE's gaan spacen als de visulisatie ze in twee contexten tegelijkertijd moet tekenen. Dit helpt, maar moet wat verfijnder geïmplementeerd worden.
+		if($gebruikteLeaves[$index]==false)
+		{
+			$leaves[]=$index;
+			$gebruikteLeaves[$index]=true;
+		}
 	}
-	$post['groups'][]['leaves']=$leaves;
+
+	if(!empty($leaves))
+		$post['groups'][]['leaves']=$leaves;
 	$contextindex[]=$context;
 }
 
@@ -126,7 +135,7 @@ foreach ($post['groups'] as $index=>$inhoud)
 
 // Teken groepen met meer nodes eerst
 // Uitgecomment omdat de subgroepid's niet worden meeveranderd
-//usort($post['groups'], 'subgroupsizecmp'); 
+/*usort($post['groups'], 'subgroupsizecmp');
 
 function subgroupsizecmp($a,$b)
 {
@@ -135,6 +144,6 @@ function subgroupsizecmp($a,$b)
 		return 1;
 	}
 	return -1;
-}
+}*/
 
 echo strtr(json_encode($post),array('<\/'=>'</','<sub>'=>'','<\/sub>'=>''));
