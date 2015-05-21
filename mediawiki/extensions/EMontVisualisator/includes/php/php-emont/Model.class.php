@@ -217,19 +217,7 @@ class Model
 		$l1model=Uri::SMWuriNaarLeesbareTitel($practice_uri);
 
 		self::nieuweContext($titel);
-
-		$vnTitle = Title::newFromText($titel.' VN');
-		$vnArticle = new Article($vnTitle);
-
-		if($vnArticle)
-		{
-			$vnArticleContents='{{Context VN
-|Model link='.$titel.'
-}}
-{{Intentional Element VN set links}}
-{{Intentional Element VN show}}';
-			$vnArticle->doEdit($vnArticleContents, 'Pagina aangemaakt via EMontVisualisator.');
-		}
+		self::nieuweVN($titel.' VN','Context',$titel);
 
 		$experienceTitle = Title::newFromText($titel.' experience');
 		$experienceArticle = new Article($experienceTitle);
@@ -250,6 +238,41 @@ class Model
 }}
 {{Practice query}}';
 			$experienceArticle->doEdit($experienceArticleContents, 'Pagina aangemaakt via EMontVisualisator.');
+
+			$l1hoofdcontext_uri=self::geefContextVanModel($practice_uri);
+			$l1contexten=self::geefUrisVanContextEnSubcontexten($l1hoofdcontext_uri);
+
+			var_dump($l1contexten);
+
+			$l1l2context=array();
+			$l1l2context[Uri::SMWuriNaarLeesbareTitel($l1hoofdcontext_uri)]=$titel;
+
+			array_shift($l1contexten);
+			foreach($l1contexten as $l1context)
+			{
+				$l1contextnaam=Uri::deescapeSpecialeTekens(Uri::SMWuriNaarLeesbareTitel($l1context));
+				$l2contextnaam=$titel.' '.$l1contextnaam;
+				self::nieuweContext($l2contextnaam);
+				self::nieuweVN($l2contextnaam.' VN','Context',$l2contextnaam);
+
+				$l1l2context[$l1contextnaam]=$l2contextnaam;
+
+				var_dump($l1l2context);
+
+				$l1supercontexten=self::geefInhoudVanBlokargumentVanArtikelAlsArray($l1contextnaam, 'Context', 'Supercontext');
+				foreach($l1supercontexten as $l1supercontext)
+				{
+					if($l1l2context[$l1supercontext])
+					{
+						$l2supercontextnaam=$l1l2context[$l1supercontext];
+					}
+					else
+					{
+						$l2supercontextnaam=$titel.' '.$l1supercontext;
+					}
+					self::extraSupercontext($l2contextnaam, $l2supercontextnaam);
+				}
+			}
 		}
 	}
 
@@ -381,7 +404,6 @@ class Model
 			$posblock=strpos($inhoud,$blockstring,$posblock);
 			$posnaar=strpos($inhoud,$naar,$posblock);
 			$posvolgendeblock=strpos($inhoud,$blockstring,$posblock+1);
-			//echo $posblock.' '.$posnaar.' '.$posvolgendeblock.'<br />';
 
 			if($posnaar<$posvolgendeblock || $posvolgendeblock===FALSE)
 			{
@@ -485,6 +507,24 @@ class Model
 {{Context query}}';
 			$contextArticle->doEdit($contextArticleContents, 'Pagina aangemaakt via EMontVisualisator.');
 		}
+	}
+
+	static function nieuweVN($naam,$type,$model)
+	{
+		$vnTitle = Title::newFromText($naam);
+		$vnArticle = new Article($vnTitle);
+
+		if($vnArticle)
+		{
+			$vnArticleContents='{{'.$type.' VN
+|Model link='.$model.'
+}}
+{{'.$type.' VN set links}}
+{{'.$type.' VN show}}';
+			$vnArticle->doEdit($vnArticleContents, 'Pagina aangemaakt via EMontVisualisator.');
+			return true;
+		}
+		return false;
 	}
 
 	static function extraSupercontext($context_uri,$supercontext_uri)
@@ -617,5 +657,51 @@ class Model
 		$nieuwe_inhoud=$preblock.$block.$postblock;
 
 		$te_bewerken_artikel->doEdit($nieuwe_inhoud,$samenvatting,EDIT_UPDATE);
+	}
+
+	static function geefInhoudVanBlokargumentVanArtikelAlsArray($artikel,$bloknaam,$argument)
+	{
+		$inhoud=self::geefArtikelTekst($artikel);
+
+		$blockstring='{{'.$bloknaam;
+		$eindstring='}}';
+
+		$posblock=strpos($inhoud,$blockstring);
+		$poseind=strpos($inhoud,$eindstring,$posblock+1);
+		$block=substr($inhoud,$posblock,($poseind-$posblock));
+
+		if(!strpos($block,$argument))
+		{
+			return null;
+		}
+		else
+		{
+			$argumentblockintro=$argument.'=';
+			$argumentblockoutro='|';
+
+			$posintro=strpos($block,$argumentblockintro)+strlen($argumentblockintro);
+			$posoutro=strpos($block,$argumentblockoutro,$posintro);
+
+			if($posoutro)
+			{
+				$argumentblock=trim(substr($block,$posintro,($posoutro-$posintro)));
+			}
+			else
+			{
+				$argumentblock=trim(substr($block,$posintro));
+			}
+
+			$argumentblock=trim($argumentblock,", \t\n\r\0\x0B");
+
+			$argumentenvuil=explode(',',$argumentblock);
+			$argumentenschoon=array();
+
+			foreach ($argumentenvuil as $argumentvuil)
+			{
+				$argumentenschoon[]=trim($argumentvuil);
+			}
+
+			return $argumentenschoon;
+		}
 	}
 }

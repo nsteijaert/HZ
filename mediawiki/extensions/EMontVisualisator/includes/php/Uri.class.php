@@ -77,22 +77,23 @@ class Uri
 		$name_array=preg_split("/URIResolver\//", self::decodeerSMWNaam($uri));
 		if($name_array[1])
 		{
-			return $name_array[1];
+			return self::deescapeSpecialeTekens($name_array[1]);
 		}
 		elseif(strpos($uri,':'))
 		{
 			//Verwijder de prefix: het gedeelte tot en met de eerste(!) dubbele punt.
 			$name_array=array_slice(explode(':',self::decodeerSMWNaam($uri)),1);
-			return implode(':',$name_array);
+			return self::deescapeSpecialeTekens(implode(':',$name_array));
 		}
 		else
 		{
-			return $uri;
+			return self::deescapeSpecialeTekens($uri);
 		}
 	}
 
 	public static function escapeSpecialeTekens($string)
 	{
+		$string=self::deescapeSpecialeTekens($string);
 		return strtr($string, array(
 		'(' => '\(',
 		')' => '\)',
