@@ -146,4 +146,15 @@ function subgroupsizecmp($a,$b)
 	return -1;
 }*/
 
+function geefInitialen($string)
+{
+	$words = explode(" ", $string);
+	$acronym = "";
+
+	foreach ($words as $w) {
+ 		$acronym .= $w[0];
+	}
+	return $acronym;
+}
+
 echo strtr(json_encode($post),array('<\/'=>'</','<sub>'=>'','<\/sub>'=>''));

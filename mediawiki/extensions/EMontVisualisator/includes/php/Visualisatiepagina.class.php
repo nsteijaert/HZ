@@ -22,6 +22,7 @@ if($_POST)
 			$supercontext_uri=$_POST['supercontext'];
 
 			Model::nieuweContext($naam);
+			Model::nieuweVN($naam.' VN','Context',$naam);
 			Model::extraSupercontext($naam,$supercontext_uri);
 		}
 		elseif($actie=='extrasupercontext')
@@ -53,6 +54,8 @@ if($_POST)
 		elseif($actie=='nieuw')
 		{
 			Model::nieuwIE($_POST['ie'],$_POST['context'],$_POST['titel']);
+			$type=SPARQLConnection::geefEersteResultaat($_POST['ie'],'property:Intentional_Element_type');
+			Model::nieuweVN($_POST['titel'].' VN',$type,$_POST['titel']);
 		}
 		elseif($actie=='maakverband')
 		{
@@ -67,7 +70,7 @@ if($_POST)
 
 			Model::maakVerband($_POST['van'],$_POST['naar'],$_POST['type'],$eigenschappen);
 		}
-		elseif(actie=='verwijderverband')
+		elseif($actie=='verwijderverband')
 		{
 			$waardes=explode('|',$_POST['verwijder-verband']);
 			Model::verwijderVerband($waardes[0],$waardes[2],$waardes[1]);
@@ -86,6 +89,20 @@ class Visualisatiepagina
 		if(!$model_uri)
 			$model_uri='wiki:Building_with_Nature-2Dinterventies_op_het_systeem_practice';
 
+		$this->inhoud.='<script type="text/javascript">
+		function toggleL1modelframe()
+		{
+			var l1modelframe=document.getElementById(\'l1modelframe\');
+			if (l1modelframe.style.display==\'none\')
+			{
+				l1modelframe.style.display=\'block\';
+			}
+			else
+			{
+				l1modelframe.style.display=\'none\';
+			}
+		}
+		</script>';
 		$this->inhoud.='<h2 id="visualisatiekop">Visualisatie</h2>
 		<p>U kunt elementen verslepen om het overzicht te verbeteren. Dubbelklik op een element om de wikipagina ervan weer te geven.</p>';
 
@@ -125,6 +142,38 @@ class Visualisatiepagina
 						{
 							$verbandenlijst[]=array('van'=>$item['label'],'type'=>$element['type'],'naar'=>$element['Element link']);
 						}
+						elseif($element['type']=='Intentional Element links' || $element['type']=='Activity links')
+						{
+							$linksverbanden=array();
+
+							if($element['Part of'])
+							{
+								$linksverbanden=explode(',',$element['Part of']);
+								foreach($linksverbanden as $linksverband)
+								{
+									if(trim($linksverband))
+										$verbandenlijst[]=array('van'=>$item['label'],'type'=>'Part of','naar'=>trim($linksverband));
+								}
+							}
+							if($element['Consumes'])
+							{
+								$linksverbanden=explode(',',$element['Consumes']);
+								foreach($linksverbanden as $linksverband)
+								{
+									if(trim($linksverband))
+										$verbandenlijst[]=array('van'=>$item['label'],'type'=>'Consumes','naar'=>trim($linksverband));
+								}
+							}
+							if($element['Produces'])
+							{
+								$linksverbanden=explode(',',$element['Produces']);
+								foreach($linksverbanden as $linksverband)
+								{
+									if(trim($linksverband))
+										$verbandenlijst[]=array('van'=>$item['label'],'type'=>'Produces','naar'=>trim($linksverband));
+								}
+							}
+						}
 					}
 					if($item['Eigenschap-3AContext'])
 					{
@@ -144,7 +193,8 @@ class Visualisatiepagina
 			}
 
 			$this->inhoud.='<h2>L1-model: '.Uri::SMWuriNaarLeesbareTitel($l1hoofdcontext).'</h2>';
-			$this->inhoud.='<iframe width="100%" height="800" src="/mediawiki/extensions/EMontVisualisator/includes/php/Visualisatie.class.php?echo=true&amp;model_uri='.urlencode($l1model).'"></iframe>';
+			$this->inhoud.='<button onclick="toggleL1modelframe();">Open/dichtklappen</button>';
+			$this->inhoud.='<iframe style="display:none;" id="l1modelframe" width="100%" height="800" src="/mediawiki/extensions/EMontVisualisator/includes/php/Visualisatie.class.php?echo=true&amp;model_uri='.urlencode($l1model).'"></iframe>';
 
 			////
 			$this->inhoud.='<h2>Nieuw Intentional Element</h2>';
@@ -167,7 +217,7 @@ class Visualisatiepagina
 			$this->inhoud.='<form method="post" action="?actie=maakverband&amp;type=ie"><table>';
 			$this->inhoud.='<tr><th>Van:</th><th>Type:</th><th>Naar:</th><tr>';
 			$this->inhoud.='<tr><td><select name="van">'.$ie_lijst.'</select></td>';
-			$this->inhoud.='<td><select name="type"><option value="Contributes">Contributes</option><option value="Depends">Depends</option><option value="Connects">Connects</option><option value="Produces">Produces</option><option value="Consumes">Consumes</option></select></td>';
+			$this->inhoud.='<td><select name="type"><option value="Contributes">Contributes</option><option value="Depends">Depends</option><option value="Connects">Connects</option><option value="Produces">Produces</option><option value="Consumes">Consumes</option><option value="Part of">Part of</option></select></td>';
 			$this->inhoud.='<td><select name="naar">'.$ie_lijst.'</select></td></tr>';
 			$this->inhoud.='<tr><td></td><td>Notitie:</td><td><input name="notitie" type="text" style="width:300px;"></td></tr>';
 			$this->inhoud.='<tr><td></td><td>CV/CT:</td><td><input name="subtype" type="text" style="width:300px;"/></td></tr>';

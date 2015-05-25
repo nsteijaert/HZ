@@ -242,8 +242,6 @@ class Model
 			$l1hoofdcontext_uri=self::geefContextVanModel($practice_uri);
 			$l1contexten=self::geefUrisVanContextEnSubcontexten($l1hoofdcontext_uri);
 
-			var_dump($l1contexten);
-
 			$l1l2context=array();
 			$l1l2context[Uri::SMWuriNaarLeesbareTitel($l1hoofdcontext_uri)]=$titel;
 
@@ -256,8 +254,6 @@ class Model
 				self::nieuweVN($l2contextnaam.' VN','Context',$l2contextnaam);
 
 				$l1l2context[$l1contextnaam]=$l2contextnaam;
-
-				var_dump($l1l2context);
 
 				$l1supercontexten=self::geefInhoudVanBlokargumentVanArtikelAlsArray($l1contextnaam, 'Context', 'Supercontext');
 				foreach($l1supercontexten as $l1supercontext)
@@ -344,10 +340,22 @@ class Model
 	/**
 	 * Voegt een verband toe tussen twee IE's
 	 */
-	static function maakVerband($van,$naar,$type,$extra_informatie)
+	static function maakVerband($van_uri,$naar_uri,$type,$extra_informatie)
 	{
-		$van=Uri::SMWuriNaarLeesbareTitel($van);
-		$naar=Uri::SMWuriNaarLeesbareTitel($naar);
+		$van=Uri::SMWuriNaarLeesbareTitel($van_uri);
+		$naar=Uri::SMWuriNaarLeesbareTitel($naar_uri);
+		$verbandtype='';
+
+		switch($type)
+		{
+			case 'Produces':
+			case 'Consumes':
+			case 'Part of':
+				$verbandtype='argument';
+				break;
+			default:
+				$verbandtype='blok';
+		}
 
 		$titel_te_bewerken_artikel=Title::newFromText($van);
 		$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
@@ -361,17 +369,38 @@ class Model
 			$achtervoegsel='{{Intentional Element query}}';
 		}
 
-		$verband_tekst='{{'.$type.'
+		if($verbandtype=='blok')
+		{
+			$verband_tekst='{{'.$type.'
 |Element link='.$naar.'
 ';
-		foreach($extra_informatie as $eigenschap=>$waarde)
-		{
-			$verband_tekst.='|'.$eigenschap.'='.$waarde.'
+			foreach($extra_informatie as $eigenschap=>$waarde)
+			{
+				$verband_tekst.='|'.$eigenschap.'='.$waarde.'
+';
+			}
+
+			$verband_tekst.='}}
 ';
 		}
-
-		$verband_tekst.='}}
+		elseif($verbandtype=='argument')
+		{
+			$ie_type=SPARQLConnection::geefEersteResultaat(Uri::escape_uri($van_uri),'property:Intentional_Element_type');
+			if(strpos($inhoud,$ie_type.' links'))
+			{
+				self::voegToeAanBlokargumentVanArtikel($van, $ie_type.' links', $type, $naar, 'Verband toegevoegd via EMontVisualisator');
+				return;
+			}
+			else
+			{
+				//TODO Dedupliceren
+				$verband_tekst='{{'.$ie_type.'
+|'.$type.'='.$naar.'
 ';
+			$verband_tekst.='}}
+';
+			}
+		}
 		$nieuwe_inhoud=$inhoud.$verband_tekst.$achtervoegsel;
 
 		$te_bewerken_artikel->doEdit($nieuwe_inhoud,'Verband toegevoegd via EMontVisualisator',EDIT_UPDATE);
@@ -381,10 +410,30 @@ class Model
 	 * Verwijdert een verband tussen twee IE's, indien aanwezig.
 	 * @type: Met beginhoofdletter, zoals in wikiartikel, na {{
 	 */
-	static function verwijderVerband($van,$naar,$type)
+	static function verwijderVerband($van_uri,$naar_uri,$type)
 	{
-		$van=Uri::SMWuriNaarLeesbareTitel($van);
-		$naar=Uri::SMWuriNaarLeesbareTitel($naar);
+		$van=Uri::SMWuriNaarLeesbareTitel($van_uri);
+		$naar=Uri::SMWuriNaarLeesbareTitel($naar_uri);
+		$verbandtype='';
+
+		switch($type)
+		{
+			case 'Produces':
+			case 'Consumes':
+			case 'Part of':
+				$verbandtype='argument';
+				break;
+			default:
+				$verbandtype='blok';
+		}
+
+		if($verbandtype=='argument')
+		{
+			$ie_type=SPARQLConnection::geefEersteResultaat('wiki:'.Uri::escape_uri($van_uri),'property:Intentional_Element_type');
+			self::verwijderUitBlokargumentVanArtikel($van, $ie_type.' links', $type, $naar, 'Verband verwijderd via EMontVisualisator');
+			return;
+		}
+
 
 		$titel_te_bewerken_artikel=Title::newFromText($van);
 		$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
@@ -532,7 +581,7 @@ class Model
 		$context=Uri::SMWuriNaarLeesbareTitel($context_uri);
 		$supercontext=Uri::SMWuriNaarLeesbareTitel($supercontext_uri);
 
-		self::voegToeAanBlokargumentVanArtikel($context,'Context','Supercontext',$supercontext_uri,'Supercontext toegevoegd via EMontVisualisator');
+		self::voegToeAanBlokargumentVanArtikel($context,'Context','Supercontext',$supercontext,'Supercontext toegevoegd via EMontVisualisator');
 	}
 
 	static function supercontextVerwijderen($context_uri,$supercontext_uri)
@@ -540,7 +589,7 @@ class Model
 		$context=Uri::SMWuriNaarLeesbareTitel($context_uri);
 		$supercontext=Uri::SMWuriNaarLeesbareTitel($supercontext_uri);
 
-		self::verwijderUitBlokargumentVanArtikel($context,'Context','Supercontext',$supercontext_uri,'Supercontext verwijderd via EMontVisualisator');
+		self::verwijderUitBlokargumentVanArtikel($context,'Context','Supercontext',$supercontext,'Supercontext verwijderd via EMontVisualisator');
 	}
 
 	static function contextToevoegenAanIE($ie_uri,$context_uri)
@@ -614,7 +663,7 @@ class Model
 	 * Verwijdert een waarde uit een argument van een blok op een wiki-pagina.
 	 * Bijvoorbeeld {{Context|Supercontext=te_verwijderen_waarde}}
 	 */
-	static function verwijderUitBlokargumentVanArtikel($artikel,$bloknaam,$argument,$toe_te_voegen_inhoud,$samenvatting)
+	static function verwijderUitBlokargumentVanArtikel($artikel,$bloknaam,$argument,$te_verwijderen_inhoud,$samenvatting)
 	{
 		$titel_te_bewerken_artikel=Title::newFromText($artikel);
 		$te_bewerken_artikel=new WikiPage($titel_te_bewerken_artikel);
@@ -650,7 +699,7 @@ class Model
 			$argumentpostblock='';
 		}
 
-		$argumentblock=strtr($argumentblock,array($toe_te_voegen_inhoud=>''));
+		$argumentblock=strtr($argumentblock,array($te_verwijderen_inhoud=>''));
 		$argumentblock=strtr($argumentblock,array(',,'=>','));
 
 		$block=$argumentpreblock.$argumentblock.$argumentpostblock;
