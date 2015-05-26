@@ -103,6 +103,7 @@ class Visualisatiepagina
 			}
 		}
 		</script>';
+		$this->inhoud.='<a href="'.rtrim($_SERVER['REQUEST_URI'],'/').'/../../">Terug naar het modellenoverzicht</a>';
 		$this->inhoud.='<h2 id="visualisatiekop">Visualisatie</h2>
 		<p>U kunt elementen verslepen om het overzicht te verbeteren. Dubbelklik op een element om de wikipagina ervan weer te geven.</p>';
 
