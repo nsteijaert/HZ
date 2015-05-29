@@ -1,0 +1,74 @@
+				// for (var i = 0; i < links.length; i++) {
+				// links.push({
+				// target : sort_data[data.links[i].target],
+				// source : sort_data[data.links[i].source]
+				// });
+				//
+				// var material = new THREE.LineBasicMaterial({
+				// color : LINK_COLOR,
+				// linewidth : 2
+				// });
+				// var geometry = new THREE.Geometry();
+				//
+				// geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+				// geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+				// var line = new THREE.Line(geometry, material);
+				// line.userData = {
+				// source : data.links[i].source,
+				// target : data.links[i].target
+				// };
+				// three_links.push(line);
+				// scene.add(line);
+				//
+				// force.start();
+				// }
+				// for (var i = 0; i < data.links.length; i++) {
+				// links.push({
+				// target : sort_data[data.links[i].target],
+				// source : sort_data[data.links[i].source],
+				// type : sort_data[data.links[i].type]
+				// });
+				// var origin = new THREE.Vector3(0, 0, 0);
+				// var terminus = new THREE.Vector3(20, 20, 20);
+				// var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
+				// var distance = origin.distanceTo(terminus);
+				// var color = new THREE.Color("rgb(0,0,0)");
+				// var headLength = 10;
+				// var headWidth = 5;
+				// var arrow = new THREE.ArrowHelper(direction, origin, distance, color, headLength, headWidth);
+				// //arrows.push(arrow);
+				// //console.log(distance);
+				// console.log(arrow);
+				// scene.add(arrow);
+				// arrow.userData = {
+				// source : data.links[i].source,
+				// target : data.links[i].target
+				// };
+				// three_links.push(arrow);
+				// scene.add(arrow);
+				// }
+				//force.start();
+
+						// for (var j = 0; j < three_links.length; j++) {
+						// var arrow = three_links[j];
+						// if (arrow.userData.source === i) {
+						// var x_arrow = x(nodes[key].x) * 40 - 40;
+						// var y_arrow = y(nodes[key].y) * 40 - 40;
+						// var z_arrow = z(nodes[key].z) * 40 - 40;
+						// var new_origin = new THREE.Vector3(x_arrow, y_arrow, z_arrow);
+						// arrow.position = new_origin;
+						// }
+						// if (arrow.userData.target === i) {
+						// var x_arrow_cur = arrow.position.x;
+						// var y_arrow_cur = arrow.position.y;
+						// var z_arrow_cur = arrow.position.z;
+						// var cur_pos = new THREE.Vector3(x_arrow_cur, y_arrow_cur, z_arrow_cur);
+						// var x_arrow_tar = x(sort_data[i].x) * 40 - 40;
+						// var y_arrow_tar = y(sort_data[i].y) * 40 - 40;
+						// var z_arrow_tar = z(sort_data[i].z) * 40 - 40;
+						// var newTarget = new THREE.Vector3(x_arrow_tar, y_arrow_tar, z_arrow_tar);
+						// var direction = new THREE.Vector3().sub(newTarget, cur_pos);
+						// arrow.setDirection(direction.normalize());
+						// arrow.setLength(cur_pos.distanceTo(newTarget) - 5, 10, 5);
+						// }
+						//}

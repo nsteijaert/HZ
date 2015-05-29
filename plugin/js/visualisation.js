@@ -4,19 +4,15 @@
 //Wait for document to finish loading
 $(document).ready(function() {
 
-	var debug = true;
-
 	function load() {
 		$('.visualisationResult').append('<div class="bar"></div>');
 		$bar = $('.bar');
 		$bar.animate({
 			width : '100%'
 		}, 600, "swing", function() {
-
 		});
 	}
 
-	//console.log($.cookie("depth"));
 	if ($.cookie("depth") != "" && $.cookie("relations") != "")
 		visualize("TZW:gezicht", $.cookie("depth"), $.cookie("relations"));
 	else
@@ -24,7 +20,7 @@ $(document).ready(function() {
 
 	function visualize(concept, depth, relations) {
 		// Set visualisation variables
-		var WIDTH = 600;
+		var WIDTH = 1000;
 		HEIGHT = 500;
 		COLOR = "steelblue";
 		LINK_COLOR = "#cccccc";
@@ -32,11 +28,14 @@ $(document).ready(function() {
 		// Create scene
 		var scene = new THREE.Scene();
 
-		// set some camera attributes
+		// Set camera attributes and create camera
 		var VIEW_ANGLE = 45,
 		    ASPECT = WIDTH / HEIGHT,
 		    NEAR = 0.1,
 		    FAR = 10000;
+		var camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+		scene.add(camera);
+		camera.position.z = 300;
 
 		// Set variable for container
 		var $container = $('#canvas-svg');
@@ -49,11 +48,6 @@ $(document).ready(function() {
 		renderer.setClearColor(0x000000, 0);
 		renderer.setSize(WIDTH, HEIGHT);
 
-		// Create camera
-		var camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
-		scene.add(camera);
-		camera.position.z = 300;
-
 		// Create controls (orbitcontrols)
 		var controls = new THREE.OrbitControls(camera);
 
@@ -61,69 +55,44 @@ $(document).ready(function() {
 		$container.append(renderer.domElement);
 
 		// Create arrays for spheres and links
-		var spheres = [],
+		var spheres = [], //Contains spheres
 		    three_links = [];
+		//Contains arrows
 		labels = [];
+		//Contains label sprites
 
-		// Define the 3d force
-		var force = d3.layout.force3d().nodes( sort_data = []).links( links = []).size([50, 50]).gravity(0.3).charge(-400);
-		var DISTANCE = 1;
-
-		// create a point light
+		// Instantiate light sources
 		var pointLight1 = new THREE.PointLight(0xFFFFFF);
-		var pointLight2 = new THREE.PointLight(0xFFFFFF);
-		var pointLight3 = new THREE.PointLight(0xFFFFFF);
-		var pointLight4 = new THREE.PointLight(0xFFFFFF);
-		var pointLight5 = new THREE.PointLight(0xFFFFFF);
-
-		// set its position
 		pointLight1.position.x = 0;
 		pointLight1.position.y = 50;
 		pointLight1.position.z = 500;
-
+		scene.add(pointLight1);
+		var pointLight2 = new THREE.PointLight(0xFFFFFF);
 		pointLight2.position.x = 0;
 		pointLight2.position.y = 500;
 		pointLight2.position.z = -500;
-
+		scene.add(pointLight2);
+		var pointLight3 = new THREE.PointLight(0xFFFFFF);
 		pointLight3.position.x = 500;
 		pointLight3.position.y = 500;
 		pointLight3.position.z = 0;
-
+		scene.add(pointLight3);
+		var pointLight4 = new THREE.PointLight(0xFFFFFF);
 		pointLight4.position.x = -500;
 		pointLight4.position.y = 50;
 		pointLight4.position.z = 0;
-
-		pointLight4.position.x = 0;
-		pointLight4.position.y = -100;
-		pointLight4.position.z = 0;
-
-		// add to the scene
-		scene.add(pointLight1);
-		scene.add(pointLight2);
-		scene.add(pointLight3);
 		scene.add(pointLight4);
-
-		// Raypicking
-		projector = new THREE.Projector();
-		mouseVector = new THREE.Vector3();
-
-		// User interaction
-		//window.addEventListener('mousemove', onMouseMove, false);
-		//window.addEventListener('resize', onWindowResize, false);
+		var pointLight5 = new THREE.PointLight(0xFFFFFF);
+		pointLight5.position.x = 0;
+		pointLight5.position.y = -100;
+		pointLight5.position.z = 0;
+		scene.add(pointLight5);
 
 		if ( typeof concept === 'undefined' || concept === '') {
 			throw "Concept is undefined";
 		}
 		var depth = typeof depth !== 'undefined' ? depth : 1;
 		var relations = typeof relations !== 'undefined' ? relations : "true,true";
-		var timeOut;
-		var mouseTimeOut;
-
-		// Clear div
-		d3.select(".visualisation").html("");
-
-		var width = $('.visualisation').width(),
-		    height = 500;
 
 		$.ajax({
 			type : "POST",
@@ -136,13 +105,12 @@ $(document).ready(function() {
 				relations : relations
 			}
 		}).done(function(data) {
-			loadOptions(depth, relations);
 
-			var links = JSON.parse(data);
-			var nodes = {};
+			var nodelinks = JSON.parse(data);
+			var nodes = [];
 
 			// Compute the distinct nodes from the links.
-			links.forEach(function(link) {
+			nodelinks.forEach(function(link) {
 				link.source = nodes[link.source] || (nodes[link.source] = {
 					name : link.source,
 					url : link.urlsource
@@ -153,27 +121,31 @@ $(document).ready(function() {
 				});
 			});
 
-			console.log(Object.keys(nodes).length);
+			// // Define the 3d force
+			// var force = d3.layout.force3d().nodes(spheres).links(nodelinks).size([50, 50]).gravity(0.3).charge(-400);
+			// var DISTANCE = 1;
 
-			//initControls();
-			createNodes();
-			initForce3D();
+			// Cola.js constraint-based layout setup
+			var d3cola = cola.d3adaptor().linkDistance(30).size([600, 500]);
+			var constraints = {"axis":"y", "left":0, "right":1, "gap":25};
+			d3cola.nodes(spheres).links(nodelinks).constraints(constraints).symmetricDiffLinkLengths(5).avoidOverlaps(true).start(10, 15, 20);
+
+			// User interaction
+			window.addEventListener('resize', onWindowResize, false);
+
+			visualize();
 			animate();
 
-			// Functions
-			function createNodes() {
-				console.log("createNodes called");
-				console.log(spheres);
+			// Visualize RDF data
+			function visualize() {
+
+				// Create nodes and randomize default position
 				for (var key in nodes) {
 					if (nodes.hasOwnProperty(key)) {
 						var val = nodes[key];
 						nodes[key].x = Math.floor((Math.random() * 100) + 1);
-						;
 						nodes[key].y = Math.floor((Math.random() * 100) + 1);
-						;
 						nodes[key].z = Math.floor((Math.random() * 100) + 1);
-						;
-						//console.log(val);
 
 						// set up the sphere vars
 						var radius = 5,
@@ -187,14 +159,12 @@ $(document).ready(function() {
 
 						var sphere = new THREE.Mesh(new THREE.SphereGeometry(radius, segments, rings), sphereMaterial);
 						sphere.name = nodes[key].name;
-						console.log(sphere);
 						spheres[key] = sphere;
-						console.log(spheres);
-						//spheres.push(sphere);
 
 						// add the sphere to the scene
 						scene.add(sphere);
 
+						// Create label mesh
 						var canvas1 = document.createElement('canvas');
 						var context1 = canvas1.getContext('2d');
 						context1.font = "Bold 30px Arial";
@@ -212,95 +182,67 @@ $(document).ready(function() {
 						var mesh1 = new THREE.Mesh(new THREE.PlaneGeometry(40, 15), material1);
 
 						labels[key] = mesh1;
-						//labels.push(mesh1);
 
 						scene.add(mesh1);
 					}
 				}
-				// for (var i = 0; i < data.links.length; i++) {
-				// links.push({
-				// target : sort_data[data.links[i].target],
-				// source : sort_data[data.links[i].source],
-				// type : sort_data[data.links[i].type]
-				// });
-				// var origin = new THREE.Vector3(0, 0, 0);
-				// var terminus = new THREE.Vector3(20, 20, 20);
-				// var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
-				// var distance = origin.distanceTo(terminus);
-				// var color = new THREE.Color("rgb(0,0,0)");
-				// var headLength = 10;
-				// var headWidth = 5;
-				// var arrow = new THREE.ArrowHelper(direction, origin, distance, color, headLength, headWidth);
-				// //arrows.push(arrow);
-				// //console.log(distance);
-				// console.log(arrow);
-				// scene.add(arrow);
-				// arrow.userData = {
-				// source : data.links[i].source,
-				// target : data.links[i].target
-				// };
-				// three_links.push(arrow);
-				// scene.add(arrow);
-				// }
-				force.start();
-			}
 
-			function loadOptions(depth, relations) {
-				var currentDepth = depth;
-				var currentRelations = relations.split(",");
+				// Create arrows
+				for (var i = 0; i < nodelinks.length; i++) {
+					var origin = new THREE.Vector3(50, 100, 50);
+					var terminus = new THREE.Vector3(75, 75, 75);
+					var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
+					var distance = origin.distanceTo(terminus);
+					var arrow = new THREE.ArrowHelper(direction, origin, distance, 0x000000);
+					arrow.userData = {
+						target : nodes[nodelinks[i].target.name].name,
+						source : nodes[nodelinks[i].source.name].name
+					};
+					scene.add(arrow);
+					three_links.push(arrow);
 
-				$("#options .depth").val(currentDepth);
-				$("#options .broader").prop("checked", (currentRelations[0] === "true"));
-				$("#options .narrower").prop("checked", (currentRelations[1] === "true"));
-			}
-
-			function initForce3D() {
-				if (debug) {
-					console.log('debug enabled');
 				}
+				initCola();
+			}
 
-				console.log('force 3D initializing');
+			// Initializes force3D calculations and spaces nodes according to a forced layout
+			function initCola() {
 				// set up the axes
 				var x = d3.scale.linear().domain([0, 350]).range([0, 10]),
 				    y = d3.scale.linear().domain([0, 350]).range([0, 10]),
 				    z = d3.scale.linear().domain([0, 350]).range([0, 10]);
 
-				force.on("tick", function(e) {
-					//console.log(spheres);
-					for (var key in nodes) {
-						//console.log(spheres);
-						spheres[key].position.set(x(nodes[key].x) * 40 - 40, y(nodes[key].y) * 40 - 40, z(nodes[key].z) * 40 - 40);
-						labels[key].position.set(x(nodes[key].x) * 40 - 40, y(nodes[key].y) * 40 - 40, z(nodes[key].z) * 40 - 40);
+				//.on("tick", function(e) {
+				for (var key in nodes) {
+					spheres[key].position.set(x(nodes[key].x) * 40 - 40, y(nodes[key].y) * 40 - 40, z(nodes[key].z) * 40 - 40);
+					labels[key].position.set(x(nodes[key].x) * 40 - 40, y(nodes[key].y) * 40 - 40, z(nodes[key].z) * 40 - 40);
 
-						// for (var j = 0; j < three_links.length; j++) {
-						// var arrow = three_links[j];
-						// if (arrow.userData.source === i) {
-						// var x_arrow = x(nodes[key].x) * 40 - 40;
-						// var y_arrow = y(nodes[key].y) * 40 - 40;
-						// var z_arrow = z(nodes[key].z) * 40 - 40;
-						// var new_origin = new THREE.Vector3(x_arrow, y_arrow, z_arrow);
-						// arrow.position = new_origin;
-						// }
-						// if (arrow.userData.target === i) {
-						// var x_arrow_cur = arrow.position.x;
-						// var y_arrow_cur = arrow.position.y;
-						// var z_arrow_cur = arrow.position.z;
-						// var cur_pos = new THREE.Vector3(x_arrow_cur, y_arrow_cur, z_arrow_cur);
-						// var x_arrow_tar = x(sort_data[i].x) * 40 - 40;
-						// var y_arrow_tar = y(sort_data[i].y) * 40 - 40;
-						// var z_arrow_tar = z(sort_data[i].z) * 40 - 40;
-						// var newTarget = new THREE.Vector3(x_arrow_tar, y_arrow_tar, z_arrow_tar);
-						// var direction = new THREE.Vector3().sub(newTarget, cur_pos);
-						// arrow.setDirection(direction.normalize());
-						// arrow.setLength(cur_pos.distanceTo(newTarget) - 5, 10, 5);
-						// }
-						//}
+					for (var j = 0; j < three_links.length; j++) {
+						var arrow = three_links[j];
+						var vi = null;
+						if (arrow.userData.source === key) {
+							vi = 0;
+						}
+						if (arrow.userData.target === key) {
+							vi = 1;
+						}
+						if (vi >= 0) {
+							if (vi == 0) {
+								var vectOrigin = new THREE.Vector3(spheres[key].position.x, spheres[key].position.y, spheres[key].position.z);
+								setArrowOrigin(arrow, vectOrigin);
+							}
+							if (vi == 1) {
+								var vectTarget = new THREE.Vector3(spheres[key].position.x, spheres[key].position.y, spheres[key].position.z);
+								setArrowTarget(arrow, vectTarget);
+							}
+						}
 					}
 
-					renderer.render(scene, camera);
-				});
+				}
+				renderer.render(scene, camera);
 			}
 
+			// Animate the webGL objects for rendering
 			function animate() {
 				requestAnimationFrame(animate);
 				renderer.render(scene, camera);
@@ -312,25 +254,11 @@ $(document).ready(function() {
 				render();
 			}
 
+			// Extension of default render function
 			function render() {
-
 			}
 
-			function onMouseMove(e) {
-
-				mouseVector.x = 2 * (e.clientX / WIDTH) - 1;
-				mouseVector.y = 1 - 2 * (e.clientY / HEIGHT);
-				var raycaster = projector.pickingRay(mouseVector.clone(), camera),
-				    intersects;
-				var intersects = raycaster.intersectObjects(spheres);
-				for (var i = 0; i < intersects.length; i++) {
-					var intersection = intersects[i],
-					    obj = intersection.object;
-					obj.material.color.set("red");
-					console.log(obj.name);
-				}
-			}
-
+			// Actionlistener for resizing parent frame
 			function onWindowResize(e) {
 				WIDTH = $(window).width();
 				HEIGHT = $(window).height();
@@ -339,32 +267,38 @@ $(document).ready(function() {
 				camera.updateProjectionMatrix();
 			}
 
-			function convertVectorsToDist(source, target) {
-
-				var dx = source.x - target.x;
-				var dy = source.y - target.y;
-				var dz = source.z - target.z;
-				return sqrt(dx * dx + dy * dy + dz * dz);
-			}
-
-			function convertVectorsToDir(source, target) {
-
-				var dx = source.x - target.x;
-				var dy = source.y - target.y;
-				var dz = source.z - target.z;
-				return sqrt(dx * dx + dy * dy + dz * dz);
-			}
-
+			// Construction method for arrowhelpers
 			function constructArrowHelper(source, target) {
-				var origin = new THREE.Vector3(50, 100, 50);
-				var terminus = new THREE.Vector3(75, 75, 75);
+				var origin = new THREE.Vector3(10, 10, 10);
+				var terminus = new THREE.Vector3(0, 0, 0);
 				var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
 				var distance = origin.distanceTo(terminus);
-				var arrow = new THREE.ArrowHelper(direction, origin, distance, 0x884400);
-				//arrows.push(arrow);
-				//console.log(distance)
-				//console.log(arrow);
+				var arrow = new THREE.ArrowHelper(direction, origin, distance, 0x000000);
+
+				arrow.userData = {
+					target : nodes[nodelinks[i].target.name].name,
+					source : nodes[nodelinks[i].source.name].name
+				};
 				scene.add(arrow);
+			}
+
+			function setArrowOrigin(arrow, origin) {
+				//Get current position
+				vectTarget = spheres[arrow.userData.target].position;
+				console.log(vectTarget);
+
+				arrow.position.x = origin.x;
+				arrow.position.y = origin.y;
+				arrow.position.z = origin.z;
+
+				arrow.setLength(arrow.position.distanceTo(vectTarget) - 5, 10, 5);
+				arrow.setDirection(new THREE.Vector3().subVectors(vectTarget, arrow.position).normalize());
+			}
+
+			function setArrowTarget(arrow, target) {
+				var newTarget = new THREE.Vector3(target.x, target.y, target.z);
+				arrow.setLength(arrow.position.distanceTo(newTarget) - 5, 10, 5);
+				arrow.setDirection(new THREE.Vector3().subVectors(newTarget, arrow.position).normalize());
 			}
 
 

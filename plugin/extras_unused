@@ -1,0 +1,53 @@
+					window.addEventListener('mousemove', onMouseMove, false);
+			window.addEventListener('mousedown', onMouseDown, false);	
+			
+			
+			// Actionlistener for mouse move events
+			function onMouseMove(e) {
+				mouseVector.x = 2 * (e.clientX / WIDTH) - 1;
+				mouseVector.y = 1 - 2 * (e.clientY / HEIGHT);
+				var raycaster = projector.pickingRay(mouseVector.clone(), camera),
+				    intersects;
+				var intersects = raycaster.intersectObjects(spheres);
+				console.log(intersects);
+				for (var i = 0; i < intersects.length; i++) {
+					var intersection = intersects[i],
+					    obj = intersection.object;
+					obj.material.color.set("red");
+				}
+			}
+
+			//event listener
+			function onMouseDown(event_info) {
+				console.log(spheres.children);
+				//stop any other event listener from recieving this event
+				event_info.preventDefault();
+
+				//this where begin to transform the mouse cordinates to three,js cordinates
+				mouse.x = (event_info.clientX / window.innerWidth ) * 2 - 1;
+				mouse.y = -(event_info.clientY / window.innerHeight ) * 2 + 1;
+
+				//this vector caries the mouse click cordinates
+				mouse_vector.set(mouse.x, mouse.y, mouse.z);
+
+				//the final step of the transformation process, basically this method call
+				//creates a point in 3d space where the mouse click occurd
+				projector.unprojectVector(mouse_vector, camera);
+
+				var direction = mouse_vector.sub(camera.position).normalize();
+
+				//ray = new THREE.Raycaster( camera.position, direction );
+				ray.set(camera.position, direction);
+
+				//asking the raycaster if the mouse click touched the sphere object
+				intersects = ray.intersectObject();
+
+				//the ray will return an array with length of 1 or greater if the mouse click
+				//does touch the sphere object
+				if (intersects.length) {
+
+					alert("hit");
+
+				}
+
+			}

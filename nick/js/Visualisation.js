@@ -200,54 +200,59 @@ function init() {
 	var DISTANCE = 1;
 
 	//mouse event variables
-	var projector = new THREE.Projector(), 
-    mouse_vector = new THREE.Vector3(),
-    mouse = { x: 0, y: 0, z: 1 },
-    ray = new THREE.Raycaster( new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0) ),
-    intersects = [];
+	var projector = new THREE.Projector(),
+	    mouse_vector = new THREE.Vector3(),
+	    mouse = {
+		x : 0,
+		y : 0,
+		z : 1
+	},
+	    ray = new THREE.Raycaster(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0)),
+	    intersects = [];
 
-		// create a point light
-		var pointLight1 = new THREE.PointLight(0xFFFFFF);
-		var pointLight2 = new THREE.PointLight(0xFFFFFF);
-		var pointLight3 = new THREE.PointLight(0xFFFFFF);
-		var pointLight4 = new THREE.PointLight(0xFFFFFF);
-		var pointLight5 = new THREE.PointLight(0xFFFFFF);
+	// create a point light
+	var pointLight1 = new THREE.PointLight(0xFFFFFF);
+	var pointLight2 = new THREE.PointLight(0xFFFFFF);
+	var pointLight3 = new THREE.PointLight(0xFFFFFF);
+	var pointLight4 = new THREE.PointLight(0xFFFFFF);
+	var pointLight5 = new THREE.PointLight(0xFFFFFF);
 
-		// set its position
-		pointLight1.position.x = 0;
-		pointLight1.position.y = 50;
-		pointLight1.position.z = 500;
+	// set its position
+	pointLight1.position.x = 0;
+	pointLight1.position.y = 50;
+	pointLight1.position.z = 500;
 
-		pointLight2.position.x = 0;
-		pointLight2.position.y = 500;
-		pointLight2.position.z = -500;
+	pointLight2.position.x = 0;
+	pointLight2.position.y = 500;
+	pointLight2.position.z = -500;
 
-		pointLight3.position.x = 500;
-		pointLight3.position.y = 500;
-		pointLight3.position.z = 0;
+	pointLight3.position.x = 500;
+	pointLight3.position.y = 500;
+	pointLight3.position.z = 0;
 
-		pointLight4.position.x = -500;
-		pointLight4.position.y = 50;
-		pointLight4.position.z = 0;
+	pointLight4.position.x = -500;
+	pointLight4.position.y = 50;
+	pointLight4.position.z = 0;
 
-		pointLight4.position.x = 0;
-		pointLight4.position.y = -100;
-		pointLight4.position.z = 0;
+	pointLight4.position.x = 0;
+	pointLight4.position.y = -100;
+	pointLight4.position.z = 0;
 
-		// add to the scene
-		scene.add(pointLight1);
-		scene.add(pointLight2);
-		scene.add(pointLight3);
-		scene.add(pointLight4);
+	// add to the scene
+	scene.add(pointLight1);
+	scene.add(pointLight2);
+	scene.add(pointLight3);
+	scene.add(pointLight4);
 
 	//initControls();
+	loadOptions();
 	createNodes();
 	initForce3D();
 	animate();
-	
+
 	//we add the even listener function to the domElement
-    renderer.domElement.addEventListener( 'mousedown', onMouseDown );
-	
+	renderer.domElement.addEventListener('mousedown', onMouseDown);
+
 	function createNodes() {
 		for (var i = 0; i < data.nodes.length; i++) {
 			sort_data.push({
@@ -343,9 +348,18 @@ function init() {
 			three_links.push(line);
 			scene.add(line);
 
-			force.start(); 
+			force.start();
 		}
 
+	}
+
+	function loadOptions(depth, relations) {
+		var currentDepth = depth;
+		var currentRelations = relations.split(",");
+
+		$("#options .depth").val(currentDepth);
+		$("#options .broader").prop("checked", (currentRelations[0] === "true"));
+		$("#options .narrower").prop("checked", (currentRelations[1] === "true"));
 	}
 
 	function initForce3D() {
@@ -396,39 +410,40 @@ function init() {
 	function render() {
 
 	}
+
 	//event listener
-function onMouseDown( event_info ) {
-	console.log(spheres.children);
-    //stop any other event listener from recieving this event
-    event_info.preventDefault();  
-    
-    //this where begin to transform the mouse cordinates to three,js cordinates
-    mouse.x = ( event_info.clientX / window.innerWidth ) * 2 - 1;
-    mouse.y = - ( event_info.clientY / window.innerHeight ) * 2 + 1;
-    
-    //this vector caries the mouse click cordinates
-    mouse_vector.set( mouse.x, mouse.y, mouse.z );
-    
-    //the final step of the transformation process, basically this method call
-    //creates a point in 3d space where the mouse click occurd
-    projector.unprojectVector( mouse_vector, camera );
-    
-    var direction = mouse_vector.sub( camera.position ).normalize();
-    
-    //ray = new THREE.Raycaster( camera.position, direction );
-    ray.set( camera.position, direction );
-    
-    //asking the raycaster if the mouse click touched the sphere object
-    intersects = ray.intersectObject();
-    
-    //the ray will return an array with length of 1 or greater if the mouse click
-    //does touch the sphere object
-    if( intersects.length ) {
-        
-        alert( "hit" );
-        
-    }
-    
-}
+	function onMouseDown(event_info) {
+		console.log(spheres.children);
+		//stop any other event listener from recieving this event
+		event_info.preventDefault();
+
+		//this where begin to transform the mouse cordinates to three,js cordinates
+		mouse.x = (event_info.clientX / window.innerWidth ) * 2 - 1;
+		mouse.y = -(event_info.clientY / window.innerHeight ) * 2 + 1;
+
+		//this vector caries the mouse click cordinates
+		mouse_vector.set(mouse.x, mouse.y, mouse.z);
+
+		//the final step of the transformation process, basically this method call
+		//creates a point in 3d space where the mouse click occurd
+		projector.unprojectVector(mouse_vector, camera);
+
+		var direction = mouse_vector.sub(camera.position).normalize();
+
+		//ray = new THREE.Raycaster( camera.position, direction );
+		ray.set(camera.position, direction);
+
+		//asking the raycaster if the mouse click touched the sphere object
+		intersects = ray.intersectObject();
+
+		//the ray will return an array with length of 1 or greater if the mouse click
+		//does touch the sphere object
+		if (intersects.length) {
+
+			alert("hit");
+
+		}
+
+	}
 
 }
