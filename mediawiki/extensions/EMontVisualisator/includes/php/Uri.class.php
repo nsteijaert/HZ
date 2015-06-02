@@ -75,7 +75,7 @@ class Uri
 	public static function SMWuriNaarLeesbareTitel($uri)
 	{
 		$name_array=preg_split("/URIResolver\//", self::decodeerSMWNaam($uri));
-		if($name_array[1])
+		if(isset($name_array[1]))
 		{
 			return self::deescapeSpecialeTekens($name_array[1]);
 		}
@@ -111,7 +111,7 @@ class Uri
 	public static function stripSMWuriPadEnPrefixes($uri)
 	{
 		$name_array=preg_split("/URIResolver\//", $uri);
-		if($name_array[1])
+		if(isset($name_array[1]))
 		{
 			return $name_array[1];
 		}
