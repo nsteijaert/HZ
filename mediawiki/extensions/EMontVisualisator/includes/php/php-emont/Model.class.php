@@ -50,19 +50,17 @@ class Model
 		if(rtrim($context_uri)==FALSE)
 			return $subrollen;
 
-		$context_uri=Uri::escape_uri($context_uri);
-
-		$query='DESCRIBE ?supercontext WHERE { '.$context_uri.' property:Supercontext ?supercontext }';
+		$query='SELECT ?supercontext WHERE { % property:Supercontext ?supercontext }';
 		$connectie=new SPARQLConnection();
 		$contexten=$connectie->JSONQueryAsMultidimensionalPHPArray($query);
 
 		$return=array();
-		if(isset($contexten['@graph']))
+		if(isset($contexten['results']['bindings']))
 		{
-			foreach($contexten['@graph'] as $item)
+			foreach($contexten['results']['bindings'] as $item)
 			{
-				if($item['@id'])
-					$return[]=$item['@id'];
+				if($item['supercontext']['value'])
+					$return[]=$item['supercontext']['value'];
 			}
 		}
 		return $return;
@@ -149,10 +147,10 @@ class Model
 	{
 		$query='DESCRIBE ?practice WHERE {
 			?practice property:Practice_type "Experience" .
-			FILTER (?practice = '.Uri::escape_uri($model_uri).')}';
+			FILTER (?practice = %)}';
 
 		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
+		$result=$connectie->escapedQuery($query,array($model_uri));
 
 		if (count($result)>1)
 		{
@@ -166,10 +164,9 @@ class Model
 
 	static function geefContextVanModel($model_uri)
 	{
-		$query='SELECT ?context WHERE {
-			'.Uri::escape_uri($model_uri).' property:Context ?context}';
+		$query='SELECT ?context WHERE { % property:Context ?context}';
 		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
+		$result=$connectie->escapedQuery($query,array($model_uri));
 
 		return strtr($result['results']['bindings'][0]['context']['value'],array('http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'=>'wiki:'));
 	}
@@ -181,10 +178,9 @@ class Model
 			return null;
 		}
 
-		$query='SELECT ?model WHERE {
-			'.Uri::escape_uri($l2_uri).' property:Part_of ?model}';
+		$query='SELECT ?model WHERE { % property:Part_of ?model}';
 		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
+		$result=$connectie->escapedQuery($query,array($l2_uri));
 
 		return strtr($result['results']['bindings'][0]['model']['value'],array('http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'=>'wiki:'));
 	}
@@ -194,14 +190,12 @@ class Model
 	 */
 	static function isHoofdcontextVanPractice($context_uri)
 	{
-		$context_uri=Uri::escape_uri($context_uri);
 		$query="DESCRIBE ?s ?o WHERE {
-			?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3ASelection_link> ".$context_uri."
-			.
+			?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3ASelection_link> % .
 			?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3APractice_back_link> ?o
 			}";
 		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
+		$result=$connectie->escapedQuery($query,array($context_uri));
 
 		if (empty($result['@graph'])) // Leeg resultaat
 		{

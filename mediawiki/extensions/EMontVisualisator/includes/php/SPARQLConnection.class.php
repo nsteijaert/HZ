@@ -1,6 +1,5 @@
 <?php
 require_once(__DIR__.'/Uri.class.php');
-require_once('EasyRdf.php');
 
 class SPARQLConnection
 {
@@ -48,6 +47,8 @@ class SPARQLConnection
 			$pos = strpos($query, '%');
     		if ($pos !== false)
     		{
+    			if(trim($vars[$teller])==FALSE)
+					return null;
         		$query = substr_replace($query, Uri::escape_uri($vars[$teller]), $pos, 1);
     		}
 		}
@@ -55,8 +56,8 @@ class SPARQLConnection
 
 		try
 		{
-			$return=file_get_contents($this->endpoint.rawurlencode($prefixed_query));
-			return $return;
+			$return=@file_get_contents($this->endpoint.rawurlencode($prefixed_query));
+			return json_decode($return,true);
 		}
 		catch(Exception $e)
 		{
@@ -65,12 +66,24 @@ class SPARQLConnection
 		}
 	}
 
+	public function escapedQueryAsMultidimensionalPHPArray($query,$vars)
+	{
+		$data=self::escapeQuery($query,$vars);
+		// Eén resultaat wordt anders teruggeven dan meerdere. Dat wordt hiermee afgevangen.
+		if($data && !array_key_exists('@graph',$data))
+		{
+			$return['@graph'][0]=$data;
+			return $return;
+		}
+		return $data;
+	}
+
 	public function JSONQuery($query)
 	{
 		$prefixed_query=self::prefixesIntoQuery().$query;
 		try
 		{
-			$return=file_get_contents($this->endpoint.rawurlencode($prefixed_query));
+			$return=@file_get_contents($this->endpoint.rawurlencode($prefixed_query));
 			return $return;
 		}
 		catch(Exception $e)
