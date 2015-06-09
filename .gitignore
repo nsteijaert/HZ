@@ -12,3 +12,5 @@ mediawiki/*
 
 mediawiki/extensions/*
 !mediawiki/extensions/EMontVisualisator/
+mediawiki/extensions/EMontVisualisator/includes/php/EasyRdf
+mediawiki/extensions/EMontVisualisator/includes/php/EasyRdf.php
