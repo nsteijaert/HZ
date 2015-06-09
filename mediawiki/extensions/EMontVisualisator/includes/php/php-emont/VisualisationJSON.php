@@ -57,7 +57,12 @@ $post['constraints']=array();
 foreach($links as $link)
 {
 	$post['links'][]=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']],'type'=>$link['type'],'extraInfo'=>$link['extraInfo'],'note'=>$link['note']);
-	if($link['type']!='partOf')
+	if($link['type']=='connects' && strpos($link['extraInfo'],'seq'))
+	{
+		$post['constraints'][]=array('gap'=>140,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+		$post['constraints'][]=array('gap'=>0,'axis'=>'y', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+	}
+	elseif($link['type']!='partOf')
 	{
 		$post['constraints'][]=array('gap'=>30,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
 	}
@@ -125,15 +130,17 @@ foreach ($post['groups'] as $index=>$inhoud)
 	$post['groups'][$index]['titel']=Uri::SMWuriNaarLeesbareTitel(implode("",array_slice($contextindex,$index,1)));
 	$post['groups'][$index]['langbijschrift']="";
 
-	foreach($gebruikteSubcontexten[$index] as $supercontextindex)
+	if(isset($gebruikteSubcontexten[$index]))
 	{
-		if($post['groups'][$index]['langbijschrift'])
-			$post['groups'][$index]['langbijschrift'].=", ";
-		$post['groups'][$index]['langbijschrift'].=Uri::SMWuriNaarLeesbareTitel(implode("",array_slice($contextindex,$supercontextindex,1))).': '.$post['groups'][$index]['titel'];
+		foreach($gebruikteSubcontexten[$index] as $supercontextindex)
+		{
+			if($post['groups'][$index]['langbijschrift'])
+				$post['groups'][$index]['langbijschrift'].=", ";
+			$post['groups'][$index]['langbijschrift'].=Uri::SMWuriNaarLeesbareTitel(implode("",array_slice($contextindex,$supercontextindex,1))).': '.$post['groups'][$index]['titel'];
+		}
 	}
-
 	//Als de context nooit als subcontext voorkomt is het waarschijnlijk de hoofdcontext, die geen supercontextvermelding heeft (om begrijpelijke redenen).
-	if($gebruikteSubcontexten[$index]==false)
+	else
 	{
 		$post[groups][$index]['langbijschrift']=$post['groups'][$index]['titel'];
 		$post[groups][$index]['bijschrift']=$post['groups'][$index]['titel'];
@@ -156,6 +163,13 @@ foreach ($post['groups'] as $index=>$inhoud)
 	{
 		$post[groups][$index]['bijschrift']=$post[groups][$index]['langbijschrift'];
 	}
+}
+
+$groups=$post[groups];
+$post[groups]=array();
+foreach ($groups as $group)
+{
+	$post[groups][]=$group;
 }
 
 // Teken groepen met meer nodes eerst
@@ -181,5 +195,10 @@ function geefInitialen($string)
 	}
 	return $acronym;
 }
-
-echo strtr(json_encode($post),array('<\/'=>'</','<sub>'=>'','<\/sub>'=>''));
+$out=json_encode($post);
+$out=strtr($out,array('<\/'=>'</'));
+$out=strtr($out,array('<sub>2</sub>'=>'₂'));
+$out=strtr($out,array('<sub>'=>'','<\/sub>'=>''));
+$out=strtr($out,array('CO2'=>'CO₂'));
+echo $out;
+error_log('JSON out op '.date('D, d M Y H:i:s'));

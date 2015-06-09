@@ -13,12 +13,13 @@ if($_POST)
 {
 	$type=$_GET['type'];
 	$actie=$_GET['actie'];
+	$naamprefix=Uri::SMWuriNaarLeesbareTitel($context_uri);
 
 	if($type=='context')
 	{
 		if($actie=='nieuw')
 		{
-			$naam=$_POST['naam-nieuwe-context'];
+			$naam=$naamprefix.' '.$_POST['naam-nieuwe-context'];
 			$supercontext_uri=$_POST['supercontext'];
 
 			Model::nieuweContext($naam);
@@ -53,9 +54,9 @@ if($_POST)
 		}
 		elseif($actie=='nieuw')
 		{
-			Model::nieuwIE($_POST['ie'],$_POST['context'],$_POST['titel']);
-			$type=SPARQLConnection::geefEersteResultaat($_POST['ie'],'property:Intentional_Element_type');
-			Model::nieuweVN($_POST['titel'].' VN',$type,$_POST['titel']);
+			$naam=$naamprefix.' '.$_POST['titel'];
+			Model::nieuwIE($_POST['ie'],$_POST['context'],$naam);
+			Model::nieuweVN($naam.' VN','Intentional Element',$naam);
 		}
 		elseif($actie=='maakverband')
 		{
@@ -200,13 +201,16 @@ class Visualisatiepagina
 			////
 			$this->inhoud.='<h2>Nieuw Intentional Element</h2>';
 			$this->inhoud.='<form action="?actie=nieuw&amp;type=ie" method="post"><table>';
-			$this->inhoud.='<tr><td>Naam:</td><td><input type="text" style="width: 300px;" name="titel"/></td></tr>';
+			$this->inhoud.='<tr><td>Naam: '.Uri::SMWuriNaarLeesbareTitel($context_uri).'</td><td><input type="text" style="width: 300px;" name="titel"/></td></tr>';
 			$this->inhoud.='<tr><td>Instance of:</td><td><select name="ie">';
 
 			$data=Model::geefElementenUitContextEnSubcontexten($l1hoofdcontext);
-			foreach($data['@graph'] as $item)
+			if(isset($data['@graph']))
 			{
-				$this->inhoud.= '<option value="'.$item['@id'].'">'.$item['label'].'</option>';
+				foreach($data['@graph'] as $item)
+				{
+					$this->inhoud.= '<option value="'.$item['@id'].'">'.$item['label'].'</option>';
+				}
 			}
 			$this->inhoud.='</select></td></tr>';
 
@@ -236,7 +240,7 @@ class Visualisatiepagina
 			////
 			$this->inhoud.='<h2>Nieuwe context</h2>';
 			$this->inhoud.='<form method="post" action="?actie=nieuw&amp;type=context">';
-			$this->inhoud.='Naam: <input type="text" name="naam-nieuwe-context" /><br />';
+			$this->inhoud.='Naam: '.Uri::SMWuriNaarLeesbareTitel($context_uri).'<input type="text" name="naam-nieuwe-context" /><br />';
 			$this->inhoud.='Supercontext: <select name="supercontext">'.$contextenlijst.'</select>';
 			$this->inhoud.='<input type="submit" value="Aanmaken"></form>';
 

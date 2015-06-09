@@ -46,6 +46,10 @@ class Model
 	static function zoekSupercontexten($context_uri)
 	{
 		$subrollen=array();
+
+		if(!$context_uri)
+			return $subrollen;
+
 		$context_uri=Uri::escape_uri($context_uri);
 
 		$query='DESCRIBE ?supercontext WHERE { '.$context_uri.' property:Supercontext ?supercontext }';
@@ -274,6 +278,9 @@ class Model
 
 	static function geefElementenUitContextEnSubcontexten($context_uri)
 	{
+		if(!$context_uri)
+			return null;
+
 		$alle_te_doorzoeken_uris=self::geefUrisVanContextEnSubcontexten($context_uri);
 
 		$zoekstring=implode(' } UNION { ?ie property:Context ',$alle_te_doorzoeken_uris);
@@ -285,6 +292,9 @@ class Model
 
 	static function geefUrisVanContextEnSubcontexten($context_uri)
 	{
+		if(!$context_uri)
+			return null;
+
 		$subrollen=Model::zoekSubcontexten($context_uri);
 
 		foreach(array_merge(array($context_uri),$subrollen) as $te_doorzoeken_uri)

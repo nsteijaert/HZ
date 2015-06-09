@@ -27,7 +27,7 @@ Class Visualisatie
 
 		$context_uri=Model::geefContextVanModel($model_uri);
 
-		$svgheight=1280;
+		$svgheight=2280;
 		$nodeheight=30;
 		$nodewidth=100;
 
@@ -49,6 +49,8 @@ Class Visualisatie
 		}
 
 		var graph;
+		var width = $("#'.$visualisatie_id.'").width();
+		var	height = $("#'.$visualisatie_id.'").height();
 
 		// Haal de gegevens op
 		$.ajax({
@@ -69,8 +71,8 @@ Class Visualisatie
 			// Selecteer de visualisatie-container
 		    var svg = d3.select(\'#'.$visualisatie_id.'\');
 
-			var width = $("#'.$visualisatie_id.'").width();
-		    	height = $("#'.$visualisatie_id.'").height();
+			console.log(width);
+			console.log(height);
 
 			var force = cola.d3adaptor()
 		    	.linkDistance(120)
