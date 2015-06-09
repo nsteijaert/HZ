@@ -68,7 +68,7 @@ class SPARQLConnection
 
 	public function escapedQueryAsMultidimensionalPHPArray($query,$vars)
 	{
-		$data=self::escapeQuery($query,$vars);
+		$data=self::escapedQuery($query,$vars);
 		// Eén resultaat wordt anders teruggeven dan meerdere. Dat wordt hiermee afgevangen.
 		if($data && !array_key_exists('@graph',$data))
 		{

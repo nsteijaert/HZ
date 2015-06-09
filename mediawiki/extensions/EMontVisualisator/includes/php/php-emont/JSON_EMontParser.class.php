@@ -101,7 +101,7 @@ class JSON_EMontParser
 					}
 				}
 
-				$query='DESCRIBE ?s WHERE { ?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3AElement_back_link> '.Uri::escape_uri($item['@id']).' }';
+				$query='DESCRIBE ?s WHERE { ?s property:Element_back_link '.Uri::escape_uri($item['@id']).' }';
 				$resultaat=$connectie->JSONQueryAsMultidimensionalPHPArray($query);
 
 				foreach($resultaat as $deelresultaat)
@@ -194,7 +194,7 @@ class JSON_EMontParser
 	static function geefContextbeschrijving($context_uri)
 	{
 		$connectie=new SPARQLConnection();
-		$description_query='SELECT ?description WHERE { '.Uri::escape_uri($context_uri).' <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3ADescription> ?description }';
+		$description_query='SELECT ?description WHERE { '.Uri::escape_uri($context_uri).' property:Description ?description }';
 		$description_result=$connectie->JSONQueryAsPHPArray($description_query);
 		$description=$description_result['results']['bindings'][0]['description']['value'];
 

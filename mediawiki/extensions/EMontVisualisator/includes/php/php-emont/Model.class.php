@@ -168,7 +168,7 @@ class Model
 		$connectie=new SPARQLConnection();
 		$result=$connectie->escapedQuery($query,array($model_uri));
 
-		return strtr($result['results']['bindings'][0]['context']['value'],array('http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'=>'wiki:'));
+		return 'wiki:'.Uri::stripSMWuriPadEnPrefixes($result['results']['bindings'][0]['context']['value']);
 	}
 
 	static function geefL1modelVanCase($l2_uri)
@@ -182,7 +182,7 @@ class Model
 		$connectie=new SPARQLConnection();
 		$result=$connectie->escapedQuery($query,array($l2_uri));
 
-		return strtr($result['results']['bindings'][0]['model']['value'],array('http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/'=>'wiki:'));
+		return 'wiki:'.Uri::stripSMWuriPadEnPrefixes($result['results']['bindings'][0]['model']['value']);
 	}
 
 	/**
@@ -191,8 +191,8 @@ class Model
 	static function isHoofdcontextVanPractice($context_uri)
 	{
 		$query="DESCRIBE ?s ?o WHERE {
-			?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3ASelection_link> % .
-			?s <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3APractice_back_link> ?o
+			?s property:Selection_link % .
+			?s property:Practice_back_link ?o
 			}";
 		$connectie=new SPARQLConnection();
 		$result=$connectie->escapedQuery($query,array($context_uri));
@@ -278,7 +278,7 @@ class Model
 		$alle_te_doorzoeken_uris=self::geefUrisVanContextEnSubcontexten($context_uri);
 
 		$zoekstring=implode(' } UNION { ?ie property:Context ',$alle_te_doorzoeken_uris);
-		$query_inhoud_situatie='DESCRIBE ?ie WHERE {{ ?ie property:Context '.$zoekstring.' }.{?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AIntentional_Element>} UNION {?ie rdf:type <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Categorie-3AActivity>}}';
+		$query_inhoud_situatie='DESCRIBE ?ie WHERE {{ ?ie property:Context '.$zoekstring.' }.{?ie rdf:type wiki:Categorie-3AIntentional_Element} UNION {?ie rdf:type wiki:Categorie-3AActivity}}';
 
 		$connectie=new SPARQLConnection();
 		return $connectie->JSONQueryAsMultidimensionalPHPArray($query_inhoud_situatie);
