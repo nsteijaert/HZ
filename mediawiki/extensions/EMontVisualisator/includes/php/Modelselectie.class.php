@@ -23,37 +23,59 @@ class Modelselectie
 
 		$this->inhoud.='<h2 id="practices">Practices (L1)</h2><ul>';
 
-		foreach ($l1modellen as $l1uri => $l1beschrijving)
+		if(isset($l1modellen))
 		{
-			$this->inhoud.='<li><a href="'.$urlpad.'/toon/'.Uri::stripSMWuriPadEnPrefixes($l1uri).'">'.$l1beschrijving.'</a></li>';
+			foreach ($l1modellen as $l1uri => $l1beschrijving)
+			{
+				$this->inhoud.='<li><a href="'.$urlpad.'/toon/'.Uri::stripSMWuriPadEnPrefixes($l1uri).'">'.$l1beschrijving.'</a></li>';
+			}
+		}
+		else
+		{
+			$this->inhoud.='<li>Geen modellen gevonden.</li>';
 		}
 
 		$this->inhoud.='</ul><h2 id="experiences">Experiences (L2, cases)</h2><ul>';
 
-		foreach($l2cases as $l2uri => $l2beschrijving)
+		if(isset($l2cases))
 		{
-			$this->inhoud.='<li><a href="'.$urlpad.'/toon/'.Uri::stripSMWuriPadEnPrefixes($l2uri).'">'.$l2beschrijving.'</a></li>';
+			foreach($l2cases as $l2uri => $l2beschrijving)
+			{
+				$this->inhoud.='<li><a href="'.$urlpad.'/toon/'.Uri::stripSMWuriPadEnPrefixes($l2uri).'">'.$l2beschrijving.'</a></li>';
+			}
+		}
+		else
+		{
+			$this->inhoud.='<li>Geen cases gevonden.</li>';
 		}
 
 		$this->inhoud.='
 		</ul>
-		<h2>Nieuwe experience aanmaken</h2>
-		<form method="post">
-			<table>
-				<tr><td style="width: 150px;">Gebaseerd op:</td><td>
-			<select style="width:350px;" name="l1model">';
+		<h2>Nieuwe experience aanmaken</h2>';
+		if(isset($l1modellen))
+		{
+			$this->inhoud.='
+			<form method="post">
+				<table>
+					<tr><td style="width: 150px;">Gebaseerd op:</td><td>
+				<select style="width:350px;" name="l1model">';
 
-			foreach ($l1modellen as $l1uri => $l1beschrijving)
-			{
-				$this->inhoud.='<option value="'.$l1uri.'">'.$l1beschrijving.'</option>';
-			}
+				foreach ($l1modellen as $l1uri => $l1beschrijving)
+				{
+					$this->inhoud.='<option value="'.$l1uri.'">'.$l1beschrijving.'</option>';
+				}
 
-		$this->inhoud.='
-			</select></td></tr>
-			<tr><td>Naam:</td><td><input style="width:342px;" type="text" name="titel" /></td></tr>
-			<tr><td colspan="100%"><input type="submit" value="Aanmaken" /></td></tr>
-			</table>
-		</form>';
+			$this->inhoud.='
+				</select></td></tr>
+				<tr><td>Naam:</td><td><input style="width:342px;" type="text" name="titel" /></td></tr>
+				<tr><td colspan="100%"><input type="submit" value="Aanmaken" /></td></tr>
+				</table>
+			</form>';
+		}
+		else
+		{
+			$this->inhoud.='Geen modellen gevonden.';
+		}
 	}
 
 	public function geefInhoud()

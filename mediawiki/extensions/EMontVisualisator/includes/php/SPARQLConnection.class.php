@@ -1,9 +1,11 @@
 <?php
 require_once(__DIR__.'/Uri.class.php');
+require_once('EasyRdf.php');
 
 class SPARQLConnection
 {
 	private $default_endpoint="http://127.0.0.1:3030/ds/query?output=json&query=";
+	private $default_endpoint_clean="http://127.0.0.1:3030/ds/query";
 	private $endpoint="";
 	private $default_prefixes=array();
 
@@ -11,20 +13,71 @@ class SPARQLConnection
 	{
 		if ($endpoint==null)
 			$this->endpoint=$this->default_endpoint;
-		$this->default_prefixes[]='rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>';
-		$this->default_prefixes[]='rdfs: <http://www.w3.org/2000/01/rdf-schema#>';
-		$this->default_prefixes[]='owl: <http://www.w3.org/2002/07/owl#>';
-		$this->default_prefixes[]='swivt: <http://semantic-mediawiki.org/swivt/1.0#>';
-		$this->default_prefixes[]='xsd: <http://www.w3.org/2001/XMLSchema#>';
+		$this->default_prefixes['rdf']='http://www.w3.org/1999/02/22-rdf-syntax-ns#';
+		$this->default_prefixes['rdfs']='http://www.w3.org/2000/01/rdf-schema#';
+		$this->default_prefixes['owl']='http://www.w3.org/2002/07/owl#';
+		$this->default_prefixes['swivt']='http://semantic-mediawiki.org/swivt/1.0#';
+		$this->default_prefixes['xsd']='http://www.w3.org/2001/XMLSchema#';
 
-		$this->default_prefixes[]='property: <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3A>';
-		$this->default_prefixes[]='wiki: <http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/>';
+		$this->default_prefixes['property']='http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/Eigenschap-3A';
+		$this->default_prefixes['wiki']='http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/';
+	}
+
+	/*public function query($query)
+	{
+		try
+		{
+			foreach($this->default_prefixes as $prefix=>$uri)
+			{
+				EasyRdf_Namespace::set($prefix,$uri);
+			}
+			$sparql=new EasyRdf_Sparql_Client($this->default_endpoint_clean);
+			return $sparql->query($query);
+		}
+		catch(Exception $e)
+		{
+			error_log('Fout bij uitvoeren query: '.$e);
+			return null;
+		}
+	}*/
+
+	public function escapedQuery($query,$vars=array())
+	{
+		for($teller=0;strpos($query,'%')!==FALSE;$teller++)
+		{
+			$pos = strpos($query, '%');
+    		if ($pos !== false)
+    		{
+        		$query = substr_replace($query, Uri::escape_uri($vars[$teller]), $pos, 1);
+    		}
+		}
+		$prefixed_query=self::prefixesIntoQuery().$query;
+
+		try
+		{
+			$return=file_get_contents($this->endpoint.rawurlencode($prefixed_query));
+			return $return;
+		}
+		catch(Exception $e)
+		{
+			error_log('Fout bij uitvoeren query: '.$e);
+			return null;
+		}
 	}
 
 	public function JSONQuery($query)
 	{
 		$prefixed_query=self::prefixesIntoQuery().$query;
-		return file_get_contents($this->endpoint.rawurlencode($prefixed_query));
+		try
+		{
+			$return=file_get_contents($this->endpoint.rawurlencode($prefixed_query));
+			return $return;
+		}
+		catch(Exception $e)
+		{
+			error_log('Fout bij uitvoeren query: '.$e);
+			return null;
+		}
 	}
 
 	public function JSONQueryAsPHPArray($query)
@@ -49,9 +102,9 @@ class SPARQLConnection
 	{
 		$prefixes=array_merge($this->default_prefixes,$extra_prefixes);
 
-		foreach($prefixes as $prefix)
+		foreach($prefixes as $prefix=>$uri)
 		{
-			$return.='PREFIX '.$prefix." \n";
+			$return.='PREFIX '.$prefix.': <'.$uri.">\n";
 		}
 		return $return;
 	}

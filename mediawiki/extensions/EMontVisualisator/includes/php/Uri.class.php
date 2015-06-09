@@ -14,7 +14,11 @@ class Uri
 	 */
 	public static function escape_uri($uri)
 	{
-		if (substr($uri,0,4)=='http') //uri
+		if(substr($uri,1,1)=='<')
+		{
+			return $uri;
+		}
+		elseif(substr($uri,0,4)=='http') //uri
 		{
 			return '<'.$uri.'>';
 		}

@@ -47,7 +47,7 @@ class Model
 	{
 		$subrollen=array();
 
-		if(!$context_uri)
+		if(rtrim($context_uri)==FALSE)
 			return $subrollen;
 
 		$context_uri=Uri::escape_uri($context_uri);

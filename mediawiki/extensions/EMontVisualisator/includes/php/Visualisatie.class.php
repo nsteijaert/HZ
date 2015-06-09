@@ -193,7 +193,7 @@ Class Visualisatie
 		         .attr("class", function (d) {return "label label"+d.type})
 		         .text(function (d) { return d.name; })
 		         .attr("title", function (d) { return d.heading;})
-		         .on(\'dblclick\', function (d) { openInNewTab(\''.$domeinprefix.'\'+d.name);})
+		         .on(\'dblclick\', function (d) { openInNewTab(\''.$domeinprefix.'\'+d.name+\' VN\');})
 			     .call(force.drag);
 
 			// Groeptitels
