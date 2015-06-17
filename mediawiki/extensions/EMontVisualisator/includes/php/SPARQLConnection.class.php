@@ -22,24 +22,6 @@ class SPARQLConnection
 		$this->default_prefixes['wiki']='http://127.0.0.1/mediawiki/mediawiki/index.php/Speciaal:URIResolver/';
 	}
 
-	/*public function query($query)
-	{
-		try
-		{
-			foreach($this->default_prefixes as $prefix=>$uri)
-			{
-				EasyRdf_Namespace::set($prefix,$uri);
-			}
-			$sparql=new EasyRdf_Sparql_Client($this->default_endpoint_clean);
-			return $sparql->query($query);
-		}
-		catch(Exception $e)
-		{
-			error_log('Fout bij uitvoeren query: '.$e);
-			return null;
-		}
-	}*/
-
 	public function escapedQuery($query,$vars=array())
 	{
 		for($teller=0;strpos($query,'%')!==FALSE;$teller++)
