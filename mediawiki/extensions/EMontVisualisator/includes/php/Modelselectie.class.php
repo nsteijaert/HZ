@@ -54,7 +54,7 @@ class Modelselectie
 		<h2>Nieuwe experience aanmaken</h2>';
 		if(isset($l1modellen))
 		{
-			$this->inhoud.='
+			$this->inhoud.='<p>Het aanmaken van een nieuwe experience kan enkele minuten in beslag nemen.</p>
 			<form method="post">
 				<table>
 					<tr><td style="width: 150px;">Gebaseerd op:</td><td>
@@ -74,7 +74,7 @@ class Modelselectie
 		}
 		else
 		{
-			$this->inhoud.='Geen modellen gevonden.';
+			$this->inhoud.='<p>Geen modellen gevonden.</p>';
 		}
 	}
 
