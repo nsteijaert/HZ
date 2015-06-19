@@ -104,13 +104,16 @@ class JSON_EMontParser
 				$query='DESCRIBE ?s WHERE { ?s property:Element_back_link % }';
 				$resultaat=$connectie->escapedQueryAsMultidimensionalPHPArray($query,array($item['@id']));
 
-				foreach($resultaat as $deelresultaat)
+				if($resultaat)
 				{
-					if(@array_key_exists(0,$deelresultaat))
+					foreach($resultaat as $deelresultaat)
 					{
-						foreach($deelresultaat as $koppeling)
+						if(@array_key_exists(0,$deelresultaat))
 						{
-							$verbanden['ccd'][]=array('source'=>$item['@id'],'ccdkoppeling'=>$koppeling);
+							foreach($deelresultaat as $koppeling)
+							{
+								$verbanden['ccd'][]=array('source'=>$item['@id'],'ccdkoppeling'=>$koppeling);
+							}
 						}
 					}
 				}

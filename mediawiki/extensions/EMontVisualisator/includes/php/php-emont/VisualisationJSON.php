@@ -201,4 +201,3 @@ $out=strtr($out,array('<sub>2</sub>'=>'₂'));
 $out=strtr($out,array('<sub>'=>'','<\/sub>'=>''));
 $out=strtr($out,array('CO2'=>'CO₂'));
 echo $out;
-error_log('JSON out op '.date('D, d M Y H:i:s'));
