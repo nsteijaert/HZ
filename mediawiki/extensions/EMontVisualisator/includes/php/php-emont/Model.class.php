@@ -19,11 +19,9 @@ class Model
 		if(!$context_uri)
 			return $subcontexten;
 
-		$context_uri=Uri::escape_uri($context_uri);
-
-		$query='DESCRIBE ?context WHERE { ?context property:Supercontext '.$context_uri.' }';
+		$query='DESCRIBE ?context WHERE { ?context property:Supercontext % }';
 		$connectie=new SPARQLConnection();
-		$contexten=$connectie->JSONQueryAsMultidimensionalPHPArray($query);
+		$contexten=$connectie->escapedQueryAsMultidimensionalPHPArray($query,array($context_uri));
 
 		if(isset($contexten['@graph']))
 		{
@@ -52,7 +50,7 @@ class Model
 
 		$query='SELECT ?supercontext WHERE { % property:Supercontext ?supercontext }';
 		$connectie=new SPARQLConnection();
-		$contexten=$connectie->JSONQueryAsMultidimensionalPHPArray($query);
+		$contexten=$connectie->escapedQuery($query,array($context_uri));
 
 		$return=array();
 		if(isset($contexten['results']['bindings']))
@@ -73,7 +71,7 @@ class Model
 	{
 		$query='DESCRIBE ?practice WHERE {?practice property:Practice_type "Practice"}';
 		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
+		$result=$connectie->escapedQuery($query);
 
 		if(isset($result['@graph']))
 		{
@@ -99,7 +97,7 @@ class Model
 	{
 		$query='DESCRIBE ?experience WHERE {?experience property:Practice_type "Experience"}';
 		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
+		$result=$connectie->escapedQuery($query);
 
 		if(isset($result['@graph']))
 		{
@@ -125,10 +123,10 @@ class Model
 	{
 		$query='DESCRIBE ?practice WHERE {
 			?practice property:Practice_type "Practice" .
-			FILTER (?practice = '.Uri::escape_uri($model_uri).')}';
+			FILTER (?practice = %)}';
 
 		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
+		$result=$connectie->escapedQuery($query,array($model_uri));
 
 		if (count($result)>1)
 		{
@@ -277,11 +275,21 @@ class Model
 
 		$alle_te_doorzoeken_uris=self::geefUrisVanContextEnSubcontexten($context_uri);
 
-		$zoekstring=implode(' } UNION { ?ie property:Context ',$alle_te_doorzoeken_uris);
+		$zoekstring="";
+		for($teller=0;$teller<count($alle_te_doorzoeken_uris);$teller++)
+		{
+			if($zoekstring!="")
+			{
+				$zoekstring.=' } UNION { ?ie property:Context ';
+			}
+
+			$zoekstring.='%';
+		}
+
 		$query_inhoud_situatie='DESCRIBE ?ie WHERE {{ ?ie property:Context '.$zoekstring.' }.{?ie rdf:type wiki:Categorie-3AIntentional_Element} UNION {?ie rdf:type wiki:Categorie-3AActivity}}';
 
 		$connectie=new SPARQLConnection();
-		return $connectie->JSONQueryAsMultidimensionalPHPArray($query_inhoud_situatie);
+		return $connectie->escapedQueryAsMultidimensionalPHPArray($query_inhoud_situatie,$alle_te_doorzoeken_uris);
 	}
 
 	static function geefUrisVanContextEnSubcontexten($context_uri)
@@ -289,16 +297,16 @@ class Model
 		if(!$context_uri)
 			return null;
 
-		$subrollen=Model::zoekSubcontexten($context_uri);
+		$subcontexten=Model::zoekSubcontexten($context_uri);
 
-		foreach(array_merge(array($context_uri),$subrollen) as $te_doorzoeken_uri)
+		foreach(array_merge(array($context_uri),$subcontexten) as $te_doorzoeken_uri)
 		{
-			$alle_te_doorzoeken_uris[]=Uri::escape_uri($te_doorzoeken_uri);
+			$alle_te_doorzoeken_uris[]=$te_doorzoeken_uri;
 		}
 		return $alle_te_doorzoeken_uris;
 	}
 
-	static function nieuwIE($instanceOf,$context_uri,$titel)
+	static function nieuwIE($instanceOf,$context_uri,$titel,$prefix="")
 	{
 		$ie_type=SPARQLConnection::geefEersteResultaat($instanceOf,'property:Intentional_Element_type');
 		$ie_decomposition_type=SPARQLConnection::geefEersteResultaat(Uri::escape_uri($instanceOf),'property:Intentional_Element_decomposition_type');

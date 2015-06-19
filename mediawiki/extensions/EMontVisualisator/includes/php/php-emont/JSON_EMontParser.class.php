@@ -101,8 +101,8 @@ class JSON_EMontParser
 					}
 				}
 
-				$query='DESCRIBE ?s WHERE { ?s property:Element_back_link '.Uri::escape_uri($item['@id']).' }';
-				$resultaat=$connectie->JSONQueryAsMultidimensionalPHPArray($query);
+				$query='DESCRIBE ?s WHERE { ?s property:Element_back_link % }';
+				$resultaat=$connectie->escapedQueryAsMultidimensionalPHPArray($query,array($item['@id']));
 
 				foreach($resultaat as $deelresultaat)
 				{
@@ -135,7 +135,7 @@ class JSON_EMontParser
 		 */
 		foreach($contexten as $context_uri => $context_object)
 		{
-			$supercontexten=$connectie->JSONQueryAsMultidimensionalPHPArray('DESCRIBE ?supercontext WHERE { '.Uri::escape_uri($context_uri).' property:Supercontext ?supercontext}');
+			$supercontexten=$connectie->escapedQueryAsMultidimensionalPHPArray('DESCRIBE ?supercontext WHERE { % property:Supercontext ?supercontext}',array($context_uri));
 
 			if(array_key_exists('@graph',$supercontexten)) // Meerdere resultaten
 			{
@@ -193,10 +193,7 @@ class JSON_EMontParser
 
 	static function geefContextbeschrijving($context_uri)
 	{
-		$connectie=new SPARQLConnection();
-		$description_query='SELECT ?description WHERE { '.Uri::escape_uri($context_uri).' property:Description ?description }';
-		$description_result=$connectie->JSONQueryAsPHPArray($description_query);
-		$description=$description_result['results']['bindings'][0]['description']['value'];
+		$description=SPARQLConnection::geefEersteResultaat($context_uri,'property:Description');
 
 		if ($description!="")
 		{

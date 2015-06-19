@@ -4,7 +4,6 @@ require_once(__DIR__.'/Uri.class.php');
 class SPARQLConnection
 {
 	private $default_endpoint="http://127.0.0.1:3030/ds/query?output=json&query=";
-	private $default_endpoint_clean="http://127.0.0.1:3030/ds/query";
 	private $endpoint="";
 	private $default_prefixes=array();
 
@@ -60,39 +59,6 @@ class SPARQLConnection
 		return $data;
 	}
 
-	public function JSONQuery($query)
-	{
-		$prefixed_query=self::prefixesIntoQuery().$query;
-		try
-		{
-			$return=@file_get_contents($this->endpoint.rawurlencode($prefixed_query));
-			return $return;
-		}
-		catch(Exception $e)
-		{
-			error_log('Fout bij uitvoeren query: '.$e);
-			return null;
-		}
-	}
-
-	public function JSONQueryAsPHPArray($query)
-	{
-		$json=self::JSONQuery($query);
-		return json_decode($json,true);
-	}
-
-	public function JSONQueryAsMultidimensionalPHPArray($query)
-	{
-		$data=self::JSONQueryAsPHPArray($query);
-		// Eén resultaat wordt anders teruggeven dan meerdere. Dat wordt hiermee afgevangen.
-		if($data && !array_key_exists('@graph',$data))
-		{
-			$return['@graph'][0]=$data;
-			return $return;
-		}
-		return $data;
-	}
-
 	public function prefixesIntoQuery($extra_prefixes=array())
 	{
 		$prefixes=array_merge($this->default_prefixes,$extra_prefixes);
@@ -106,9 +72,9 @@ class SPARQLConnection
 
 	public static function geefEersteResultaat($subject,$predicate)
 	{
-		$query='SELECT ?object WHERE { '.Uri::escape_uri($subject).' '.$predicate.' ?object}';
+		$query='SELECT ?object WHERE { % % ?object}';
 		$connectie=new SPARQLConnection();
-		$result=$connectie->JSONQueryAsPHPArray($query);
+		$result=$connectie->escapedQuery($query,array($subject,$predicate));
 
 		return $result['results']['bindings'][0]['object']['value'];
 	}
