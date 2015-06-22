@@ -227,7 +227,6 @@ Class Visualisatie
 
 			var grouplabelcliprect = grouplabelclip.append("rect")
 				 .attr("class","grouplabelcliprect")
-				 .attr("style",function (d,i){return "clip-path: url(#clip"+i+");"})
 				 .attr("title", function (d) {return d.langbijschrift;})
 		         .attr("rx", 10).attr("ry", 10);
 
