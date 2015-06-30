@@ -66,6 +66,20 @@ Class Visualisatie
 			}
 		});
 
+		function tekenTooltipTitel(d)
+		{
+			var title=d.type;
+			if(d.extraInfo!=null)
+			{
+				title+=d.extraInfo;
+			}
+			if(d.note!=null)
+			{
+				title+="<br />"+d.note;
+			}
+			document.getElementById(\'elementTooltip\').innerHTML=title;
+		}
+
 		function tekenDiagram()
 		{
 			// Selecteer de visualisatie-container
@@ -170,11 +184,22 @@ Class Visualisatie
 		        .attr("class", "link")
 		        .attr("marker-end", "url(#standaard)");
 
+			var tooltip = d3.select("body")
+			.append("div")
+			.attr("class", "elementTooltip")
+			.attr("id", "elementTooltip");
+
+			// Mouseover en mouseout stellen de zichtbaarheid in van de tooltip,
+			// Movemove zorgt ervoor dat de juiste informatie en positie in de tooltip terechtkomt,
+			// en zorgt er tevens voor dat de tooltip meeverschuift met de muis.
 		    var linktooltip = svg.selectAll(".linktooltip")
 		        .data(graph.links)
 		       .enter().append("line")
 		        .attr("class","linktooltip")
-		        .attr("title", function (d) { var title=d.type; if(d.extraInfo!=null){title=title+d.extraInfo}if(d.note!=null){title=title+"\n"+d.note}return title;});
+		        .on("mouseover", function() {return tooltip.style("visibility", "visible");})
+				.on("mousemove", function (d) {tekenTooltipTitel(d);
+					return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+20)+"px");})
+				.on("mouseout", function() {return tooltip.style("visibility", "hidden");});
 
 		    var node = svg.selectAll(".node")
 		         .data(graph.nodes)
