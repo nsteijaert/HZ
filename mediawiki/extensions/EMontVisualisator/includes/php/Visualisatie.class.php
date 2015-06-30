@@ -93,7 +93,6 @@ Class Visualisatie
 		    	.avoidOverlaps(true)
 				.size([width, height])
 		        .handleDisconnected(false)
-		        .symmetricDiffLinkLengths(30)
 		    	.nodes(graph.nodes)
 		    	.links(graph.links)
 		    	.constraints(graph.constraints)
@@ -106,7 +105,7 @@ Class Visualisatie
 		                d.innerBounds = d.bounds.inflate(- margin);
 		            });
 		        link.each(function (d) {
-		                cola.vpsc.makeEdgeBetween(d, d.source.innerBounds, d.target.innerBounds, 0);
+		                cola.vpsc.makeEdgeBetween(d, d.source.innerBounds.inflate(-margin), d.target.innerBounds, 0);
 		            });
 
 		        link.attr("x1", function (d) { return d.sourceIntersection.x; })
@@ -115,7 +114,7 @@ Class Visualisatie
 		            .attr("y2", function (d) { return d.arrowStart.y; });
 
 		        linktooltip.each(function (d) {
-		                cola.vpsc.makeEdgeBetween(d, d.source.innerBounds, d.target.innerBounds, 0);
+		                cola.vpsc.makeEdgeBetween(d, d.source.innerBounds.inflate(-margin), d.target.innerBounds, 0);
 		            });
 
 		        linktooltip.attr("x1", function (d) { return d.sourceIntersection.x; })

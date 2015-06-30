@@ -59,7 +59,7 @@ foreach($links as $link)
 	$post['links'][]=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']],'type'=>$link['type'],'extraInfo'=>$link['extraInfo'],'note'=>$link['note']);
 	if($link['type']=='connects' && strpos($link['extraInfo'],'seq'))
 	{
-		$post['constraints'][]=array('gap'=>140,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+		$post['constraints'][]=array('gap'=>100,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
 		$post['constraints'][]=array('gap'=>0,'axis'=>'y', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
 	}
 	elseif($link['type']!='partOf')
