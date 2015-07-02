@@ -197,7 +197,7 @@ Class Visualisatie
 		        .attr("class","linktooltip")
 		        .on("mouseover", function() {return tooltip.style("visibility", "visible");})
 				.on("mousemove", function (d) {tekenTooltipTitel(d);
-					return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+20)+"px");})
+					return tooltip.style("top", (d3.event.pageY+5)+"px").style("left",(d3.event.pageX+5)+"px");})
 				.on("mouseout", function() {return tooltip.style("visibility", "hidden");});
 
 		    var node = svg.selectAll(".node")

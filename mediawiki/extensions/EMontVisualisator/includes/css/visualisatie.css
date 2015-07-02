@@ -79,7 +79,9 @@ svg{
     position:absolute;
     z-index:10;
     visibility:hidden;
-    background-color:#eae4d7;
+    color:#ffffff;
+    font-weight:bold;
+    background-color:#000000;
 	border: 1px solid #000000;
     padding:5px;
 }
