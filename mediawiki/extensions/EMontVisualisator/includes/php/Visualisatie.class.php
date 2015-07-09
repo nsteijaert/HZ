@@ -283,29 +283,28 @@ Class Visualisatie
 			label.each(insertLinebreaks);
 		}
 
-		function checkOverlappingNodes()
+		function verhelpOverlappendeNodes()
 		{
-			var allRects = d3.select("#visualisatie-Building_with_Nature-2Dinterventies_op_het_systeem_practice").selectAll(".node").selectAll(".rect");
-			console.log("ja de lengte van t arreetje issss:  "   +   allRects.length);
-			var yArray = []; //yArray is alleen nodig om actie te ondernemen als er een duplicaat wordt aangetroffen
+			var alleNodes = d3.select("#'.$visualisatie_id.'").selectAll(".node").selectAll(".rect");
+			// nodeLocaties is een array met de y-coördinaat als index, met daarin een array met de x-coördinaat als index die
+			// de nodes met dezelfde coördinaten bevat.
+			var nodeLocaties = [];
 
-			for(var i=0; i<allRects.length;i++)
+			for(var i=0; i<alleNodes.length;i++)
 			{
-				var yValue = Math.floor( allRects[i].parentNode.y.animVal.value / 20 ) * 20;
-				var xValue = Math.floor( allRects[i].parentNode.x.animVal.value / 100 ) * 100;
+				var yValue = Math.floor(alleNodes[i].parentNode.y.animVal.value / 20 ) * 20;
+				var xValue = Math.floor(alleNodes[i].parentNode.x.animVal.value / 100 ) * 100;
 
-				if(!yArray[yValue])
-					yArray[yValue]=[];
+				if(!nodeLocaties[yValue])
+					nodeLocaties[yValue]=[];
 
-				if(!yArray[yValue][xValue])
-					yArray[yValue][xValue]=[];
+				if(!nodeLocaties[yValue][xValue])
+					nodeLocaties[yValue][xValue]=[];
 
-				yArray[yValue][xValue].push(i);
-
-				console.log("loop index: " + i);
+				nodeLocaties[yValue][xValue].push(i);
 			}
 
-			yArray.forEach(verwerkYwaarden);
+			nodeLocaties.forEach(verwerkYwaarden);
 
 			function verwerkYwaarden(xArray, y, array)
 			{
@@ -319,14 +318,14 @@ Class Visualisatie
 					return;
 				}
 
-				// Sla het eerste element over, aangezien die geen tik hoeft te krijgen
+				// Sla het eerste element over, aangezien dat geen tik hoeft te krijgen
 				for(var i=1;i<nodes.length;i++)
 				{
 					console.log(nodes[i]);
 				}
 			}
 		}
-		</script><button onclick="javascript:checkOverlappingNodes();">Tik</button>';
+		</script><button onclick="javascript:verhelpOverlappendeNodes();">Tik</button>';
 	}
 
 	public function geefInhoud()
