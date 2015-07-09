@@ -282,7 +282,51 @@ Class Visualisatie
 		    };
 			label.each(insertLinebreaks);
 		}
-		</script>';
+
+		function checkOverlappingNodes()
+		{
+			var allRects = d3.select("#visualisatie-Building_with_Nature-2Dinterventies_op_het_systeem_practice").selectAll(".node").selectAll(".rect");
+			console.log("ja de lengte van t arreetje issss:  "   +   allRects.length);
+			var yArray = []; //yArray is alleen nodig om actie te ondernemen als er een duplicaat wordt aangetroffen
+
+			for(var i=0; i<allRects.length;i++)
+			{
+				var yValue = Math.floor( allRects[i].parentNode.y.animVal.value / 20 ) * 20;
+				var xValue = Math.floor( allRects[i].parentNode.x.animVal.value / 100 ) * 100;
+
+				if(!yArray[yValue])
+					yArray[yValue]=[];
+
+				if(!yArray[yValue][xValue])
+					yArray[yValue][xValue]=[];
+
+				yArray[yValue][xValue].push(i);
+
+				console.log("loop index: " + i);
+			}
+
+			yArray.forEach(verwerkYwaarden);
+
+			function verwerkYwaarden(xArray, y, array)
+			{
+				xArray.forEach(verwerkXwaarden);
+			}
+
+			function verwerkXwaarden(nodes, x, array)
+			{
+				if(nodes.length < 2)
+				{
+					return;
+				}
+
+				// Sla het eerste element over, aangezien die geen tik hoeft te krijgen
+				for(var i=1;i<nodes.length;i++)
+				{
+					console.log(nodes[i]);
+				}
+			}
+		}
+		</script><button onclick="javascript:checkOverlappingNodes();">Tik</button>';
 	}
 
 	public function geefInhoud()
