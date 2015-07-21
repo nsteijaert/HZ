@@ -12,7 +12,8 @@ $(document).ready(function() {
 		}, 600, "swing", function() {
 		});
 	}
-
+	
+	
 	if ($.cookie("depth") != "" && $.cookie("relations") != "")
 		visualize("TZW:gezicht", $.cookie("depth"), $.cookie("relations"));
 	else
@@ -120,16 +121,7 @@ $(document).ready(function() {
 					url : link.urltarget
 				});
 			});
-
-			// // Define the 3d force
-			// var force = d3.layout.force3d().nodes(spheres).links(nodelinks).size([50, 50]).gravity(0.3).charge(-400);
-			// var DISTANCE = 1;
-
-			// Cola.js constraint-based layout setup
-			var d3cola = cola.d3adaptor().linkDistance(30).size([600, 500]);
-			var constraints = {"axis":"y", "left":0, "right":1, "gap":25};
-			d3cola.nodes(spheres).links(nodelinks).constraints(constraints).symmetricDiffLinkLengths(5).avoidOverlaps(true).start(10, 15, 20);
-
+  
 			// User interaction
 			window.addEventListener('resize', onWindowResize, false);
 
@@ -269,12 +261,16 @@ $(document).ready(function() {
 
 			// Construction method for arrowhelpers
 			function constructArrowHelper(source, target) {
+				// Instantiate origin and target in Vector3 format
 				var origin = new THREE.Vector3(10, 10, 10);
 				var terminus = new THREE.Vector3(0, 0, 0);
+				
+				// Calculate terminus vectors
 				var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
 				var distance = origin.distanceTo(terminus);
 				var arrow = new THREE.ArrowHelper(direction, origin, distance, 0x000000);
 
+				// Set node data associated with the arrow
 				arrow.userData = {
 					target : nodes[nodelinks[i].target.name].name,
 					source : nodes[nodelinks[i].source.name].name
@@ -283,25 +279,28 @@ $(document).ready(function() {
 			}
 
 			function setArrowOrigin(arrow, origin) {
-				//Get current position
+				//Get current position from sphere array
 				vectTarget = spheres[arrow.userData.target].position;
-				console.log(vectTarget);
 
+				// Set arrow origin 
 				arrow.position.x = origin.x;
 				arrow.position.y = origin.y;
 				arrow.position.z = origin.z;
 
+				// Calculate new terminus vectors and set length
 				arrow.setLength(arrow.position.distanceTo(vectTarget) - 5, 10, 5);
 				arrow.setDirection(new THREE.Vector3().subVectors(vectTarget, arrow.position).normalize());
 			}
 
 			function setArrowTarget(arrow, target) {
+				// Cast function argument to Vector3 format
 				var newTarget = new THREE.Vector3(target.x, target.y, target.z);
+				
+				//Calculate new terminus vectors and set length
 				arrow.setLength(arrow.position.distanceTo(newTarget) - 5, 10, 5);
 				arrow.setDirection(new THREE.Vector3().subVectors(newTarget, arrow.position).normalize());
 			}
-
-
+			
 			d3.selection.prototype.moveToFront = function() {
 				return this.each(function() {
 					this.parentNode.appendChild(this);

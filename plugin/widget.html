@@ -1,0 +1,44 @@
+<html>
+	<head>
+
+		<!-- libraries/css - other (load first for jquery onload)-->
+		<script src="js/jquery-2.1.1.min.js"></script>
+		<link href="css/style.css" rel="stylesheet" />
+		<script src="js/jquery.cookie.js"></script>
+
+		<!-- libraries - D3 -->
+		<script src="js/d3.min.js"></script>
+		<script src="js/cola.v3.min.js"></script>
+
+		<!-- libraries - three -->
+		<script src="js/three.min.js"></script>
+		<script src="js/OrbitControls.js"></script>
+		<script src="js/TrackballControls.js"></script>
+
+		<!-- Custom scripts -->
+		<script src="js/widget.js"></script>
+
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	</head>
+	<body>
+		<script src="js/visualisation.js"></script>
+		<h3>Result in html</h3>
+		<div class="visualisationResult">
+			<div id="canvas-svg"></div>
+		</div>
+
+		<!--// MORE BETTER //
+		PREFIX uri: <http://192.168.238.133/index.php/Speciaal:URIResolver/>
+		PREFIX skos: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkos-3A>
+		PREFIX skosem: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkosem-3A>
+		PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+		select distinct ?s ?p ?o {
+		?c rdfs:label "TZW:ademhaling" .
+		?c (skosem:broader|skosem:narrower){,3} ?s .
+		?s ?p ?o .
+		}
+		-->
+
+	</body>
+</html>
