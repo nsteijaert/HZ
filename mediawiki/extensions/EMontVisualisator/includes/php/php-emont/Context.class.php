@@ -10,6 +10,7 @@ class Context
 {
 	private $uri;
 	private $description='';
+	private $type='';
 
 	// An SplObjectStorage of Context objects
 	private $supercontext;
@@ -30,13 +31,26 @@ class Context
 		return $this->description;
 	}
 
+	public function setType($type)
+	{
+		if($type=='situatie' || $type=='rol')
+		{
+			$this->type=$type;
+		}
+	}
+
+	public function getType()
+	{
+		return $this->type;
+	}
+
 	public function addSupercontext(&$supercontext)
 	{
 		if ($supercontext instanceOf Context)
 		{
 			$this->supercontext->attach($supercontext);
 		}
-		else 
+		else
 		{
 			throw new Exception('Not a Context');
 		}
@@ -48,7 +62,7 @@ class Context
 		{
 			$this->supercontext->detach($supercontext);
 		}
-		else 
+		else
 		{
 			throw new Exception('Not a Context');
 		}
