@@ -30,7 +30,7 @@ function maakTooltipOnzichtbaar()
 	document.getElementById('elementTooltip').style.visibility='hidden';
 }
 
-function tekenTooltipTitel(d)
+function tekenTooltip(d,x,y)
 {
 	var title=d.type;
 	var tooltip=document.getElementById('elementTooltip');
@@ -44,6 +44,9 @@ function tekenTooltipTitel(d)
 		title+="<br />"+d.note;
 	}
 	tooltip.innerHTML=title;
+
+	tooltip.style.left=x+"px";
+	tooltip.style.top=y+"px";
 }
 
 function tekenDiagram(visualisatieId, graph)
@@ -159,16 +162,9 @@ function tekenDiagram(visualisatieId, graph)
         .attr("class", "link")
         .attr("marker-end", "url(#standaard)");
 
-	bestaandeTooltip=document.getElementById('elementTooltip');
-	if(bestaandeTooltip==null)
+	if(document.getElementById('elementTooltip')==null)
 	{
-		var tooltip = d3.select("body")
-			.append("div")
-			.attr("id", "elementTooltip");
-	}
-	else
-	{
-		var tooltip = d3.select("#elementTooltip");
+		d3.select("body").append("div").attr("id", "elementTooltip");
 	}
 
 	// Mouseover en mouseout stellen de zichtbaarheid in van de tooltip,
@@ -179,7 +175,7 @@ function tekenDiagram(visualisatieId, graph)
        .enter().append("line")
         .attr("class","linktooltip")
         .on("mouseover", function (d) { maakTooltipZichtbaar(); })
-		.on("mousemove", function (d) {tekenTooltipTitel(d); return tooltip.style("top", (d3.event.pageY+5)+"px").style("left",(d3.event.pageX+5)+"px");})
+		.on("mousemove", function (d) { tekenTooltip(d, d3.event.pageX+5, d3.event.pageY+5); })
 		.on("mouseout", function (d) { maakTooltipOnzichtbaar(); });
 
     var node = svg.selectAll(".node")
