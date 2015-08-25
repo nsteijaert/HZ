@@ -90,20 +90,6 @@ class Visualisatiepagina
 		if(!$model_uri)
 			$model_uri='wiki:Building_with_Nature-2Dinterventies_op_het_systeem_practice';
 
-		$this->inhoud.='<script type="text/javascript">
-		function toggleL1modelframe()
-		{
-			var l1modelframe=document.getElementById(\'l1modelframe\');
-			if (l1modelframe.style.display==\'none\')
-			{
-				l1modelframe.style.display=\'block\';
-			}
-			else
-			{
-				l1modelframe.style.display=\'none\';
-			}
-		}
-		</script>';
 		$url=(explode('?',rtrim($_SERVER['REQUEST_URI'],'/')));
 		$this->inhoud.='<a href="'.$url[0].'/../../">Terug naar het modellenoverzicht</a>';
 		$this->inhoud.='<h2 id="visualisatiekop">Visualisatie</h2>
@@ -197,8 +183,14 @@ class Visualisatiepagina
 			}
 
 			$this->inhoud.='<h2>L1-model: '.Uri::SMWuriNaarLeesbareTitel($l1hoofdcontext).'</h2>';
-			$this->inhoud.='<button onclick="toggleL1modelframe();">Open/dichtklappen</button>';
-			$this->inhoud.='<iframe style="display:none;" id="l1modelframe" width="100%" height="800" src="/mediawiki/extensions/EMontVisualisator/includes/php/Visualisatie.class.php?echo=true&amp;model_uri='.urlencode($l1model).'"></iframe>';
+			$this->inhoud.='<button onclick="toggleL1modelDiv();">Open/dichtklappen</button>';
+
+			$l1visualisatie=new Visualisatie($l1model);
+			$this->inhoud.='<div id="l1modelDiv">';
+			$this->inhoud.=$l1visualisatie->geefInhoud();
+			$this->inhoud.='</div>';
+
+			$this->inhoud.='<script type="text/javascript">setTimeout(4000, toggleL1modelDiv());</script>';
 
 			////
 			$this->inhoud.='<h2>Nieuw Intentional Element</h2>';

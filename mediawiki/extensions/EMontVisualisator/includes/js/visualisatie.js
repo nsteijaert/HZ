@@ -1,16 +1,24 @@
-// Haal de gegevens op
-$.ajax({
-	type : "POST",
-	cache : false,
-	url : "/mediawiki/extensions/EMontVisualisator/includes/php/php-emont/VisualisationJSON.php",
-	async : true,
-	dataType: 'json',
-	data:{ context_uri: op_te_vragen_context_uri},
-	success: function(result) {
-		graph=result;
-		tekenDiagram();
-	}
-});
+var nodewidth = 30;
+var nodeheight = 100;
+
+function startVisualisatie(visualisatieId, opTeVragenContextUri)
+{
+	var graph;
+
+	// Haal de gegevens op
+	$.ajax({
+		type : "POST",
+		cache : false,
+		url : "/mediawiki/extensions/EMontVisualisator/includes/php/php-emont/VisualisationJSON.php",
+		async : true,
+		dataType: 'json',
+		data:{ context_uri: opTeVragenContextUri},
+		success: function(result) {
+			graph=result;
+			tekenDiagram(visualisatieId, graph);
+		}
+	});
+}
 
 function tekenTooltipTitel(d)
 {
@@ -26,10 +34,12 @@ function tekenTooltipTitel(d)
 	document.getElementById('elementTooltip').innerHTML=title;
 }
 
-function tekenDiagram()
+function tekenDiagram(visualisatieId, graph)
 {
 	// Selecteer de visualisatie-container
     var svg = d3.select(visualisatieId);
+	var width = $(visualisatieId).width();
+	var	height = $(visualisatieId).height();
 
 	console.log(width);
 	console.log(height);
@@ -298,4 +308,9 @@ function verhelpOverlappendeNodes()
 			console.log(nodes[i]);
 		}
 	}
+}
+
+function openInNewTab(url) {
+	var win = window.open(url, '_blank');
+	win.focus();
 }
