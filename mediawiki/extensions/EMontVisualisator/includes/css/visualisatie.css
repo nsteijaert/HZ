@@ -75,7 +75,7 @@ svg{
 	fill:#4c97d6;
 }
 
-.elementTooltip {
+#elementTooltip {
     position:absolute;
     z-index:10;
     visibility:hidden;

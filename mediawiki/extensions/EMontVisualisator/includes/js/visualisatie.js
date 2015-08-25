@@ -20,9 +20,21 @@ function startVisualisatie(visualisatieId, opTeVragenContextUri)
 	});
 }
 
+function maakTooltipZichtbaar()
+{
+	document.getElementById('elementTooltip').style.visibility='visible';
+}
+
+function maakTooltipOnzichtbaar()
+{
+	document.getElementById('elementTooltip').style.visibility='hidden';
+}
+
 function tekenTooltipTitel(d)
 {
 	var title=d.type;
+	var tooltip=document.getElementById('elementTooltip');
+
 	if(d.extraInfo!=null)
 	{
 		title+=d.extraInfo;
@@ -31,18 +43,17 @@ function tekenTooltipTitel(d)
 	{
 		title+="<br />"+d.note;
 	}
-	document.getElementById('elementTooltip').innerHTML=title;
+	tooltip.innerHTML=title;
 }
 
 function tekenDiagram(visualisatieId, graph)
 {
 	// Selecteer de visualisatie-container
-    var svg = d3.select(visualisatieId);
+	var svg = d3.select(visualisatieId);
 	var width = $(visualisatieId).width();
-	var	height = $(visualisatieId).height();
-
-	console.log(width);
-	console.log(height);
+	var height = $(visualisatieId).height();
+    var margin = 5, pad = 10;
+    var uniekePrefix = visualisatieId.substring(1);
 
 	var force = cola.d3adaptor()
     	.linkDistance(120)
@@ -53,7 +64,6 @@ function tekenDiagram(visualisatieId, graph)
     	.links(graph.links)
     	.constraints(graph.constraints)
     	.groups(graph.groups);
-    var margin = 5, pad = 10;
 
 	// Teken de pijlen
 	force.on("tick", function () {
@@ -81,7 +91,7 @@ function tekenDiagram(visualisatieId, graph)
 
         linktooltip.each(function (d) {
                 cola.vpsc.makeEdgeBetween(d, d.source.innerBounds.inflate(-margin), d.target.innerBounds, 0);
-            });
+		});
 
         linktooltip.attr("x1", function (d) { return d.sourceIntersection.x; })
             .attr("y1", function (d) { return d.sourceIntersection.y; })
@@ -149,10 +159,17 @@ function tekenDiagram(visualisatieId, graph)
         .attr("class", "link")
         .attr("marker-end", "url(#standaard)");
 
-	var tooltip = d3.select("body")
-	.append("div")
-	.attr("class", "elementTooltip")
-	.attr("id", "elementTooltip");
+	bestaandeTooltip=document.getElementById('elementTooltip');
+	if(bestaandeTooltip==null)
+	{
+		var tooltip = d3.select("body")
+			.append("div")
+			.attr("id", "elementTooltip");
+	}
+	else
+	{
+		var tooltip = d3.select("#elementTooltip");
+	}
 
 	// Mouseover en mouseout stellen de zichtbaarheid in van de tooltip,
 	// Movemove zorgt ervoor dat de juiste informatie en positie in de tooltip terechtkomt,
@@ -161,10 +178,9 @@ function tekenDiagram(visualisatieId, graph)
         .data(graph.links)
        .enter().append("line")
         .attr("class","linktooltip")
-        .on("mouseover", function() {return tooltip.style("visibility", "visible");})
-		.on("mousemove", function (d) {tekenTooltipTitel(d);
-			return tooltip.style("top", (d3.event.pageY+5)+"px").style("left",(d3.event.pageX+5)+"px");})
-		.on("mouseout", function() {return tooltip.style("visibility", "hidden");});
+        .on("mouseover", function (d) { maakTooltipZichtbaar(); })
+		.on("mousemove", function (d) {tekenTooltipTitel(d); return tooltip.style("top", (d3.event.pageY+5)+"px").style("left",(d3.event.pageX+5)+"px");})
+		.on("mouseout", function (d) { maakTooltipOnzichtbaar(); });
 
     var node = svg.selectAll(".node")
          .data(graph.nodes)
@@ -191,7 +207,7 @@ function tekenDiagram(visualisatieId, graph)
         .data(graph.groups)
         .enter().append("g")
         .attr("class", function (d) {return "grouplabel";})
-        .attr("style",function (d,i){return "clip-path: url(#clip"+i+");";})
+        .attr("style",function (d,i){return "clip-path: url(#"+uniekePrefix+"-clip"+i+");";})
         .call(force.drag)
         .append("text")
          .attr("class", function (d) {return "grouplabeltext";})
@@ -202,7 +218,7 @@ function tekenDiagram(visualisatieId, graph)
     	.data(graph.groups)
     	.enter().append("rect")
          .attr("class", function (d) {return "grouplabelrect";})
-         .attr("style",function (d,i){return "clip-path: url(#clip"+i+");";})
+         .attr("style",function (d,i){return "clip-path: url(#"+uniekePrefix+"-clip"+i+");";})
          .attr("rx", 10).attr("ry", 10)
 		 .attr("title", function (d) {return d.langbijschrift;})
          .call(force.drag);
@@ -211,7 +227,7 @@ function tekenDiagram(visualisatieId, graph)
 		.data(graph.groups)
 		.enter().append("clipPath")
 		 .attr("class", "grouplabelclip")
-		 .attr("id",function (d,i) {return "clip"+i;})
+		 .attr("id",function (d,i) {return uniekePrefix+"-clip"+i;})
 		 .attr("title", function (d) {return d.langbijschrift;})
 		 .call(force.drag);
 
