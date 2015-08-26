@@ -193,8 +193,6 @@ function tekenDiagram(visualisatieId, graph)
         .data(graph.nodes)
         .enter().append("text")
          .attr("class", function (d) {return "label label"+d.type;})
-         .text(function (d) { return d.name; })
-         .attr("title", function (d) { return d.heading;})
          .on('dblclick', function (d) { openInNewTab(domeinprefix+d.name+' VN');})
 	     .call(force.drag);
 
@@ -232,12 +230,9 @@ function tekenDiagram(visualisatieId, graph)
 		 .attr("title", function (d) {return d.langbijschrift;})
          .attr("rx", 10).attr("ry", 10);
 
-    node.append("title")
-        .text(function (d) { return d.heading; });
-
     var insertLinebreaks = function (d) {
         var el = d3.select(this);
-        var words = d.name.split(' ');
+        var words = d.heading.split(' ');
         el.text('');
 
 		var rows=[''];
