@@ -54,9 +54,9 @@ if($_POST)
 		}
 		elseif($actie=='nieuw')
 		{
-			$naam=$naamprefix.' '.$_POST['titel'];
-			Model::nieuwIE($_POST['ie'],$_POST['context'],$naam);
-			Model::nieuweVN($naam.' VN','Intentional Element',$naam);
+			$naam=$_POST['titel'];
+			Model::nieuwIE($_POST['ie'],$_POST['context'],$naam,$naamprefix);
+			Model::nieuweVN($naam.' VN','Intentional Element',$naamprefix.' '.$naam);
 		}
 		elseif($actie=='maakverband')
 		{

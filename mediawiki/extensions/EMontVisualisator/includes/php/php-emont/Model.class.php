@@ -308,6 +308,9 @@ class Model
 
 	static function nieuwIE($instanceOf,$context_uri,$titel,$prefix="")
 	{
+		if($prefix)
+			$prefix.=' ';
+
 		$ie_type=SPARQLConnection::geefEersteResultaat($instanceOf,'property:Intentional_Element_type');
 		$ie_decomposition_type=SPARQLConnection::geefEersteResultaat(Uri::escape_uri($instanceOf),'property:Intentional_Element_decomposition_type');
 
@@ -343,7 +346,7 @@ class Model
 {{Intentional Element query}}';
 		}
 
-		$ieTitle = Title::newFromText($titel);
+		$ieTitle = Title::newFromText($prefix.$titel);
 		$ieArticle = new Article($ieTitle);
 
 		$ieArticle->doEdit($nieuw_ie, 'Pagina aangemaakt via EMontVisualisator.');
