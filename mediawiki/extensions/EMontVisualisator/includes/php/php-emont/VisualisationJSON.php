@@ -160,7 +160,7 @@ foreach ($post['groups'] as $index=>$inhoud)
 		}
 	}
 
-	$post[groups][$index]['langbijschrift']=implode('<br />',$post[groups][$index]['langbijschrift']);
+	$post[groups][$index]['tooltip']=implode('<br />',$post[groups][$index]['langbijschrift']);
 }
 
 $groups=$post[groups];

@@ -211,8 +211,7 @@ function tekenDiagram(visualisatieId, graph)
         .call(force.drag)
         .append("text")
          .attr("class", function (d) {return "grouplabeltext";})
-         .text(function (d) { return d.bijschrift; })
-		 .attr("title", function (d) {return d.langbijschrift;});
+         .text(function (d) { return d.bijschrift; });
 
     var grouplabelrect = svg.selectAll('grouplabelrect')
     	.data(graph.groups)
@@ -220,10 +219,9 @@ function tekenDiagram(visualisatieId, graph)
          .attr("class", function (d) {return "grouplabelrect";})
          .attr("style",function (d,i){return "clip-path: url(#"+uniekePrefix+"-clip"+i+");";})
          .attr("rx", 10).attr("ry", 10)
-		 .attr("title", function (d) {return d.langbijschrift;})
          .call(force.drag)
    		  .on("mouseover", function (d) { maakTooltipZichtbaar(); })
-		  .on("mousemove", function (d) { tekenTooltip(d.langbijschrift, d3.event.pageX+5, d3.event.pageY+5); })
+		  .on("mousemove", function (d) { tekenTooltip(d.tooltip, d3.event.pageX+5, d3.event.pageY+5); })
 		  .on("mouseout", function (d) { maakTooltipOnzichtbaar(); });
 
 
@@ -232,12 +230,10 @@ function tekenDiagram(visualisatieId, graph)
 		.enter().append("clipPath")
 		 .attr("class", "grouplabelclip")
 		 .attr("id",function (d,i) {return uniekePrefix+"-clip"+i;})
-		 .attr("title", function (d) {return d.langbijschrift;})
 		 .call(force.drag);
 
 	var grouplabelcliprect = grouplabelclip.append("rect")
 		 .attr("class","grouplabelcliprect")
-		 .attr("title", function (d) {return d.langbijschrift;})
          .attr("rx", 10).attr("ry", 10);
 
     var insertLinebreaks = function (d) {
