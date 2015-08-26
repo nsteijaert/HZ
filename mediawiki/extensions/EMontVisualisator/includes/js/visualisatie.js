@@ -30,23 +30,29 @@ function maakTooltipOnzichtbaar()
 	document.getElementById('elementTooltip').style.visibility='hidden';
 }
 
-function tekenTooltip(d,x,y)
+function tekenTooltip(tekst,x,y)
 {
-	var title=d.type;
 	var tooltip=document.getElementById('elementTooltip');
+
+	tooltip.innerHTML=tekst;
+	tooltip.style.left=x+"px";
+	tooltip.style.top=y+"px";
+}
+
+function tekenVerbandTooltip(d,x,y)
+{
+	var tekst=d.type;
 
 	if(d.extraInfo!=null)
 	{
-		title+=d.extraInfo;
+		tekst+=d.extraInfo;
 	}
 	if(d.note!=null)
 	{
-		title+="<br />"+d.note;
+		tekst+="<br />"+d.note;
 	}
-	tooltip.innerHTML=title;
 
-	tooltip.style.left=x+"px";
-	tooltip.style.top=y+"px";
+	tekenTooltip(tekst,x,y);
 }
 
 function tekenDiagram(visualisatieId, graph)
@@ -175,7 +181,7 @@ function tekenDiagram(visualisatieId, graph)
        .enter().append("line")
         .attr("class","linktooltip")
         .on("mouseover", function (d) { maakTooltipZichtbaar(); })
-		.on("mousemove", function (d) { tekenTooltip(d, d3.event.pageX+5, d3.event.pageY+5); })
+		.on("mousemove", function (d) { tekenVerbandTooltip(d, d3.event.pageX+5, d3.event.pageY+5); })
 		.on("mouseout", function (d) { maakTooltipOnzichtbaar(); });
 
     var node = svg.selectAll(".node")
@@ -215,7 +221,11 @@ function tekenDiagram(visualisatieId, graph)
          .attr("style",function (d,i){return "clip-path: url(#"+uniekePrefix+"-clip"+i+");";})
          .attr("rx", 10).attr("ry", 10)
 		 .attr("title", function (d) {return d.langbijschrift;})
-         .call(force.drag);
+         .call(force.drag)
+   		  .on("mouseover", function (d) { maakTooltipZichtbaar(); })
+		  .on("mousemove", function (d) { tekenTooltip(d.langbijschrift, d3.event.pageX+5, d3.event.pageY+5); })
+		  .on("mouseout", function (d) { maakTooltipOnzichtbaar(); });
+
 
 	var grouplabelclip = svg.selectAll('.grouplabelclip')
 		.data(graph.groups)
