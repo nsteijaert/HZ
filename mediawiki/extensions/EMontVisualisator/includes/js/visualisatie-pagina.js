@@ -1,3 +1,5 @@
+var standaardSVGhoogte=1280;
+
 function toggleL1modelDiv()
 {
 	var l1modelDiv=document.getElementById('l1modelDiv');

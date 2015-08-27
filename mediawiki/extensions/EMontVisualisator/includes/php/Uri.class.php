@@ -126,5 +126,12 @@ class Uri
 			return implode(':',$name_array);
 		}
 	}
+
+	public static function geefDomeinPrefix()
+	{
+		$url='http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
+		$urlsplit=explode('index.php',$url);
+		return $urlsplit[0].'index.php/';
+	}
 }
 ?>
