@@ -57,14 +57,32 @@ function tekenVerbandTooltip(d,x,y)
 
 function tekenDiagram(visualisatieId, graph)
 {
-	// Selecteer de visualisatie-container
-	var svg = d3.select(visualisatieId);
-	var width = $(visualisatieId).width();
-	var height = $(visualisatieId).height();
-    var margin = 5, pad = 10;
-    var uniekePrefix = visualisatieId.substring(1);
+	var outer = d3.select("#div-"+visualisatieId).append("svg");
 
-	var force = cola.d3adaptor()
+	outer.attr({ id: visualisatieId, width: "100%", height: standaardSVGhoogte, "pointer-events": "all" });
+	outer.append('svg:defs').append('svg:marker')
+        	.attr({
+            	id: "standaard",
+            	viewBox: "0 -5 10 10",
+            	refX: 10,
+            	refY: 10,
+            	markerWidth: 5,
+            	markerHeight: 5,
+            	orient: 'auto'
+        	})
+      		.append('svg:path')
+        	.attr({
+            	d: "M0,-5L10,0L0,5"
+			});
+
+	// Selecteer de visualisatie-container
+	var visualisatieIdMetHash = "#"+visualisatieId;
+	var svg = d3.select(visualisatieIdMetHash);
+	var width = $(visualisatieIdMetHash).width();
+	var height = $(visualisatieIdMetHash).height();
+    var margin = 5, pad = 10;
+
+    var force = cola.d3adaptor()
     	.linkDistance(120)
     	.avoidOverlaps(true)
 		.size([width, height])
@@ -207,7 +225,7 @@ function tekenDiagram(visualisatieId, graph)
         .data(graph.groups)
         .enter().append("g")
         .attr("class", function (d) {return "grouplabel";})
-        .attr("style",function (d,i){return "clip-path: url(#"+uniekePrefix+"-clip"+i+");";})
+        .attr("style",function (d,i){return "clip-path: url(#"+visualisatieId+"-clip"+i+");";})
         .call(force.drag)
         .append("text")
          .attr("class", function (d) {return "grouplabeltext";})
@@ -217,7 +235,7 @@ function tekenDiagram(visualisatieId, graph)
     	.data(graph.groups)
     	.enter().append("rect")
          .attr("class", function (d) {return "grouplabelrect";})
-         .attr("style",function (d,i){return "clip-path: url(#"+uniekePrefix+"-clip"+i+");";})
+         .attr("style",function (d,i){return "clip-path: url(#"+visualisatieId+"-clip"+i+");";})
          .attr("rx", 10).attr("ry", 10)
          .call(force.drag)
    		  .on("mouseover", function (d) { maakTooltipZichtbaar(); })
@@ -229,7 +247,7 @@ function tekenDiagram(visualisatieId, graph)
 		.data(graph.groups)
 		.enter().append("clipPath")
 		 .attr("class", "grouplabelclip")
-		 .attr("id",function (d,i) {return uniekePrefix+"-clip"+i;})
+		 .attr("id",function (d,i) {return visualisatieId+"-clip"+i;})
 		 .call(force.drag);
 
 	var grouplabelcliprect = grouplabelclip.append("rect")
@@ -282,7 +300,7 @@ function isIE()
 
 function verhelpOverlappendeNodes()
 {
-	var alleNodes = d3.select(visualisatieId).selectAll(".node").selectAll(".rect");
+	var alleNodes = d3.select(visualisatieIdMetHash).selectAll(".node").selectAll(".rect");
 	// nodeLocaties is een array met de y-coördinaat als index, met daarin een array met de x-coördinaat als index die
 	// de nodes met dezelfde coördinaten bevat.
 	var nodeLocaties = [];

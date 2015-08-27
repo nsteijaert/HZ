@@ -5,7 +5,6 @@
  */
 require_once(__DIR__.'/php-emont/Model.class.php');
 require_once(__DIR__.'/Uri.class.php');
-require_once(__DIR__.'/Visualisatie.class.php');
 require_once(__DIR__.'/SPARQLConnection.class.php');
 
 /* Manipulatiecode */
@@ -96,8 +95,18 @@ class Visualisatiepagina
 		<p><a href="'.$url[0].'">Herladen</a></p>
 		<p>U kunt elementen verslepen om het overzicht te verbeteren. Dubbelklik op een element om de wikipagina ervan weer te geven.</p>';
 
-		$visualisatie=new Visualisatie($model_uri);
-		$this->inhoud.=$visualisatie->geefInhoud();
+		$hoofdvisualisatie_id='visualisatie-'.Uri::stripSMWuriPadEnPrefixes($model_uri);
+		$this->inhoud.='<div id="div-'.$hoofdvisualisatie_id.'"></div>';
+
+		$this->inhoud.='
+				<script type="text/javascript">
+					var domeinprefix = "'.Uri::geefDomeinPrefix().'";
+
+					var contextUri = "'.Model::geefContextVanModel($model_uri).'";
+					var visualisatieId = "'.$hoofdvisualisatie_id.'";
+
+					startVisualisatie(visualisatieId, contextUri);
+				</script>';
 
 		if(Model::modelIsExperience($model_uri))
 		{
@@ -183,14 +192,9 @@ class Visualisatiepagina
 			}
 
 			$this->inhoud.='<h2>L1-model: '.Uri::SMWuriNaarLeesbareTitel($l1hoofdcontext).'</h2>';
-			$this->inhoud.='<button onclick="toggleL1modelDiv();">Open/dichtklappen</button>';
 
-			$l1visualisatie=new Visualisatie($l1model);
-			$this->inhoud.='<div id="l1modelDiv">';
-			$this->inhoud.=$l1visualisatie->geefInhoud();
-			$this->inhoud.='</div>';
-
-			$this->inhoud.='<script type="text/javascript">setTimeout(4000, toggleL1modelDiv());</script>';
+			$sec_visualisatie_id='visualisatie-'.Uri::stripSMWuriPadEnPrefixes($l1model);
+			$this->inhoud.='<div id="div-'.$sec_visualisatie_id.'"></div>';
 
 			////
 			$this->inhoud.='<h2>Nieuw Intentional Element</h2>';
@@ -298,6 +302,13 @@ class Visualisatiepagina
 			}
 			$this->inhoud.='</table>';
 
+			$this->inhoud.='
+				<script type="text/javascript">
+					var secContextUri = "'.Model::geefContextVanModel($l1model).'";
+					var secVisualisatieId = "'.$sec_visualisatie_id.'";
+
+					startVisualisatie(secVisualisatieId, secContextUri);
+				</script>';
 		}
 	}
 
