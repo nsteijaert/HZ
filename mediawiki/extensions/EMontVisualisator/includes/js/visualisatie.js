@@ -9,7 +9,7 @@ function startVisualisatie(visualisatieId, opTeVragenContextUri)
 	$.ajax({
 		type : "POST",
 		cache : false,
-		url : "/mediawiki/extensions/EMontVisualisator/includes/php/php-emont/VisualisationJSON.php",
+		url : mw.config.get('wgExtensionAssetsPath')+"/EMontVisualisator/includes/php/php-emont/VisualisationJSON.php",
 		async : true,
 		dataType: 'json',
 		data:{ context_uri: opTeVragenContextUri},
@@ -59,13 +59,13 @@ function tekenDiagram(visualisatieId, graph)
 {
 	var outer = d3.select("#div-"+visualisatieId).append("svg");
 
-	outer.attr({ id: visualisatieId, width: "100%", height: standaardSVGhoogte, "pointer-events": "all" });
+	outer.attr({ id: visualisatieId, width: "100%", height: standaardSVGhoogte });
 	outer.append('svg:defs').append('svg:marker')
         	.attr({
             	id: "standaard",
             	viewBox: "0 -5 10 10",
             	refX: 10,
-            	refY: 10,
+            	refY: 0,
             	markerWidth: 5,
             	markerHeight: 5,
             	orient: 'auto'

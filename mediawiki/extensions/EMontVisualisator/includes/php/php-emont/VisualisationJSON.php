@@ -140,15 +140,15 @@ foreach ($post['groups'] as $index=>$inhoud)
 	//Als de context nooit als subcontext voorkomt is het waarschijnlijk de hoofdcontext, die geen supercontextvermelding heeft (om begrijpelijke redenen).
 	else
 	{
-		$post[groups][$index]['langbijschrift'][]=$post['groups'][$index]['titel'];
-		$post[groups][$index]['bijschrift']=$post['groups'][$index]['titel'];
+		$post['groups'][$index]['langbijschrift'][]=$post['groups'][$index]['titel'];
+		$post['groups'][$index]['bijschrift']=$post['groups'][$index]['titel'];
 		continue;
 	}
 
 	// Gewoon bijschrift wordt bovenaan de context getoond, lang bijschrift als tooltip.
-	$post[groups][$index]['bijschrift']=implode(', ', $post[groups][$index]['langbijschrift']);
+	$post['groups'][$index]['bijschrift']=implode(', ', $post['groups'][$index]['langbijschrift']);
 
-	if(strlen($post[groups][$index]['bijschrift'])>50)
+	if(strlen($post['groups'][$index]['bijschrift'])>50)
 	{
 		$post['groups'][$index]['bijschrift']="";
 		foreach($gebruikteSubcontexten[$index] as $supercontextindex)
@@ -160,14 +160,14 @@ foreach ($post['groups'] as $index=>$inhoud)
 		}
 	}
 
-	$post[groups][$index]['tooltip']=implode('<br />',$post[groups][$index]['langbijschrift']);
+	$post['groups'][$index]['tooltip']=implode('<br />',$post['groups'][$index]['langbijschrift']);
 }
 
-$groups=$post[groups];
-$post[groups]=array();
+$groups=$post['groups'];
+$post['groups']=array();
 foreach ($groups as $group)
 {
-	$post[groups][]=$group;
+	$post['groups'][]=$group;
 }
 
 // Teken groepen met meer nodes eerst

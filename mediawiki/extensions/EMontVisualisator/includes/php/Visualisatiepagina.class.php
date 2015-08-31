@@ -91,7 +91,8 @@ class Visualisatiepagina
 
 		$url=(explode('?',rtrim($_SERVER['REQUEST_URI'],'/')));
 		$this->inhoud.='<a href="'.$url[0].'/../../">Terug naar het modellenoverzicht</a>';
-		$this->inhoud.='<h2 id="visualisatiekop">Visualisatie</h2>
+		$this->inhoud.='<h2 id="visualisatiekop">Visualisatie</h2>';
+		$this->inhoud.='<button onclick="toggleL1modelDiv();">+</button>
 		<p><a href="'.$url[0].'">Herladen</a></p>
 		<p>U kunt elementen verslepen om het overzicht te verbeteren. Dubbelklik op een element om de wikipagina ervan weer te geven.</p>';
 
@@ -191,10 +192,7 @@ class Visualisatiepagina
 				}
 			}
 
-			$this->inhoud.='<h2>L1-model: '.Uri::SMWuriNaarLeesbareTitel($l1hoofdcontext).'</h2>';
-
 			$sec_visualisatie_id='visualisatie-'.Uri::stripSMWuriPadEnPrefixes($l1model);
-			$this->inhoud.='<div id="div-'.$sec_visualisatie_id.'"></div>';
 
 			////
 			$this->inhoud.='<h2>Nieuw Intentional Element</h2>';
@@ -306,6 +304,10 @@ class Visualisatiepagina
 				<script type="text/javascript">
 					var secContextUri = "'.Model::geefContextVanModel($l1model).'";
 					var secVisualisatieId = "'.$sec_visualisatie_id.'";
+
+					d3.select("body").append("div").attr({id: "div-"+secVisualisatieId, class: "l1hover"});
+					var div = d3.select("#div-"+secVisualisatieId);
+					div.append("button").attr({onclick: \'javascript:document.getElementById("div-"+secVisualisatieId).style.visibility="hidden";\'});
 
 					startVisualisatie(secVisualisatieId, secContextUri);
 				</script>';
