@@ -130,11 +130,26 @@ foreach ($post['groups'] as $index=>$inhoud)
 	$post['groups'][$index]['titel']=Uri::SMWuriNaarLeesbareTitel(implode("",array_slice($contextindex,$index,1)));
 	$post['groups'][$index]['langbijschrift']=array();
 
+	// Gewoon bijschrift wordt bovenaan de context getoond, lang bijschrift als tooltip.
 	if(isset($gebruikteSubcontexten[$index]))
 	{
 		foreach($gebruikteSubcontexten[$index] as $supercontextindex)
 		{
 			$post['groups'][$index]['langbijschrift'][]=Uri::SMWuriNaarLeesbareTitel(implode("",array_slice($contextindex,$supercontextindex,1))).': '.$post['groups'][$index]['titel'];
+		}
+
+		$post['groups'][$index]['bijschrift']=implode(', ', $post['groups'][$index]['langbijschrift']);
+
+		if(strlen($post['groups'][$index]['bijschrift'])>50)
+		{
+			$post['groups'][$index]['bijschrift']="";
+			foreach($gebruikteSubcontexten[$index] as $supercontextindex)
+			{
+				if($post['groups'][$index]['bijschrift'])
+					$post['groups'][$index]['bijschrift'].=", ";
+				$supercontextvermelding=geefInitialen(Uri::SMWuriNaarLeesbareTitel(implode("",array_slice($contextindex,$supercontextindex,1))));
+				$post['groups'][$index]['bijschrift'].=$supercontextvermelding.': '.$post['groups'][$index]['titel'];
+			}
 		}
 	}
 	//Als de context nooit als subcontext voorkomt is het waarschijnlijk de hoofdcontext, die geen supercontextvermelding heeft (om begrijpelijke redenen).
@@ -142,22 +157,6 @@ foreach ($post['groups'] as $index=>$inhoud)
 	{
 		$post['groups'][$index]['langbijschrift'][]=$post['groups'][$index]['titel'];
 		$post['groups'][$index]['bijschrift']=$post['groups'][$index]['titel'];
-		continue;
-	}
-
-	// Gewoon bijschrift wordt bovenaan de context getoond, lang bijschrift als tooltip.
-	$post['groups'][$index]['bijschrift']=implode(', ', $post['groups'][$index]['langbijschrift']);
-
-	if(strlen($post['groups'][$index]['bijschrift'])>50)
-	{
-		$post['groups'][$index]['bijschrift']="";
-		foreach($gebruikteSubcontexten[$index] as $supercontextindex)
-		{
-			if($post['groups'][$index]['bijschrift'])
-				$post['groups'][$index]['bijschrift'].=", ";
-			$supercontextvermelding=geefInitialen(Uri::SMWuriNaarLeesbareTitel(implode("",array_slice($contextindex,$supercontextindex,1))));
-			$post['groups'][$index]['bijschrift'].=$supercontextvermelding.': '.$post['groups'][$index]['titel'];
-		}
 	}
 
 	$post['groups'][$index]['tooltip']=implode('<br />',$post['groups'][$index]['langbijschrift']);
