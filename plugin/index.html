@@ -1,0 +1,60 @@
+<!doctype html>
+
+<html>
+	<head>
+		<title>SPARQL</title>
+		
+		<!-- libraries/css - other (load first for jquery onload)-->
+		<script src="js/jquery-2.1.1.min.js"></script>
+		<link href="css/style.css" rel="stylesheet" />
+		<script src="js/jquery.cookie.js"></script>
+		
+		<!-- libraries - D3 -->
+		<script src="js/d3.min.js"></script>
+		<script src="js/cola.v3.min.js"></script>
+		
+		<!-- libraries - three -->
+		<script src="js/three.min.js"></script>
+		<script src="js/OrbitControls.js"></script>
+		<script src="js/TrackballControls.js"></script>
+		
+		<!-- Custom scripts -->
+		<script src="js/default.js"></script>
+
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	</head>
+	<body>
+		<nav>
+			<a href="#runQuery">Query Form</a>
+			<a href="#visualisation.html">Visualisation</a>
+			<a href="#visualisationTest.html">Visualisation Test</a>
+		</nav>
+		<div class="basic-grey">
+			<div id="runQuery">
+				<form action="" method="post" onsubmit="return false;">
+					<h1>Query Form <span>Fill in the field, press Submit and enjoy the result.</span></h1>
+
+					<label> <span>Message :</span> 						<textarea id="query" name="query" placeholder="Your query"></textarea> </label>
+					<label> <span>Result :</span>
+						<select name="selection" id="selection" >
+							<option value="json">JSON</option>
+							<option value="text">Text</option>
+							<option value="xml">XML</option>
+							<option value="rdf">RDF</option>
+						</select> </label>
+					<label> <span>Depth</span>
+						<input type="number" name="depth" id="depth" placeholder="Leave empty for normal operation!" />
+					</label>
+					<label> <span>&nbsp;</span>
+						<input type="submit" class="button" value="Submit" />
+					</label>
+				</form>
+				<div id="result" >
+					<h3>Result :</h3>
+					<div class="result" ></div>
+				</div>
+			</div>
+			<div id="visualisation"></div>
+		</div>
+	</body>
+</html>

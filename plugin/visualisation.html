@@ -1,0 +1,238 @@
+<script src="js/visualisation.js"></script>
+<style>
+	.visualisation {
+		display: block;
+		height: 500px;
+	}
+
+	.visualisationResult {
+		border: 1px solid;
+		position: relative;
+		display: block;
+	}
+
+	.zoomHandlers {
+		bottom: 0;
+		position: absolute;
+		right: 0;
+	}
+
+	.optionsHandlers {
+		top: 0;
+		position: absolute;
+		right: 0;
+	}
+
+	.zoomHandlers button, .optionsHandlers button {
+		color: #DDDDDD;
+		display: block;
+		border: none;
+		padding: 5px;
+		margin: 5px;
+		background: none;
+	}
+
+	.zoomHandlers button:hover, .optionsHandlers button:hover {
+		background: #DDDDDD;
+		border-radius: 5px;
+		color: #FFFFFF;
+		cursor: pointer;
+	}
+
+	.overlay {
+		fill: none;
+		pointer-events: all;
+	}
+
+	.link {
+		fill: none;
+		stroke: #ddd;
+		stroke-width: 1.5px;
+	}
+
+	#arrow {
+		fill: #ddd;
+	}
+
+	.node .path {
+		fill: #555;
+		stroke: #fff;
+		stroke-width: 3px;
+		cursor: pointer;
+	}
+
+	text {
+		font: 10px sans-serif;
+		pointer-events: none;
+	}
+
+	/* Loaded circle */
+	.bar {
+		height: 5px;
+		width: 0;
+		background: #555555;
+		position: absolute;
+		top: 0;
+	}
+
+	/* CSS Options Tooltip */
+	.tooltip {
+		position: absolute;
+		width: 175px;
+		/* color: #FFFFFF; */
+		background: #FFFFFF;
+		border: 2px solid #DDDDDD;
+		/* height: 30px; */
+		/* line-height: 30px; */
+		/* text-align: center; */
+		display: none;
+		border-radius: 6px;
+		right: 1px;
+		padding: 4px;
+	}
+	.tooltip:before {
+		content: '';
+		position: absolute;
+		bottom: 100%;
+		left: 100%;
+		margin-left: -26px;
+		width: 0;
+		height: 0;
+		border-bottom: 11px solid #DDDDDD;
+		border-right: 12px solid transparent;
+		border-left: 12px solid transparent;
+	}
+	.tooltip:after {
+		content: '';
+		position: absolute;
+		bottom: 100%;
+		left: 92%;
+		margin-left: -7px;
+		width: 0;
+		height: 0;
+		border-bottom: 8px solid #FFFFFF;
+		border-right: 8px solid transparent;
+		border-left: 8px solid transparent;
+	}
+	#options label {
+		display: inline-block;
+	}
+	#options input {
+		margin: 0;
+		line-height: normal;
+		height: auto;
+	}
+
+	.objcontext {
+		padding: 8px;
+	}
+
+	table {
+		border-collapse: collapse;
+		width: 100%;
+	}
+
+	table td:first-child {
+		font-weight: bold;
+	}
+
+	h4 {
+		margin: 0 0 15px;
+	}
+	h4 a {
+		color: inherit;
+		text-decoration: none;
+	}
+	h4 a:hover {
+		color: #000;
+	}
+
+	div.links {
+		bottom: 3px;
+		position: fixed;
+		right: 8px;
+	}
+
+	div.links img {
+		height: 35px;
+	}
+</style>
+<h3>Result in html</h3>
+<div class="visualisationResult">
+	<div id="canvas-svg"></div>
+</div>
+
+<!--
+
+PREFIX uri: <http://192.168.238.133/index.php/Speciaal:URIResolver/>
+PREFIX skos: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkos-3A>
+PREFIX skosem: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkosem-3A>
+PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT (?v1 as ?concept) ?relation ?value WHERE
+{
+?v1 ?relation ?value .
+{
+SELECT ?c1 ?r1 ?v1 WHERE
+{
+?c1 rdf:label "%s" .
+?c1 ?r1 ?v1 .
+
+FILTER(regex(str(?r1), "Eigenschap-3ASkos-3A")
+|| regex(str(?r1), "Eigenschap-3ASkosem-3A")) .
+}
+}
+
+FILTER(regex(str(?relation), "Eigenschap-3ASkos-3A")
+|| regex(str(?relation), "Eigenschap-3ASkosem-3A")) .
+}
+
+PREFIX uri: <http://192.168.238.133/index.php/Speciaal:URIResolver/>
+PREFIX skos: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkos-3A>
+PREFIX skosem: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkosem-3A>
+PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?c WHERE
+{
+uri:TZW-3Abottumor skosem:broader{,1} ?c .
+}
+
+// SOLVED //
+
+PREFIX uri: <http://192.168.238.133/index.php/Speciaal:URIResolver/>
+PREFIX skos: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkos-3A>
+PREFIX skosem: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkosem-3A>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+construct { ?s ?p ?o }
+where {
+?c rdfs:label "TZW:mondademen" .
+?c (<>|!<>)? ?s .
+?s ?p ?o
+}
+
+// ALTERNATIVE //
+
+PREFIX uri: <http://192.168.238.133/index.php/Speciaal:URIResolver/>
+PREFIX skos: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkos-3A>
+PREFIX skosem: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkosem-3A>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+select ?s ?p ?o {
+?c rdfs:label "TZW:ademhaling" .
+?c (<>|!<>){,2} ?s .
+?s ?p ?o .
+}
+
+// MORE BETTER //
+PREFIX uri: <http://192.168.238.133/index.php/Speciaal:URIResolver/>
+PREFIX skos: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkos-3A>
+PREFIX skosem: <http://192.168.238.133/index.php/Speciaal:URIResolver/Eigenschap-3ASkosem-3A>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+select distinct ?s ?p ?o {
+?c rdfs:label "TZW:ademhaling" .
+?c (skosem:broader|skosem:narrower){,3} ?s .
+?s ?p ?o .
+}
+-->
