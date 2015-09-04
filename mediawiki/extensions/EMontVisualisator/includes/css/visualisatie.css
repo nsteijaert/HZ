@@ -1,31 +1,38 @@
 /* Standaard */
-.node {
-    fill: #eee;
-    stroke-width: 1px;
-    cursor: move;
+.node
+{
+	fill: #eee;
+	stroke-width: 1px;
+	cursor: move;
 }
-.nodeActivity {
-    fill: #eae4d7;
-    stroke:#bfac88;
+.nodeActivity
+{
+	fill: #eae4d7;
+	stroke:#bfac88;
 }
-.nodeCondition {
+.nodeCondition
+{
 	fill: #4c97d6;
 }
-.nodeBelief {
+.nodeBelief
+{
 	fill: #4c97d6;
 }
-.nodeGoal {
+.nodeGoal
+{
 	fill: #ffffff;
 }
-.nodeOutcome {
+.nodeOutcome
+{
 	fill: #ffffff;
-    stroke:#bfac88;
+	stroke:#bfac88;
 }
 
-.link {
-    stroke:#bfac88;
-    stroke-width: 1px;
-    marker-end:#standaard;
+.link
+{
+	stroke:#bfac88;
+	stroke-width: 1px;
+	marker-end:#standaard;
 }
 
 .linktooltip
@@ -33,13 +40,15 @@
 	stroke:#222;
 	stroke-opacity:0;
 	stroke-width:7px;
-    cursor: help;
+	cursor: help;
 }
-.linktooltip:hover {
+.linktooltip:hover
+{
 	stroke-opacity:0.3;
 }
 
-.group {
+.group
+{
   stroke: #bfac88;
   stroke-width: 1px;
   fill: #eae4d7;
@@ -53,40 +62,47 @@
 	fill-opacity:0.5;
 }
 
-.label {
+.label
+{
   	font-size:17px; /* 17px is 13 pt.*/
 	font-family:Open Sans,Arial,Helvetica,sans-serif;
 	fill:#222;
-    cursor: move;
-    text-anchor:middle;
+	cursor: move;
+	text-anchor:middle;
 }
-.labelBelief {
+.labelBelief
+{
 	fill: #fff;
 }
-.labelGoal {
+.labelGoal
+{
 	fill:#4c97d6;
 }
-.labelOutcome {
+.labelOutcome
+{
 	fill:#4c97d6;
 }
 
-#elementTooltip {
-    position:absolute;
-    z-index:10;
-    visibility:hidden;
-    color:#ffffff;
-    font-weight:bold;
-    background-color:#000000;
+#elementTooltip
+{
+	position:absolute;
+	z-index:10;
+	visibility:hidden;
+	color:#ffffff;
+	font-weight:bold;
+	background-color:#000000;
 	border: 1px solid #000000;
-    padding:5px;
+	padding:5px;
 }
 
-.elementTooltip:hover {
-    visibility:hidden;
-    stroke-opacity:0.8;
+.elementTooltip:hover
+{
+	visibility:hidden;
+	stroke-opacity:0.8;
 }
 
-marker#standaard {
+marker#standaard
+{
 	fill:#bfac88;
 	stroke: #bfac88;
 }
@@ -94,14 +110,14 @@ marker#standaard {
 .l1hover
 {
 	position:absolute;
-    z-index:10;
-    visibility:hidden;
-    overflow:scroll;
-    background-color:#eae4d7;
+	z-index:10;
+	visibility:hidden;
+	overflow:scroll;
+	background-color:#eae4d7;
 	border: 2px solid #bfac88;
-    padding:5px;
-    top: 50px;
-    bottom: 50px;
-    left: 50px;
-    right: 50px;
+	padding:5px;
+	top: 50px;
+	bottom: 50px;
+	left: 50px;
+	right: 50px;
 }
