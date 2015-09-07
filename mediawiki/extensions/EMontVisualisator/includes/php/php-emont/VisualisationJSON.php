@@ -68,7 +68,7 @@ foreach($links as $link)
 	}
 	else
 	{
-		$post['constraints'][]=array('gap'=>200,'axis'=>'y', 'left'=>$indices[$link['target']],'right'=>$indices[$link['source']]);
+		$post['constraints'][]=array('gap'=>50,'axis'=>'y', 'left'=>$indices[$link['target']],'right'=>$indices[$link['source']]);
 	}
 }
 
