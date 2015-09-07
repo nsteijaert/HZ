@@ -21,7 +21,7 @@ $wgResourceLoaderDebug = true;
 
 $wgResourceModules['ext.EMontVisualisator'] = array(
 	// Scripts en stijldefinities
-	'scripts' => array('js/cola.v3.min.js', 'js/d3.v3.js', 'js/visualisatie.js', 'js/visualisatie-pagina.js'),
+	'scripts' => array('js/d3.v3.js', 'js/cola.v3.min.js', 'js/visualisatie.js', 'js/visualisatie-pagina.js'),
 	'styles' => array ('css/visualisatie.css'),
 	'position' => 'top',
 
