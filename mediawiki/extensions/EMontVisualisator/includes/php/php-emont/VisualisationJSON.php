@@ -59,16 +59,16 @@ foreach($links as $link)
 	$post['links'][]=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']],'type'=>$link['type'],'extraInfo'=>$link['extraInfo'],'note'=>$link['note']);
 	if($link['type']=='connects' && strpos($link['extraInfo'],'seq'))
 	{
-		$post['constraints'][]=array('gap'=>100,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
-		$post['constraints'][]=array('gap'=>0,'axis'=>'y', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+		$post['constraints'][]=array('gap'=>200,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+		//$post['constraints'][]=array('gap'=>0,'axis'=>'y', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
 	}
 	elseif($link['type']!='partOf')
 	{
-		$post['constraints'][]=array('gap'=>30,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+		$post['constraints'][]=array('gap'=>200,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
 	}
 	else
 	{
-		$post['constraints'][]=array('gap'=>30,'axis'=>'y', 'left'=>$indices[$link['target']],'right'=>$indices[$link['source']]);
+		$post['constraints'][]=array('gap'=>200,'axis'=>'y', 'left'=>$indices[$link['target']],'right'=>$indices[$link['source']]);
 	}
 }
 

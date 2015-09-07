@@ -83,10 +83,10 @@ function tekenDiagram(visualisatieId, graph)
     var margin = 5, pad = 10;
 
     var force = cola.d3adaptor()
-    	.linkDistance(120)
+    	.linkDistance(90)
     	.avoidOverlaps(true)
 		.size([width, height])
-        .handleDisconnected(false)
+        .handleDisconnected(true)
     	.nodes(graph.nodes)
     	.links(graph.links)
     	.constraints(graph.constraints)
