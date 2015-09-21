@@ -109,15 +109,63 @@ marker#standaard
 
 .l1hover
 {
-	position:absolute;
-	z-index:10;
 	visibility:hidden;
-	overflow:scroll;
-	background-color:#eae4d7;
-	border: 2px solid #bfac88;
-	padding:5px;
+}
+
+.popup
+{
+	position:fixed;
+	z-index:10;
 	top: 50px;
 	bottom: 50px;
 	left: 50px;
 	right: 50px;
+	background-color:#eae4d7;
+	border: 2px solid #bfac88;
+	padding:5px;
+}
+
+.modelembed
+{
+	position:absolute;
+	z-index:11;
+	overflow:scroll;
+	top: 100px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+}
+
+#visualisatiepaginacontainer
+{
+	overflow:scroll;
+	width:100%;
+}
+
+.background
+{
+    stroke: #eae4d7;
+    stroke-width: 1px;
+    fill: #eae4d7;
+}
+
+#instanceBalk
+{
+	text-align: center;
+	margin-top: 10px;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+.keuzelijst
+{
+	background-color:#F5F5F5;
+	border:1px solid #888888;
+	padding: 5px;
+	border-collapse: collapse;
+}
+
+.keuzelijstFrame
+{
+	margin: 15px;
 }

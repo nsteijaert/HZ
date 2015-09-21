@@ -59,12 +59,13 @@ foreach($links as $link)
 	$post['links'][]=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']],'type'=>$link['type'],'extraInfo'=>$link['extraInfo'],'note'=>$link['note']);
 	if($link['type']=='connects' && strpos($link['extraInfo'],'seq'))
 	{
-		$post['constraints'][]=array('gap'=>200,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
-		//$post['constraints'][]=array('gap'=>0,'axis'=>'y', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+		$post['constraints'][]=array('gap'=>120,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+	//	$post['constraints'][]=array('gap'=>0,'axis'=>'y', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
 	}
 	elseif($link['type']!='partOf')
 	{
-		$post['constraints'][]=array('gap'=>200,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+		$post['constraints'][]=array('gap'=>120,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+		//$post['constraints'][]=array('gap'=>0,'axis'=>'y', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
 	}
 	else
 	{
@@ -91,7 +92,7 @@ foreach($ies_contexten as $context=>$ies)
 	}
 
 	if(!empty($leaves))
-		$post['groups'][]['leaves']=$leaves;
+		$post['groups'][]=array('leaves' => $leaves);
 	$contextindex[]=$context;
 }
 
@@ -125,6 +126,8 @@ foreach($contextLinks as $contextLink)
 // Kan waarschijnlijk efficiënter
 foreach ($post['groups'] as $index=>$inhoud)
 {
+	$post['groups'][$index]['uri']=$contextindex[$index];
+
 	// Gebruik de uri om een titel toe te voegen aan de context. Deze komen uit een array, en moeten daarna worden omgezet in
 	// een string om ze vervolgens om te zetten in een leesbare titel.
 	$post['groups'][$index]['titel']=Uri::SMWuriNaarLeesbareTitel(implode("",array_slice($contextindex,$index,1)));

@@ -7,79 +7,6 @@ require_once(__DIR__.'/php-emont/Model.class.php');
 require_once(__DIR__.'/Uri.class.php');
 require_once(__DIR__.'/SPARQLConnection.class.php');
 
-/* Manipulatiecode */
-if($_POST)
-{
-	$type=$_GET['type'];
-	$actie=$_GET['actie'];
-	$naamprefix=Uri::SMWuriNaarLeesbareTitel($context_uri);
-
-	if($type=='context')
-	{
-		if($actie=='nieuw')
-		{
-			$naam=$naamprefix.' '.$_POST['naam-nieuwe-context'];
-			$supercontext_uri=$_POST['supercontext'];
-
-			Model::nieuweContext($naam);
-			Model::nieuweVN($naam.' VN','Context',$naam);
-			Model::extraSupercontext($naam,$supercontext_uri);
-		}
-		elseif($actie=='extrasupercontext')
-		{
-			$context=$_POST['context'];
-			$supercontext=$_POST['supercontext'];
-
-			if($context!=$supercontext)
-			{
-				Model::extraSupercontext($context,$supercontext);
-			}
-		}
-		elseif($actie=='supercontextverwijderen')
-		{
-			list($context,$supercontext)=explode('|',$_POST['verwijder-supercontexten']);
-
-			Model::supercontextVerwijderen($context,$supercontext);
-		}
-	}
-	elseif($type=='ie')
-	{
-		if($actie=='contexttoevoegen')
-		{
-			$ie=$_POST['ie'];
-			$context=$_POST['context'];
-
-			Model::contextToevoegenAanIE($ie,$context);
-		}
-		elseif($actie=='nieuw')
-		{
-			$naam=$_POST['titel'];
-			Model::nieuwIE($_POST['ie'],$_POST['context'],$naam,$naamprefix);
-			Model::nieuweVN($naam.' VN','Intentional Element',$naamprefix.' '.$naam);
-		}
-		elseif($actie=='maakverband')
-		{
-			$eigenschappen=array();
-
-			if($_POST['notitie'])
-				$eigenschappen['Element link note']=$_POST['notitie'];
-			if($_POST['type']=='Contributes')
-				$eigenschappen['Element contribution value']=$_POST['subtype'];
-			if($_POST['type']=='Connects')
-				$eigenschappen['Element connection type']=$_POST['subtype'];
-
-			Model::maakVerband($_POST['van'],$_POST['naar'],$_POST['type'],$eigenschappen);
-		}
-		elseif($actie=='verwijderverband')
-		{
-			$waardes=explode('|',$_POST['verwijder-verband']);
-			Model::verwijderVerband($waardes[0],$waardes[2],$waardes[1]);
-		}
-	}
-}
-
-/* Einde manipulatiecode */
-
 class Visualisatiepagina
 {
 	private $inhoud='';
@@ -89,25 +16,33 @@ class Visualisatiepagina
 		if(!$model_uri)
 			$model_uri='wiki:Building_with_Nature-2Dinterventies_op_het_systeem_practice';
 
-		$url=(explode('?',rtrim($_SERVER['REQUEST_URI'],'/')));
-		$this->inhoud.='<a href="'.$url[0].'/../../">Terug naar het modellenoverzicht</a>';
-		$this->inhoud.='<h2 id="visualisatiekop">Visualisatie</h2>';
-		$this->inhoud.='<button onclick="toggleL1modelDiv();">+</button>
-		<p><a href="'.$url[0].'">Herladen</a></p>
-		<p>U kunt elementen verslepen om het overzicht te verbeteren. Dubbelklik op een element om de wikipagina ervan weer te geven.</p>';
+		$url = (explode('?',rtrim($_SERVER['REQUEST_URI'],'/')));
+		$hoofdvisualisatie_id = 'visualisatie-'.Uri::stripSMWuriPadEnPrefixes($model_uri);
 
-		$hoofdvisualisatie_id='visualisatie-'.Uri::stripSMWuriPadEnPrefixes($model_uri);
-		$this->inhoud.='<div id="div-'.$hoofdvisualisatie_id.'"></div>';
+		$this->inhoud.=sprintf('
+			<p>U kunt elementen verslepen om het overzicht te verbeteren. Dubbelklik op een element om de wikipagina ervan weer te geven.</p>
 
-		$this->inhoud.='
-				<script type="text/javascript">
-					var domeinprefix = "'.Uri::geefDomeinPrefix().'";
+			<button onclick="window.location=\'%1$s/../../\'">⮤ Terug naar modellenoverzicht</button>
+			<button onclick="window.location=\'%1$s\';">⟳ Herladen</button>',$url[0]);
 
-					var contextUri = "'.Model::geefContextVanModel($model_uri).'";
-					var visualisatieId = "'.$hoofdvisualisatie_id.'";
+		if(Model::modelIsExperience($model_uri))
+			$this->inhoud.=' <button onclick="toggleL1modelDiv(true);">➕ Nieuw IE</button>';
 
-					startVisualisatie(visualisatieId, contextUri);
-				</script>';
+		$this->inhoud.=sprintf('
+		<div id="visualisatiepaginacontainer">
+			<div id="div-%1$s"></div>
+		</div>
+			<script type="text/javascript">
+
+				$("#visualisatiepaginacontainer").height($("#mw-content-text").width()*0.75);
+
+				var domeinprefix = "%2$s";
+
+				var contextUri = "%3$s";
+				var visualisatieId = "%1$s";
+
+				startVisualisatie(visualisatieId, contextUri);
+			</script>',$hoofdvisualisatie_id,Uri::geefDomeinPrefix(),Model::geefContextVanModel($model_uri));
 
 		if(Model::modelIsExperience($model_uri))
 		{
@@ -193,7 +128,7 @@ class Visualisatiepagina
 			}
 
 			$sec_visualisatie_id='visualisatie-'.Uri::stripSMWuriPadEnPrefixes($l1model);
-
+/*
 			////
 			$this->inhoud.='<h2>Nieuw Intentional Element</h2>';
 			$this->inhoud.='<form action="?actie=nieuw&amp;type=ie" method="post"><table>';
@@ -299,16 +234,13 @@ class Visualisatiepagina
 				}
 			}
 			$this->inhoud.='</table>';
-
+*/
 			$this->inhoud.='
 				<script type="text/javascript">
 					var secContextUri = "'.Model::geefContextVanModel($l1model).'";
 					var secVisualisatieId = "'.$sec_visualisatie_id.'";
 
-					d3.select("body").append("div").attr({id: "div-"+secVisualisatieId, class: "l1hover"});
-					var div = d3.select("#div-"+secVisualisatieId);
-					div.append("button").attr({onclick: \'javascript:document.getElementById("div-"+secVisualisatieId).style.visibility="hidden";\'});
-
+					createL1hoverPopup(secVisualisatieId);
 					startVisualisatie(secVisualisatieId, secContextUri);
 				</script>';
 		}

@@ -2,7 +2,7 @@
 // Direct opvragen kan niet, enkel via als module van de Mediawiki
 if ( !defined( 'MEDIAWIKI' ) ) {
 	echo <<<EOT
-To install my extension, put the following line in LocalSettings.php:
+Om deze extensie te installeren voegt u de volgende regel toe aan LocalSettings.php:
 require_once( "\$IP/extensions/EMontVisualisator/EMontVisualisator" );
 EOT;
 	exit(1);
@@ -30,8 +30,11 @@ $wgResourceModules['ext.EMontVisualisator'] = array(
 	'remoteExtPath' => 'EMontVisualisator'.'/includes'
 );
 
+$wgAutoloadClasses['EMVAjaxInterface'] = __DIR__.'/includes/php/EMVAjaxInterface.class.php';
+$wgAPIModules['EMVAI'] = 'EMVAjaxInterface';
+
 // Specificeert welke pagina er getoond moet worden
-$wgAutoloadClasses['SpecialEMontVisualisator'] = __DIR__ . '/SpecialEMontVisualisator.php';
+$wgAutoloadClasses['SpecialEMontVisualisator'] = __DIR__.'/SpecialEMontVisualisator.php';
 // Registreer bovenstaande pagina als Speciale Pagina van EMontVisualisator
 $wgSpecialPages['EMontVisualisator'] = 'SpecialEMontVisualisator';
 ?>

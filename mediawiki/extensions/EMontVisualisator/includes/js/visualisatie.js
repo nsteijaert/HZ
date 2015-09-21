@@ -1,5 +1,8 @@
-var nodewidth = 30;
-var nodeheight = 100;
+var nodewidth = 75;
+var nodeheight = 20;
+var margin = 5;
+var pad = 10;
+var graphs = [];
 
 function startVisualisatie(visualisatieId, opTeVragenContextUri)
 {
@@ -57,10 +60,20 @@ function tekenVerbandTooltip(d,x,y)
 
 function tekenDiagram(visualisatieId, graph)
 {
-	var outer = d3.select("#div-"+visualisatieId).append("svg");
+	var force = cola.d3adaptor().convergenceThreshold(0.1);
 
-	outer.attr({ id: visualisatieId, width: "100%", height: standaardSVGhoogte });
-	outer.append('svg:defs').append('svg:marker')
+	var div = d3.select("#div-"+visualisatieId);
+	var width = 3000;
+	var height = 3000;
+
+	var outer = div.append("svg")
+		.attr({	id: visualisatieId,
+			width: width,
+			height: height
+		});
+
+	outer.append('svg:defs')
+		.append('svg:marker')
         	.attr({
             	id: "standaard",
             	viewBox: "0 -5 10 10",
@@ -71,26 +84,26 @@ function tekenDiagram(visualisatieId, graph)
             	orient: 'auto'
         	})
       		.append('svg:path')
-        	.attr({
-            	d: "M0,-5L10,0L0,5"
-			});
+        		.attr({
+            		d: "M0,-5L10,0L0,5"
+				});
 
 	// Selecteer de visualisatie-container
 	var visualisatieIdMetHash = "#"+visualisatieId;
 	var svg = d3.select(visualisatieIdMetHash);
-	var width = $(visualisatieIdMetHash).width();
-	var height = $(visualisatieIdMetHash).height();
-    var margin = 5, pad = 10;
+	graphs[visualisatieId]=graph;
 
-    var force = cola.d3adaptor()
-    	.linkDistance(90)
+    force
     	.avoidOverlaps(true)
+    	.flowLayout('x', 150)
+		.jaccardLinkLengths(150)
 		.size([width, height])
-        .handleDisconnected(true)
     	.nodes(graph.nodes)
     	.links(graph.links)
     	.constraints(graph.constraints)
-    	.groups(graph.groups);
+    	.groups(graphs[visualisatieId].groups);
+
+
 
 	// Teken de pijlen
 	force.on("tick", function () {
@@ -108,13 +121,7 @@ function tekenDiagram(visualisatieId, graph)
 
       	link.attr("d", function (d) {
             cola.vpsc.makeEdgeBetween(d, d.source.innerBounds, d.target.innerBounds, 5);
-            var lineData = [{ x: d.sourceIntersection.x, y: d.sourceIntersection.y }, { x: d.arrowStart.x, y: d.arrowStart.y }];
-            return lineFunction(lineData);
         });
-        if (isIE())
-        {
-        	link.each(function (d) { this.parentNode.insertBefore(this, this);});
-        }
 
         linktooltip.each(function (d) {
                 cola.vpsc.makeEdgeBetween(d, d.source.innerBounds.inflate(-margin), d.target.innerBounds, 0);
@@ -127,27 +134,29 @@ function tekenDiagram(visualisatieId, graph)
 
         label.each(function (d) {
             var b = this.getBBox();
-            d.width = b.width + 2 * pad;
-            d.height = b.height + 2 * pad;
+            d.width = Math.max(nodewidth,b.width + 2 * pad);
+            d.height = Math.max(nodeheight,b.height + 2 * pad);
         });
 
 		group.each(function (d) {
             d.padding=25;
+            d.bounds.width(Math.max(nodewidth+20,d.bounds.width()));
+            d.bounds.height(Math.max(nodeheight+20,d.bounds.height()));
         });
 
         node.attr("x", function (d) { return d.innerBounds.x; })
             .attr("y", function (d) { return d.innerBounds.y; })
-            .attr("width", function (d) { return d.innerBounds.width(); })
-            .attr("height", function (d) { return d.innerBounds.height(); });
+            .attr("width", function (d) { return Math.max(nodewidth,d.innerBounds.width()); })
+            .attr("height", function (d) { return Math.max(nodeheight,d.innerBounds.height()); });
 
         group.attr("x", function (d) { return d.bounds.x+margin; })
-             .attr("y", function (d) { return d.bounds.y+margin; })
-            .attr("width", function (d) { return d.bounds.width()-pad;})
-            .attr("height", function (d) { return d.bounds.height()-pad;});
+            .attr("y", function (d) { return d.bounds.y+margin; })
+            .attr("width", function (d) { return Math.max(nodewidth+20,d.bounds.width()-pad);})
+            .attr("height", function (d) { return Math.max(nodeheight+20,d.bounds.height()-pad);});
 
         grouplabelrect.attr("x", function (d) { return d.bounds.x+margin; })
-             .attr("y", function (d) { return d.bounds.y+margin; })
-            .attr("width", function (d) { return d.bounds.width()-(2*margin);})
+            .attr("y", function (d) { return d.bounds.y+margin; })
+            .attr("width", function (d) { return Math.max(0,d.bounds.width()-(2*margin));})
             .attr("height", 50);
 
         label.attr("transform", function (d) {
@@ -159,25 +168,29 @@ function tekenDiagram(visualisatieId, graph)
         });
 
         grouplabelcliprect.attr("x",function (d) {return d.bounds.x+margin;})
-        				.attr("y",function (d) {return d.bounds.y;})
-        				.attr("width",function (d) { return d.bounds.width()-(2*margin);})
-        				.attr("height", 25);
+        	.attr("y",function (d) {return d.bounds.y;})
+        	.attr("width",function (d) { return Math.max(nodewidth+20,d.bounds.width()-(2*margin));})
+        	.attr("height", 25);
+
+		adjustScrollbarsIfNecessary();
+
 	});
+
 
 	// De force layout zet alles automatisch op zijn plek
 
 	// Deze manier van aanroepen zorgt voor een oneindige lus bij kleine modellen (van bijv. 1 of 2 IE's), vandaar deze if-constructie.
 	if(graph.nodes.length>10)
-		force.start(80,160,100000);
+		force.start(0,300,100000);
 	else
 		force.start();
 
     var group = svg.selectAll(".group")
-        .data(graph.groups)
+        .data(graphs[visualisatieId].groups)
        .enter().append("rect")
         .attr("rx", 10).attr("ry", 10)
         .attr("class", "group")
-         .attr('width',nodewidth+20)
+        .attr('width',nodewidth+20)
 	    .attr('height',nodeheight+20);
 
     var link = svg.selectAll(".link")
@@ -217,12 +230,13 @@ function tekenDiagram(visualisatieId, graph)
         .data(graph.nodes)
         .enter().append("text")
          .attr("class", function (d) {return "label label"+d.type;})
-         .on('dblclick', function (d) { openInNewTab(domeinprefix+d.name+' VN');})
+         .on('click', function (d) { setSelectedIE(d.uri, d.heading);})
+         .on('dblclick', function (d) { openInNewTab(domeinprefix+d.name);})
 	     .call(force.drag);
 
 	// Groeptitels
     var grouplabel = svg.selectAll(".grouplabel")
-        .data(graph.groups)
+        .data(graphs[visualisatieId].groups)
         .enter().append("g")
         .attr("class", function (d) {return "grouplabel";})
         .attr("style",function (d,i){return "clip-path: url(#"+visualisatieId+"-clip"+i+");";})
@@ -232,7 +246,7 @@ function tekenDiagram(visualisatieId, graph)
          .text(function (d) { return d.bijschrift; });
 
     var grouplabelrect = svg.selectAll('grouplabelrect')
-    	.data(graph.groups)
+    	.data(graphs[visualisatieId].groups)
     	.enter().append("rect")
          .attr("class", function (d) {return "grouplabelrect";})
          .attr("style",function (d,i){return "clip-path: url(#"+visualisatieId+"-clip"+i+");";})
@@ -244,7 +258,7 @@ function tekenDiagram(visualisatieId, graph)
 
 
 	var grouplabelclip = svg.selectAll('.grouplabelclip')
-		.data(graph.groups)
+		.data(graphs[visualisatieId].groups)
 		.enter().append("clipPath")
 		 .attr("class", "grouplabelclip")
 		 .attr("id",function (d,i) {return visualisatieId+"-clip"+i;})
@@ -279,23 +293,13 @@ function tekenDiagram(visualisatieId, graph)
     };
 	label.each(insertLinebreaks);
 
-	var lineFunction = d3.svg.line()
-        .x(function (d) { return d.x; })
-        .y(function (d) { return d.y; })
-        .interpolate("linear");
+	force.on('end', adjustScrollbarsIfNecessary());
 
-	var routeEdges = function () {
-	    force.prepareEdgeRouting(margin / 3);
-	    link.attr("d", function (d) { return lineFunction(force.routeEdge(d)); });
-	    if (isIE()) link.each(function (d) { this.parentNode.insertBefore(this, this); });
-	};
 
-	//force.on("end", routeEdges);
-}
-
-function isIE()
-{
-	return navigator.appName == "Microsoft Internet Explorer";
+	function adjustScrollbarsIfNecessary()
+	{
+		adjustScrollbars(visualisatieId,false,2000);
+	}
 }
 
 function verhelpOverlappendeNodes()

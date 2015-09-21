@@ -12,7 +12,7 @@ require_once(__DIR__.'/../Uri.class.php');
 class VisualisationVisitor implements PHPEMontVisitor
 {
 	function __construct() {}
-	
+
 	function visit($visitee)
 	{
 		if ($visitee instanceof IntentionalElement)
@@ -55,7 +55,7 @@ class VisualisationVisitor implements PHPEMontVisitor
 					$links[]=array('source'=>$uri,'type'=>'connects','target'=>$link->getLink()->getUri(),'note'=>$link->getLinkNote(),'extraInfo'=>': '.$link->getConnectionType().' '.$link->getLinkCondition());
 				}
 			}
-			
+
 			$return['node']=$node;
 			$return['links']=$links;
 			$return['ies_contexten']=$ies_contexten;
@@ -65,6 +65,7 @@ class VisualisationVisitor implements PHPEMontVisitor
 		{
 			$context=array();
 			$uri=$visitee->getUri();
+			$context['uri']=$visitee->getUri();
 			$context['description']=$visitee->getDescription();
 			$contextLinks=array();
 			foreach($visitee->getSupercontext() as $link)
