@@ -23,6 +23,7 @@ $ies_contexten=array();
 $contexten=array();
 $contextLinks=array();
 $indices=array();
+$extragroups=array();
 $teller=0;
 foreach($result as $uri =>$object)
 {
@@ -83,7 +84,7 @@ foreach($ies_contexten as $context=>$ies)
 	{
 		$index=array_search($ie,$nodeindex);
 
-		// IE's gaan spacen als de visulisatie ze in twee contexten tegelijkertijd moet tekenen. Dit helpt, maar moet wat verfijnder geïmplementeerd worden.
+		// IE's gaan spacen als de visualisatie ze in twee contexten tegelijkertijd moet tekenen. Dit helpt, maar moet wat verfijnder geïmplementeerd worden.
 		if($gebruikteLeaves[$index]==false)
 		{
 			$leaves[]=$index;
@@ -101,6 +102,8 @@ foreach($contexten as $uri=>$description)
 {
 	if(!array_search($uri,$contextindex))
 	{
+		/*$post['nodes'][]=array('uri'=>'dummy','name'=>'','heading'=>'dummy','type'=>'dummy');*/
+		$post['groups'][]=array(); //'leaves'=>array(count($post['nodes'])-1));
 		$contextindex[]=$uri;
 	}
 }
@@ -113,9 +116,15 @@ foreach($contextLinks as $contextLink)
 	$contextnr=array_search($context,$contextindex);
 	$supercontextnr=array_search($supercontext,$contextindex);
 
-	if($contextnr!==FALSE && $supercontextnr!==FALSE && !empty($post['groups'][$contextnr])&& !$gebruikteSubcontexten[$contextnr])
+	if($contextnr!==FALSE && $supercontextnr!==FALSE && !$gebruikteSubcontexten[$contextnr])
 	{
-		$post['groups'][$supercontextnr]['groups'][]=$contextnr;
+		if(!empty($post['groups'][$contextnr])) {
+			$post['groups'][$supercontextnr]['groups'][]=$contextnr;
+		}
+		else {
+			$extragroups[$supercontextnr][]=$contextnr;
+		}
+
 	}
 	if(!$gebruikteSubcontexten[$contextnr])
 		$gebruikteSubcontexten[$contextnr]=array();
@@ -167,9 +176,26 @@ foreach ($post['groups'] as $index=>$inhoud)
 
 $groups=$post['groups'];
 $post['groups']=array();
+$teller=0;
+
 foreach ($groups as $group)
 {
-	$post['groups'][]=$group;
+	if($extragroups[$teller]) {
+		$grouptemp=$group;
+		if($grouptemp['groups'])
+			$grouptemp['groups']=array_merge($group['groups'],$extragroups[$teller]);
+		else
+			$grouptemp['groups']=$extragroups[$teller];
+
+		$post['allgroups'][]=$grouptemp;
+	}else {
+		$post['allgroups'][]=$group;
+	}
+
+	if(count($group['leaves'])>0 || count($group['groups'])>0)
+		$post['groups'][]=$group;
+
+	$teller++;
 }
 
 // Teken groepen met meer nodes eerst
@@ -201,3 +227,5 @@ $out=strtr($out,array('<sub>2</sub>'=>'₂'));
 $out=strtr($out,array('<sub>'=>'','<\/sub>'=>''));
 $out=strtr($out,array('CO2'=>'CO₂'));
 echo $out;
+
+//error_log(var_export($contexten,true));

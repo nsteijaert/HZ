@@ -27,6 +27,10 @@
 	fill: #ffffff;
 	stroke:#bfac88;
 }
+.nodedummy
+{
+	display:none;
+}
 
 .link
 {
@@ -160,12 +164,28 @@ marker#standaard
 .keuzelijst
 {
 	background-color:#F5F5F5;
-	border:1px solid #888888;
+	border-bottom:1px solid #888888;
 	padding: 5px;
 	border-collapse: collapse;
 }
 
 .keuzelijstFrame
 {
-	margin: 15px;
+	margin: 15px auto 15px auto;
+	width:88%;
+	border:1px solid #888888;
+	border-bottom:0px;
+}
+
+.keuzelijstHover
+{
+	background-color:#bfac88;
+	color:#f5f5f5;
+	cursor:pointer;
+}
+
+.keuzelijstSelected
+{
+	background-color:#4c97d6 !important;
+	color:#f5f5f5;
 }

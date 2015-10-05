@@ -1,4 +1,3 @@
-var standaardSVGhoogte = 2280;
 var volgendeActie = null;
 var popupVars = {};
 
@@ -31,6 +30,7 @@ function createPopup(id)
 	}
 
 	var popup = d3.select('#'+id);
+	popup.attr({class: "popup"});
 
 	popup.append("div").attr({id: id+"-werkbalk", style: "display:flex; justify-content: space-between; align-items: center;"});
 	var werkbalk=d3.select("#"+id+"-werkbalk");
@@ -41,7 +41,7 @@ function createPopup(id)
 
 	linkerknoppen.append("button")
 		.attr({id: "popup-sluitknop", title: "Sluiten", onclick: "verbergOfVerwijderPopup('"+id+"');"})
-		.text("❌ Annuleren");
+		.text("❌ Annuleer");
 }
 
 function createL1hoverPopup(secVisualisatieId)
@@ -88,47 +88,120 @@ function nieuwIE_naarStap2()
 	var popup = d3.select('#nieuwie-stap2');
 	d3.select("#nieuwie-stap2-rechterknoppen").append("button")
 		.attr({id: "l1hover-opslagknop"})
-		.text("✓ Aanmaken")
+		.text("✓ Voeg toe")
 		.on("click", function() { nieuwIE_finish();});
 
-	popup.append('div').attr({'style': "text-align:center; margin-top:10px;"}).html('Kies in welke context u dit intentional element wilt plaatsen.');
+	popup.append('div').attr({'style': "text-align:center; margin-top:10px;"}).html('<h4>Kies in welke context u dit intentional element wilt plaatsen:</h4>');
 
-	var groepen=popup.append('div').attr({id: '#nieuwie-subcontext', class: "keuzelijstFrame"});
+	contextKeuzelijst('nieuwie-stap2');
+}
 
-	graphs[visualisatieId].groups.forEach(
+function nieuweContextPopup()
+{
+	createPopup('nieuweContext');
+
+	var popup = d3.select('#nieuweContext');
+	var middenknoppen = d3.select("#nieuweContext-middenknoppen");
+	var rechterknoppen= d3.select("#nieuweContext-rechterknoppen");
+
+	middenknoppen.append("input")
+		.attr({id: "titel-nieuwe-context", type: "text", placeholder: "Naam nieuwe context", style: "width: 250px;"});
+
+	rechterknoppen.append("button")
+		.attr({id: "nieuweContext-opslagknop"})
+		.text("✓ Voeg toe")
+		.on("click", function() { nieuweContext_finish();});
+
+	popup.append('div').attr({'style': "text-align:center; margin-top:10px;"}).html('<h4>Kies een supercontext:</h4>');
+
+	contextKeuzelijst('nieuweContext');
+}
+
+function contextKeuzelijst(div_id)
+{
+	var popup = d3.select('#'+div_id);
+	var groepen=popup.append('div').attr({id: '#'+div_id+'-contextkeuze', class: "keuzelijstFrame"});
+
+	gGraphs[visualisatieId].allgroups.forEach(
 		function(d) {
 			groepen.append('div')
 				.attr({class: "keuzelijst"})
 				.html(d.langbijschrift)
-				.on("click", function () { popupVars.subcontext=d.uri; });
+				.on("click", function () { popupVars.contextkeuze=d.uri; });
 		}
+	);
+
+	$('.keuzelijst').hover(
+    	function(){ $(this).addClass('keuzelijstHover'); },
+    	function(){ $(this).removeClass('keuzelijstHover'); }
+	);
+
+	$('.keuzelijst').click(
+		function(){ $('.keuzelijst').removeClass('keuzelijstSelected'); $(this).addClass('keuzelijstSelected');}
 	);
 }
 
 function nieuwIE_finish()
 {
 	console.log(popupVars);
+	var newnode={};
+	newnode.name=popupVars.titelNieuwIE;
+	newnode.heading=popupVars.titelNieuwIE;
+	newnode.instanceof=popupVars.instanceOf;
+
+	gGraphs[visualisatieId].nodes.push(newnode);
+	gGraphs[visualisatieId].groups[0].leaves.push((gGraphs[visualisatieId].nodes.length)-1);
+	setNodes(visualisatieId);
+
+	verbergOfVerwijderPopup('nieuwie-stap2');
 
 	mw.loader.using( 'mediawiki.api', function () {
-		( new mw.Api() ).post( {
+		( new mw.Api() ).get( {
 			action: 'EMVAI',
 			actie: 'nieuw',
 		 	type: 'ie',
 		 	hoofdcontextUri: contextUri,
-		 	context: popupVars.subcontext,
+		 	context: popupVars.contextkeuze,
 		 	titel: popupVars.titelNieuwIE,
-		 	instanceOf: popupVars.instanceOf
-		} ).done( function(data) {
-			verbergOfVerwijderPopup('nieuwie-stap2');
+		 	instanceOf: popupVars.instanceOf,
+		} ).done( function() {
+
 		} );
 	} );
+}
 
+function nieuweContext_finish()
+{
+	var titel=document.getElementById('titel-nieuwe-context').value;
+	var newgroup={};
+	newgroup.leaves=[];
+	newgroup.bijschrift=titel;
+	newgroup.titel=titel;
+	newgroup.tooltip=titel;
+
+	gGraphs[visualisatieId].groups.push(newgroup);
+	setGroups(visualisatieId);
+
+	verbergOfVerwijderPopup('nieuweContext');
+
+	mw.loader.using( 'mediawiki.api', function () {
+		( new mw.Api() ).get( {
+			action: 'EMVAI',
+			actie: 'nieuw',
+		 	type: 'context',
+		 	hoofdcontextUri: contextUri,
+		 	supercontext: popupVars.contextkeuze,
+		 	titel: titel,
+		} ).done( function() {
+
+		} );
+	} );
 }
 
 function adjustScrollbars(visualisatieId,force,timeout)
 {
-	setTimeout(function () {
-		var d = graphs[visualisatieId].groups[0];
+	setTimeout(function (data) {
+		var d = gGraphs[visualisatieId].groups[0];
 		var containerElement;
 		var container = document.getElementById('div-'+visualisatieId);
 
@@ -142,7 +215,7 @@ function adjustScrollbars(visualisatieId,force,timeout)
 			|| force) {
 			$("#"+containerElement).scrollTop(Math.max(0,d.bounds.y-25));
 			$("#"+containerElement).scrollLeft(Math.max(0,d.bounds.x-25));
-			graphs[visualisatieId].groups[0].adjustedScrollbars=true;
+			gGraphs[visualisatieId].groups[0].adjustedScrollbars=true;
 		}
 	}, timeout);
 }

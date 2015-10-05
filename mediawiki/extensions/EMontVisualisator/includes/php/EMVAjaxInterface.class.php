@@ -10,75 +10,76 @@ class EMVAjaxInterface extends ApiBase
 {
 	public function execute()
 	{
-		$type=$_POST['type'];
-		$actie=$_POST['actie'];
-		$naamprefix=Uri::SMWuriNaarLeesbareTitel($_POST['hoofdcontextUri']);
+		$type = $this->getParameter('type');
+		$actie = $this->getParameter('actie');
+		$naamprefix = Uri::SMWuriNaarLeesbareTitel($this->getParameter('hoofdcontextUri'));
 
-		if($type=='context')
+		$formattedData = array();
+		$result = $this->getResult();
+		$result->setIndexedTagName($formattedData, 'p');
+		$result->addValue(null, $this->getModuleName(), $formattedData);
+
+		if ($type == 'context')
 		{
-			if($actie=='nieuw')
+			if ($actie == 'nieuw')
 			{
-				$naam=$naamprefix.' '.$_POST['naam-nieuwe-context'];
-				$supercontext_uri=$_POST['supercontext'];
+				$naam = $naamprefix . ' ' . $this->getParameter('titel');
+				$supercontext_uri = $this->getParameter('supercontext');
 
 				Model::nieuweContext($naam);
-				Model::nieuweVN($naam.' VN','Context',$naam);
-				Model::extraSupercontext($naam,$supercontext_uri);
+				Model::nieuweVN($naam . ' VN', 'Context', $naam);
+				Model::extraSupercontext($naam, $supercontext_uri);
 			}
-			elseif($actie=='extrasupercontext')
+			elseif ($actie == 'extrasupercontext')
 			{
-				$context=$_POST['context'];
-				$supercontext=$_POST['supercontext'];
+				$context = $params['context'];
+				$supercontext = $params['supercontext'];
 
-				if($context!=$supercontext)
+				if ($context != $supercontext)
 				{
-					Model::extraSupercontext($context,$supercontext);
+					Model::extraSupercontext($context, $supercontext);
 				}
 			}
-			elseif($actie=='supercontextverwijderen')
+			elseif ($actie == 'supercontextverwijderen')
 			{
-				list($context,$supercontext)=explode('|',$_POST['verwijder-supercontexten']);
+				list($context, $supercontext) = explode('|', $params['verwijder-supercontexten']);
 
-				Model::supercontextVerwijderen($context,$supercontext);
+				Model::supercontextVerwijderen($context, $supercontext);
 			}
 		}
-		elseif($type=='ie')
+		elseif ($type == 'ie')
 		{
-			if($actie=='contexttoevoegen')
+			if ($actie == 'contexttoevoegen')
 			{
-				$ie=$_POST['ie'];
-				$context=$_POST['context'];
+				$ie = $params['ie'];
+				$context = $params['context'];
 
-				Model::contextToevoegenAanIE($ie,$context);
+				Model::contextToevoegenAanIE($ie, $context);
 			}
-			elseif($actie=='nieuw')
+			elseif ($actie == 'nieuw')
 			{
-				$naam=$_POST['titel'];
-				Model::nieuwIE($_POST['instanceOf'],$_POST['context'],$naam,$naamprefix);
-				Model::nieuweVN($naam.' VN','Intentional Element',$naamprefix.' '.$naam);
+				$naam = $this->getParameter('titel');
+				Model::nieuwIE($this->getParameter('instanceOf'), $this->getParameter('context'), $naam, $naamprefix);
+				Model::nieuweVN($naam .' VN', 'Intentional Element', $naamprefix.' '.$naam);
 			}
-			elseif($actie=='maakverband')
+			elseif ($actie == 'maakverband')
 			{
-				$eigenschappen=array();
+				$eigenschappen = array();
 
-				if($_POST['notitie'])
-					$eigenschappen['Element link note']=$_POST['notitie'];
-				if($_POST['type']=='Contributes')
-					$eigenschappen['Element contribution value']=$_POST['subtype'];
-				if($_POST['type']=='Connects')
-					$eigenschappen['Element connection type']=$_POST['subtype'];
+				if ($params['notitie'])
+					$eigenschappen['Element link note'] = $params['notitie'];
+				if ($params['type'] == 'Contributes')
+					$eigenschappen['Element contribution value'] = $params['subtype'];
+				if ($params['type'] == 'Connects')
+					$eigenschappen['Element connection type'] = $params['subtype'];
 
-				Model::maakVerband($_POST['van'],$_POST['naar'],$_POST['type'],$eigenschappen);
+				Model::maakVerband($params['van'], $params['naar'], $params['type'], $eigenschappen);
 			}
-			elseif($actie=='verwijderverband')
+			elseif ($actie == 'verwijderverband')
 			{
-				$waardes=explode('|',$_POST['verwijder-verband']);
-				Model::verwijderVerband($waardes[0],$waardes[2],$waardes[1]);
+				$waardes = explode('|', $params['verwijder-verband']);
+				Model::verwijderVerband($waardes[0], $waardes[2], $waardes[1]);
 			}
 		}
-
-		$this->getResult()->addValue(null, $this->getModuleName(), "OK");
-		return true;
 	}
 }
-?>

@@ -19,14 +19,73 @@ class Visualisatiepagina
 		$url = (explode('?',rtrim($_SERVER['REQUEST_URI'],'/')));
 		$hoofdvisualisatie_id = 'visualisatie-'.Uri::stripSMWuriPadEnPrefixes($model_uri);
 
+		if($_POST)
+		{
+			$type = $_GET['type'];
+			$actie = $_GET['actie'];
+
+			if ($type == 'context')
+			{
+				if ($actie == 'extrasupercontext')
+				{
+					$context = $_POST['context'];
+					$supercontext = $_POST['supercontext'];
+
+					if ($context != $supercontext)
+					{
+						Model::extraSupercontext($context, $supercontext);
+					}
+				}
+				elseif ($actie == 'supercontextverwijderen')
+				{
+					list($context, $supercontext) = explode('|', $_POST['verwijder-supercontexten']);
+
+					Model::supercontextVerwijderen($context, $supercontext);
+				}
+			}
+			elseif ($type == 'ie')
+			{
+				if ($actie == 'contexttoevoegen')
+				{
+					$ie = $_POST['ie'];
+					$context = $_POST['context'];
+
+					Model::contextToevoegenAanIE($ie, $context);
+				}
+				elseif ($actie == 'maakverband')
+				{
+					$eigenschappen = array();
+
+					if ($_POST['notitie'])
+						$eigenschappen['Element link note'] = $_POST['notitie'];
+					if ($_POST['type'] == 'Contributes')
+						$eigenschappen['Element contribution value'] = $_POST['subtype'];
+					if ($_POST['type'] == 'Connects')
+						$eigenschappen['Element connection type'] = $_POST['subtype'];
+
+					Model::maakVerband($_POST['van'], $_POST['naar'], $_POST['type'], $eigenschappen);
+				}
+				elseif ($actie == 'verwijderverband')
+				{
+					$waardes = explode('|', $_POST['verwijder-verband']);
+					Model::verwijderVerband($waardes[0], $waardes[2], $waardes[1]);
+				}
+			}
+		}
+
 		$this->inhoud.=sprintf('
 			<p>U kunt elementen verslepen om het overzicht te verbeteren. Dubbelklik op een element om de wikipagina ervan weer te geven.</p>
 
-			<button onclick="window.location=\'%1$s/../../\'">⮤ Terug naar modellenoverzicht</button>
-			<button onclick="window.location=\'%1$s\';">⟳ Herladen</button>',$url[0]);
+			<button title="Terug naar modellenoverzicht" onclick="window.location=\'%1$s/../../\'">⮤</button>
+			<button title="Herladen" onclick="window.location=\'%1$s\';">⟳</button>
+			<button title="Naar hoofdcontext scrollen" onclick="adjustScrollbars(visualisatieId,true,0);">⯐</button>',$url[0]);
 
-		if(Model::modelIsExperience($model_uri))
-			$this->inhoud.=' <button onclick="toggleL1modelDiv(true);">➕ Nieuw IE</button>';
+		if(Model::modelIsExperience($model_uri)) {
+			$this->inhoud.=' <button title="Nieuw Intentional Element" onclick="toggleL1modelDiv(true);">➕ IE</button>';
+			$this->inhoud.=' <button title="Nieuwe Context" onclick="nieuweContextPopup();">➕ Context</button>';
+			// Nog in ontwikkeling
+			//$this->inhoud.=' <button title="Context verwijderen" onclick="contextVerwijderenPopup();">🗑 Context</button>';
+		}
 
 		$this->inhoud.=sprintf('
 		<div id="visualisatiepaginacontainer">
@@ -128,9 +187,9 @@ class Visualisatiepagina
 			}
 
 			$sec_visualisatie_id='visualisatie-'.Uri::stripSMWuriPadEnPrefixes($l1model);
-/*
+
 			////
-			$this->inhoud.='<h2>Nieuw Intentional Element</h2>';
+			/*$this->inhoud.='<h2>Nieuw Intentional Element</h2>';
 			$this->inhoud.='<form action="?actie=nieuw&amp;type=ie" method="post"><table>';
 			$this->inhoud.='<tr><td>Naam: '.Uri::SMWuriNaarLeesbareTitel($context_uri).'</td><td><input type="text" style="width: 300px;" name="titel"/></td></tr>';
 			$this->inhoud.='<tr><td>Instance of:</td><td><select name="ie">';
@@ -147,7 +206,7 @@ class Visualisatiepagina
 
 			$this->inhoud.='<tr><td>Context:</td><td><select name="context">'.$contextenlijst.'</select></td></tr>';
 			$this->inhoud.='</table><input type="submit" value="Aanmaken"/></form>';
-
+*/
 			////
 			$this->inhoud.='<h2>Nieuw verband aanbrengen</h2>';
 			$this->inhoud.='<form method="post" action="?actie=maakverband&amp;type=ie"><table>';
@@ -169,14 +228,14 @@ class Visualisatiepagina
 			$this->inhoud.='</table><input type="submit" value="Verwijderen"></form>';
 
 			////
-			$this->inhoud.='<h2>Nieuwe context</h2>';
+/*			$this->inhoud.='<h2>Nieuwe context</h2>';
 			$this->inhoud.='<form method="post" action="?actie=nieuw&amp;type=context">';
 			$this->inhoud.='Naam: '.Uri::SMWuriNaarLeesbareTitel($context_uri).'<input type="text" name="naam-nieuwe-context" /><br />';
 			$this->inhoud.='Supercontext: <select name="supercontext">'.$contextenlijst.'</select>';
-			$this->inhoud.='<input type="submit" value="Aanmaken"></form>';
+			$this->inhoud.='<input type="submit" value="Aanmaken"></form>';*/
 
 			////
-			$this->inhoud.='<h2>Context verwijderen</h2>';
+			//$this->inhoud.='<h2>Context verwijderen</h2>';
 
 			////
 			$this->inhoud.='<h2>Supercontext toevoegen aan context</h2>';
@@ -234,7 +293,7 @@ class Visualisatiepagina
 				}
 			}
 			$this->inhoud.='</table>';
-*/
+
 			$this->inhoud.='
 				<script type="text/javascript">
 					var secContextUri = "'.Model::geefContextVanModel($l1model).'";

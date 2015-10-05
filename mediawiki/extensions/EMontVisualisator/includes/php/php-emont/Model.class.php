@@ -321,7 +321,7 @@ class Model
 |Intentional Element decomposition type='.$ie_decomposition_type.'
 }}
 {{Heading
-|Heading nl='.$_POST['titel'].'
+|Heading nl='.$titel.'
 }}
 {{VN query}}
 {{Activity links
