@@ -90,9 +90,13 @@ class JSON_EMontParser
 					}
 					else
 					{
-						if($value=='Eigenschap-3AIntentional_Element_decomposition_type')
+						if($key=='Eigenschap-3AIntentional_Element_decomposition_type')
 						{
 							$obj->setDecompositionType($value);
+						}
+						elseif($key=='Eigenschap-3AInstance_of')
+						{
+							$obj->setInstanceOf($value);
 						}
 						else
 						{
@@ -176,9 +180,6 @@ class JSON_EMontParser
 						case 'partOf':
 							@$items[$verband['source']]->addPartOf($items[$verband['target']]);
 							break;
-						case 'instanceOf':
-							@$items[$verband['source']]->addInstanceOf($items[$verband['target']]);
-							break;
 						case 'context':
 							@$items[$verband['source']]->addContext($contexten[$verband['target']]);
 							break;
@@ -260,9 +261,6 @@ class JSON_EMontParser
 				break;
 			case 'Eigenschap-3APart_of':
 				$verbanden['partOf'][]=array('source'=>$item['@id'],'target'=>$value);
-				break;
-			case 'Eigenschap-3AInstance_of':
-				$verbanden['instanceof'][]=array('source'=>$item['@id'],'target'=>$value);
 				break;
 			default:
 		}

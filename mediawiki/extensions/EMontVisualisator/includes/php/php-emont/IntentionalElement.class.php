@@ -14,8 +14,10 @@ class IntentionalElement implements PHPEMontVisitee
 	// A Context object
 	private $context;
 
-	// Both SplObjectStorages ofIntentional Elements
+	// A URI of an Intentional Element
 	private $instanceOf;
+
+	// An SplObjectStorage of Intentional Elements
 	private $partOf;
 
 	//An SplObjectStorage of Contributes objects
@@ -28,7 +30,6 @@ class IntentionalElement implements PHPEMontVisitee
 		$this->contributes=new SplObjectStorage();
 		$this->depends=new SplObjectStorage();
 		$this->partOf=new SplObjectStorage();
-		$this->instanceOf=new SplObjectStorage();
 		$this->context=new SplObjectStorage();
 		$this->uri=$uri;
 	}
@@ -92,31 +93,11 @@ class IntentionalElement implements PHPEMontVisitee
 		return $this->context;
 	}
 
-	public function addInstanceOf(&$instanceOf)
+	public function setInstanceOf($instanceOf)
 	{
-		// This separates the men from the boys. The first is the parameter for setting the EMont property,
-		// the second is the PHP opcode to check whether the parameters is an Intentional Element object.
-		if ($instanceOf instanceOf IntentionalElement)
-		{
-			$this->instanceOf->attach($instanceOf);
-		}
-		else
-		{
-			throw new Exception('Not an Intentional Element');
-		}
-	}
-		public function removeInstanceOf(&$instanceOf)
-	{
-		// The first is the parameter for setting the EMont property,
-		// the second is the PHP opcode to check whether the parameters is an Intentional Element object.
-		if ($instanceOf instanceOf IntentionalElement)
-		{
-			$this->instanceOf->detach($instanceOf);
-		}
-		else
-		{
-			throw new Exception('Not an Intentional Element');
-		}
+		if($instanceOf)
+			$this->instanceOf=$instanceOf;
+
 	}
 
 	public function getInstanceOf()
@@ -159,7 +140,7 @@ class IntentionalElement implements PHPEMontVisitee
 		{
 			$this->contributes->attach($contributes);
 		}
-		else 
+		else
 		{
 			throw new Exception('Not a Contributes');
 		}
@@ -171,7 +152,7 @@ class IntentionalElement implements PHPEMontVisitee
 		{
 			$this->contributes->detach($contributes);
 		}
-		else 
+		else
 		{
 			throw new Exception('Not a Contributes');
 		}
@@ -188,7 +169,7 @@ class IntentionalElement implements PHPEMontVisitee
 		{
 			$this->depends->attach($depends);
 		}
-		else 
+		else
 		{
 			throw new Exception('Not a Depends');
 		}
@@ -200,7 +181,7 @@ class IntentionalElement implements PHPEMontVisitee
 		{
 			$this->depends->detach($depends);
 		}
-		else 
+		else
 		{
 			throw new Exception('Not a Depends');
 		}

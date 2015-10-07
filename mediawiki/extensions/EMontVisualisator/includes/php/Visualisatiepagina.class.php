@@ -85,6 +85,7 @@ class Visualisatiepagina
 			$this->inhoud.=' <button title="Nieuwe Context" onclick="nieuweContextPopup();">➕ Context</button>';
 			// Nog in ontwikkeling
 			//$this->inhoud.=' <button title="Context verwijderen" onclick="contextVerwijderenPopup();">🗑 Context</button>';
+			$this->inhoud.=' <button title="Nieuwe verband" onclick="nieuwVerbandPopup();">➕ Verband</button>';
 		}
 
 		$this->inhoud.=sprintf('
@@ -206,7 +207,7 @@ class Visualisatiepagina
 
 			$this->inhoud.='<tr><td>Context:</td><td><select name="context">'.$contextenlijst.'</select></td></tr>';
 			$this->inhoud.='</table><input type="submit" value="Aanmaken"/></form>';
-*/
+
 			////
 			$this->inhoud.='<h2>Nieuw verband aanbrengen</h2>';
 			$this->inhoud.='<form method="post" action="?actie=maakverband&amp;type=ie"><table>';
@@ -216,7 +217,7 @@ class Visualisatiepagina
 			$this->inhoud.='<td><select name="naar">'.$ie_lijst.'</select></td></tr>';
 			$this->inhoud.='<tr><td></td><td>Notitie:</td><td><input name="notitie" type="text" style="width:300px;"></td></tr>';
 			$this->inhoud.='<tr><td></td><td>CV/CT:</td><td><input name="subtype" type="text" style="width:300px;"/></td></tr>';
-			$this->inhoud.='</table><input type="submit" value="Aanmaken" /></form>';
+			$this->inhoud.='</table><input type="submit" value="Aanmaken" /></form>';*/
 
 			////
 			$this->inhoud.='<h2>Verband verwijderen</h2>';

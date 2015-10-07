@@ -17,20 +17,18 @@ class VisualisationVisitor implements PHPEMontVisitor
 	{
 		if ($visitee instanceof IntentionalElement)
 		{
-			$uri=$visitee->getUri();
 			$node=array();
+			$links=array();
+			$ies_contexten=array();
+
+			$uri=$visitee->getUri();
 			$node['uri']=$uri;
 			$node['type']=get_class($visitee);
 			$node['name']=Uri::SMWuriNaarLeesbareTitel($visitee->getUri());
 			$node['heading']=$visitee->getHeading();
 			$node['decompositionType']=$visitee->getDecompositionType();
+			$node['instanceOf']=$visitee->getInstanceOf();
 
-			$links=array();
-			$ies_contexten=array();
-			foreach($visitee->getInstanceOf() as $link)
-			{
-				$links[]=array('source'=>$uri,'type'=>'instanceOf','target'=>$link->getUri());
-			}
 			foreach($visitee->getPartOf() as $link)
 			{
 				$links[]=array('source'=>$uri,'type'=>'partOf','target'=>$link->getUri());

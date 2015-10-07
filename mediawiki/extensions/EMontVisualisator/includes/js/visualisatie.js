@@ -1,3 +1,8 @@
+/**
+ * Functies die met de visualisatie zelf te maken hebben.
+ * @author Michael Steenbeek
+ */
+
 var nodewidth = 75;
 var nodeheight = 20;
 var margin = 5;
@@ -75,11 +80,7 @@ function tekenDiagram(visualisatieId)
 	gVisualisationData[visualisatieId].force.on("tick", function() { adjustPositions(visualisatieId); });
 	gVisualisationData[visualisatieId].force.on('end', adjustScrollbars(visualisatieId,false,2000));
 
-	// Deze manier van aanroepen zorgt voor een oneindige lus bij kleine modellen (van bijv. 1 of 2 IE's), vandaar deze if-constructie.
-	if(gGraphs[visualisatieId].nodes.length>10)
-		gVisualisationData[visualisatieId].force.start(0,300,100000);
-	else
-		gVisualisationData[visualisatieId].force.start();
+	startForceLayout(visualisatieId);
 }
 
 /*function verhelpOverlappendeNodes()
@@ -124,6 +125,15 @@ function tekenDiagram(visualisatieId)
 		}
 	}
 }*/
+
+function startForceLayout(visualisatieId)
+{
+	// Deze manier van aanroepen zorgt voor een oneindige lus bij kleine modellen (van bijv. 1 of 2 IE's), vandaar deze if-constructie.
+	if(gGraphs[visualisatieId].nodes.length>10)
+		gVisualisationData[visualisatieId].force.start(0,300,100000);
+	else
+		gVisualisationData[visualisatieId].force.start();
+}
 
 function adjustPositions(visualisatieId)
 {
@@ -313,49 +323,57 @@ function setGroups(visualisatieId)
          .attr("rx", 10).attr("ry", 10);
 }
 
-// Visualisatiehulpmiddelen
-function openInNewTab(url) {
-	var win = window.open(url, '_blank');
-	win.focus();
-}
-
-// Tooltips
-function maakTooltipZichtbaar()
+function findNodeByUri(visualisatieId,uri)
 {
-	if(document.getElementById('elementTooltip')==null)
+	if (uri==null)
+		return null;
+
+	for(i=0;i<gGraphs[visualisatieId].nodes.length;i++)
 	{
-		d3.select("body").append("div").attr("id", "elementTooltip");
+		if(gGraphs[visualisatieId].nodes[i].uri==uri)
+			return i;
 	}
-
-	document.getElementById('elementTooltip').style.visibility='visible';
+	return null;
 }
 
-function maakTooltipOnzichtbaar()
+function findGroupByUri(visualisatieId,uri)
 {
-	document.getElementById('elementTooltip').style.visibility='hidden';
-}
+	if (uri==null)
+		return null;
 
-function tekenTooltip(tekst,x,y)
-{
-	var tooltip=document.getElementById('elementTooltip');
-
-	tooltip.innerHTML=tekst;
-	tooltip.style.left=x+"px";
-	tooltip.style.top=y+"px";
-}
-
-function tekenVerbandTooltip(d,x,y)
-{
-	var tekst=d.type;
-
-	if(d.extraInfo!=null)
+	for(i=0;i<gGraphs[visualisatieId].groups.length;i++)
 	{
-		tekst+=d.extraInfo;
+		if(gGraphs[visualisatieId].groups[i].uri==uri)
+			return i;
 	}
-	if(d.note!=null)
-	{
-		tekst+="<br />"+d.note;
-	}
+	return null;
+}
 
-	tekenTooltip(tekst,x,y);
+function findLinksFromNodeId(visualisatieId,sourceId)
+{
+	var links=[];
+	for(i=0;i<gGraphs[visualisatieId].links.length;i++)
+	{
+		if(gGraphs[visualisatieId].links[i].source.index==sourceId) {
+			links.push(gGraphs[visualisatieId].links[i].target.index);
+		}
+	}
+	return links;
+}
+
+function redrawAfterChange(visualisatieId)
+{
+	$("#"+visualisatieId+" > .node").remove();
+	$("#"+visualisatieId+" > .label").remove();
+	$("#"+visualisatieId+" > .link").remove();
+	$("#"+visualisatieId+" > .linktooltip").remove();
+	$("#"+visualisatieId+" > .group").remove();
+	$("#"+visualisatieId+" > .grouplabel").remove();
+	$("#"+visualisatieId+" > .grouplabelrect").remove();
+	$("#"+visualisatieId+" > .grouplabelclip").remove();
+
+	setLinks(visualisatieId);
+	setGroups(visualisatieId);
+	setNodes(visualisatieId);
+	startForceLayout(visualisatieId);
 }
