@@ -70,8 +70,6 @@ class Visualisatiepagina
 		if(Model::modelIsExperience($model_uri)) {
 			$this->inhoud.=' <button title="Nieuw Intentional Element" onclick="toggleL1modelDiv(true);">➕ IE</button>';
 			$this->inhoud.=' <button title="Nieuwe Context" onclick="nieuweContextPopup();">➕ Context</button>';
-			// Nog in ontwikkeling
-			//$this->inhoud.=' <button title="Context verwijderen" onclick="contextVerwijderenPopup();">🗑 Context</button>';
 			$this->inhoud.=' <button title="Nieuwe verband" onclick="nieuwVerbandPopup();">➕ Verband</button>';
 		}
 
@@ -177,36 +175,6 @@ class Visualisatiepagina
 			$sec_visualisatie_id='visualisatie-'.Uri::stripSMWuriPadEnPrefixes($l1model);
 
 			////
-			/*$this->inhoud.='<h2>Nieuw Intentional Element</h2>';
-			$this->inhoud.='<form action="?actie=nieuw&amp;type=ie" method="post"><table>';
-			$this->inhoud.='<tr><td>Naam: '.Uri::SMWuriNaarLeesbareTitel($context_uri).'</td><td><input type="text" style="width: 300px;" name="titel"/></td></tr>';
-			$this->inhoud.='<tr><td>Instance of:</td><td><select name="ie">';
-
-			$data=Model::geefElementenUitContextEnSubcontexten($l1hoofdcontext);
-			if(isset($data['@graph']))
-			{
-				foreach($data['@graph'] as $item)
-				{
-					$this->inhoud.= '<option value="'.$item['@id'].'">'.$item['label'].'</option>';
-				}
-			}
-			$this->inhoud.='</select></td></tr>';
-
-			$this->inhoud.='<tr><td>Context:</td><td><select name="context">'.$contextenlijst.'</select></td></tr>';
-			$this->inhoud.='</table><input type="submit" value="Aanmaken"/></form>';
-
-			////
-			$this->inhoud.='<h2>Nieuw verband aanbrengen</h2>';
-			$this->inhoud.='<form method="post" action="?actie=maakverband&amp;type=ie"><table>';
-			$this->inhoud.='<tr><th>Van:</th><th>Type:</th><th>Naar:</th><tr>';
-			$this->inhoud.='<tr><td><select name="van">'.$ie_lijst.'</select></td>';
-			$this->inhoud.='<td><select name="type"><option value="Contributes">Contributes</option><option value="Depends">Depends</option><option value="Connects">Connects</option><option value="Produces">Produces</option><option value="Consumes">Consumes</option><option value="Part of">Part of</option></select></td>';
-			$this->inhoud.='<td><select name="naar">'.$ie_lijst.'</select></td></tr>';
-			$this->inhoud.='<tr><td></td><td>Notitie:</td><td><input name="notitie" type="text" style="width:300px;"></td></tr>';
-			$this->inhoud.='<tr><td></td><td>CV/CT:</td><td><input name="subtype" type="text" style="width:300px;"/></td></tr>';
-			$this->inhoud.='</table><input type="submit" value="Aanmaken" /></form>';*/
-
-			////
 			$this->inhoud.='<h2>Verband verwijderen</h2>';
 			$this->inhoud.='<form method="post" action="?actie=verwijderverband&amp;type=ie"><table>';
 			foreach($verbandenlijst as $verband)
@@ -214,13 +182,6 @@ class Visualisatiepagina
 				$this->inhoud.='<tr><td><input type="radio" name="verwijder-verband" value="'.$verband['van'].'|'.$verband['type'].'|'.$verband['naar'].'"/>&nbsp;</td><td>'.$verband['van'].'&nbsp;</td><td>'.$verband['type'].'&nbsp;</td><td>'.$verband['naar'].'</td></tr>';
 			}
 			$this->inhoud.='</table><input type="submit" value="Verwijderen"></form>';
-
-			////
-/*			$this->inhoud.='<h2>Nieuwe context</h2>';
-			$this->inhoud.='<form method="post" action="?actie=nieuw&amp;type=context">';
-			$this->inhoud.='Naam: '.Uri::SMWuriNaarLeesbareTitel($context_uri).'<input type="text" name="naam-nieuwe-context" /><br />';
-			$this->inhoud.='Supercontext: <select name="supercontext">'.$contextenlijst.'</select>';
-			$this->inhoud.='<input type="submit" value="Aanmaken"></form>';*/
 
 			////
 			//$this->inhoud.='<h2>Context verwijderen</h2>';
