@@ -359,6 +359,7 @@ class Model
 	{
 		$van=Uri::SMWuriNaarLeesbareTitel($van_uri);
 		$naar=Uri::SMWuriNaarLeesbareTitel($naar_uri);
+		$type=ucfirst($type);
 		$verbandtype='';
 
 		switch($type)

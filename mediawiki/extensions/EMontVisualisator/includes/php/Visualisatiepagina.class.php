@@ -52,19 +52,6 @@ class Visualisatiepagina
 
 					Model::contextToevoegenAanIE($ie, $context);
 				}
-				elseif ($actie == 'maakverband')
-				{
-					$eigenschappen = array();
-
-					if ($_POST['notitie'])
-						$eigenschappen['Element link note'] = $_POST['notitie'];
-					if ($_POST['type'] == 'Contributes')
-						$eigenschappen['Element contribution value'] = $_POST['subtype'];
-					if ($_POST['type'] == 'Connects')
-						$eigenschappen['Element connection type'] = $_POST['subtype'];
-
-					Model::maakVerband($_POST['van'], $_POST['naar'], $_POST['type'], $eigenschappen);
-				}
 				elseif ($actie == 'verwijderverband')
 				{
 					$waardes = explode('|', $_POST['verwijder-verband']);

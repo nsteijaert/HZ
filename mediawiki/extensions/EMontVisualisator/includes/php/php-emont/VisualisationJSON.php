@@ -57,11 +57,22 @@ $post['links']=array();
 $post['constraints']=array();
 foreach($links as $link)
 {
-	$post['links'][]=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']],'type'=>$link['type'],'extraInfo'=>$link['extraInfo'],'note'=>$link['note']);
-	if($link['type']=='connects' && strpos($link['extraInfo'],'seq'))
+	$newlink=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']],'type'=>$link['type'],'extraInfo'=>$link['extraInfo'],'note'=>$link['note']);
+
+	if($link['type']=='connects')
 	{
-		$post['constraints'][]=array('gap'=>120,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
-	//	$post['constraints'][]=array('gap'=>0,'axis'=>'y', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+		$newlink['connectionType']=$link['connectionType'];
+		$newlink['linkCondition']=$link['linkCondition'];
+
+		if($link['connectionType']=='seq')
+		{
+			$post['constraints'][]=array('gap'=>120,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+		//	$post['constraints'][]=array('gap'=>0,'axis'=>'y', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
+		}
+	}
+	elseif($link['type']=='contributes')
+	{
+		$newlink['contributionValue']=$link['contributionValue'];
 	}
 	elseif($link['type']!='partOf')
 	{
@@ -72,6 +83,7 @@ foreach($links as $link)
 	{
 		$post['constraints'][]=array('gap'=>50,'axis'=>'y', 'left'=>$indices[$link['target']],'right'=>$indices[$link['source']]);
 	}
+	$post['links'][]=$newlink;
 }
 
 $contextindex=array();
@@ -221,6 +233,7 @@ function geefInitialen($string)
 	}
 	return $acronym;
 }
+
 $out=json_encode($post);
 $out=strtr($out,array('<\/'=>'</'));
 $out=strtr($out,array('<sub>2</sub>'=>'₂'));

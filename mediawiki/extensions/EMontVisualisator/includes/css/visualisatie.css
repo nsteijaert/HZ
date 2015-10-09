@@ -164,17 +164,25 @@ marker#standaard
 .keuzelijst
 {
 	background-color:#F5F5F5;
-	border-bottom:1px solid #888888;
+	border:1px solid #888888;
+	border-bottom:0px;
 	padding: 5px;
-	border-collapse: collapse;
 }
 
 .keuzelijstFrame
 {
-	margin: 15px auto 15px auto;
-	width:88%;
-	border:1px solid #888888;
-	border-bottom:0px;
+	position:absolute;
+	z-index:11;
+	overflow-y:auto;
+	top: 100px;
+	bottom: 15px;
+	left: 6%;
+	right: 6%;
+
+}
+.keuzelijstFrame > div:last-child
+{
+	border-bottom:1px solid #888888;
 }
 
 .keuzelijstHover

@@ -32,7 +32,6 @@ function tekenDiagram(visualisatieId)
 	gVisualisationData[visualisatieId]={};
 	gVisualisationData[visualisatieId].force = cola.d3adaptor().convergenceThreshold(0.1);
 
-	$("#div-"+visualisatieId);
 	var div = d3.select("#div-"+visualisatieId);
 	var width = 4000;
 	var height = 4000;
@@ -72,8 +71,9 @@ function tekenDiagram(visualisatieId)
     	.constraints(gGraphs[visualisatieId].constraints)
     	.groups(gGraphs[visualisatieId].groups);
 
+	setGroupsPre(visualisatieId);
 	setLinks(visualisatieId);
-	setGroups(visualisatieId);
+	setGroupsPost(visualisatieId);
 	setNodes(visualisatieId);
 
 	// Teken de pijlen
@@ -277,7 +277,7 @@ function setLinks(visualisatieId)
 		.on("mouseout", function (d) { maakTooltipOnzichtbaar(); });
 }
 
-function setGroups(visualisatieId)
+function setGroupsPre(visualisatieId)
 {
 	var svg = d3.select("#"+visualisatieId);
 
@@ -288,6 +288,11 @@ function setGroups(visualisatieId)
         .attr("class", "group")
         .attr('width',nodewidth+20)
 	    .attr('height',nodeheight+20);
+}
+
+function setGroupsPost(visualisatieId)
+{
+	var svg = d3.select("#"+visualisatieId);
 
    	// Groeptitels
     gVisualisationData[visualisatieId].grouplabel = svg.selectAll(".grouplabel")
@@ -355,7 +360,19 @@ function findLinksFromNodeId(visualisatieId,sourceId)
 	for(i=0;i<gGraphs[visualisatieId].links.length;i++)
 	{
 		if(gGraphs[visualisatieId].links[i].source.index==sourceId) {
-			links.push(gGraphs[visualisatieId].links[i].target.index);
+			var connection={};
+			connection.target=gGraphs[visualisatieId].links[i].target.index;
+			connection.type=gGraphs[visualisatieId].links[i].type;
+
+			if(connection.type=='contributes') {
+				connection.contributionValue=gGraphs[visualisatieId].links[i].contributionValue;
+			}
+			if(connection.type=='connects') {
+				connection.connectionType=gGraphs[visualisatieId].links[i].connectionType;
+				connection.linkCondition=gGraphs[visualisatieId].links[i].linkCondition;
+			}
+
+			links.push(connection);
 		}
 	}
 	return links;
@@ -372,8 +389,9 @@ function redrawAfterChange(visualisatieId)
 	$("#"+visualisatieId+" > .grouplabelrect").remove();
 	$("#"+visualisatieId+" > .grouplabelclip").remove();
 
+	setGroupsPre(visualisatieId);
 	setLinks(visualisatieId);
-	setGroups(visualisatieId);
+	setGroupsPost(visualisatieId);
 	setNodes(visualisatieId);
 	startForceLayout(visualisatieId);
 }

@@ -65,15 +65,18 @@ class EMVAjaxInterface extends ApiBase
 			elseif ($actie == 'maakverband')
 			{
 				$eigenschappen = array();
+				$linkType=ucfirst($this->getParameter('linkType'));
 
-				if ($params['notitie'])
-					$eigenschappen['Element link note'] = $params['notitie'];
-				if ($params['type'] == 'Contributes')
-					$eigenschappen['Element contribution value'] = $params['subtype'];
-				if ($params['type'] == 'Connects')
-					$eigenschappen['Element connection type'] = $params['subtype'];
+				if ($this->getParameter('notitie'))
+					$eigenschappen['Element link note'] = $this->getParameter('notitie');
+				if ($linkType == 'Contributes')
+					$eigenschappen['Element contribution value'] = $this->getParameter('contributionValue');
+				if ($linkType == 'Connects') {
+					$eigenschappen['Element connection type'] = $this->getParameter('connectionType');
+					$eigenschappen['Element link condition'] = $this->getParameter('linkCondition');
+				}
 
-				Model::maakVerband($params['van'], $params['naar'], $params['type'], $eigenschappen);
+				Model::maakVerband($this->getParameter('van'), $this->getParameter('naar'), $linkType, $eigenschappen);
 			}
 			elseif ($actie == 'verwijderverband')
 			{

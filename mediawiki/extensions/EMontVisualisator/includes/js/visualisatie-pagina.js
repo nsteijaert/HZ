@@ -30,6 +30,12 @@ function setSelectedIE(ie_uri, ie_heading)
 	instanceBalk.innerHTML = "<b>Geselecteerd IE: </b>"+ie_heading;
 }
 
+function setLinkToAdd(linkNumber, uri)
+{
+	popupVars.linkNumber=linkNumber;
+	popupVars.targetUri=uri;
+}
+
 function createPopup(id)
 {
 	if(document.getElementById(id)==null)
@@ -130,43 +136,57 @@ function nieuwVerbandPopup()
 	createPopup('nieuwVerband');
 
 	var popup = d3.select('#nieuwVerband');
-	var middenknoppen = d3.select("#nieuweContext-middenknoppen");
-	var rechterknoppen= d3.select("#nieuweContext-rechterknoppen");
-	var indiv=popup.append('div');
+	var middenknoppen= d3.select("#nieuwVerband-middenknoppen");
+	var rechterknoppen= d3.select("#nieuwVerband-rechterknoppen");
+
+	middenknoppen.append("input")
+		.attr({id: "nieuwVerband-notitie", type: "text", placeholder: "Notitie (optioneel)", style: "width: 250px;"});
+
+	rechterknoppen.append("button")
+		.attr({id: "nieuwVerband-opslagknop"})
+		.text("✓ Voeg toe")
+		.on("click", function () { nieuwVerband_finish(); });
 
 	// In het corresponderende L1-model is vastgelegd welke geldige verbindingsmogelijkheden er zijn.
 	// Hiervoor zoeken we dus het corresponderde L1-IE op, en vragen daarvan een lijst op van mogelijke
 	// verbindingen op L1-niveau. Hierna bepalen welke L2-elementen deze L1-elementen implementeren.
 	var selectedIEId=findNodeByUri(visualisatieId, popupVars.selectedIE);
-	console.log(selectedIEId);
 	var instanceOf=gGraphs[visualisatieId].nodes[selectedIEId].instanceOf;
-	console.log(instanceOf);
 	var instanceOfId=findNodeByUri(secVisualisatieId,instanceOf);
-	console.log(instanceOfId);
 
-	var links=findLinksFromNodeId(secVisualisatieId, instanceOfId);
-	console.log(links);
-	var linksuris=[];
-	links.forEach(function(element, index, array) {
-		linksuris.push(gGraphs[secVisualisatieId].nodes[element].uri);
-	});
-	console.log(linksuris);
+	popupVars.links=findLinksFromNodeId(secVisualisatieId, instanceOfId);
 
 	eligibleL2nodes=[];
 	gGraphs[visualisatieId].nodes.forEach(function(nodeElement, nodeIndex, nodeArray) {
-		linksuris.forEach(function(linkElement, linkIndex, linkArray) {
-			if(nodeElement.instanceOf==linkElement)
-				eligibleL2nodes.push(nodeElement.uri);
+		popupVars.links.forEach(function(linkElement, linkIndex, linkArray) {
+			if(nodeElement.instanceOf==gGraphs[secVisualisatieId].nodes[linkElement.target].uri)
+			{
+				var nodeEntry={};
+				nodeEntry.uri=nodeElement.uri;
+				nodeEntry.type=linkElement.type;
+				nodeEntry.heading=nodeElement.heading;
+				nodeEntry.linkNumber=linkIndex;
+
+				if(linkElement.type=='connects')
+					nodeEntry.extraInfo=linkElement.connectionType+", "+linkElement.linkCondition;
+				else if(linkElement.type=='contributes')
+					nodeEntry.extraInfo=linkElement.contributionValue;
+				else
+					nodeEntry.extraInfo="";
+
+				eligibleL2nodes.push(nodeEntry);
+			}
 		});
 	});
 
-	indiv.html("Mogelijke verbanden voor "+popupVars.selectedIE+":");
-	var verbindingen=indiv.append('div').attr({class: "keuzelijstFrame"});
+	popup.append('div').attr({style: "text-align:center; margin-top:10px;"}).html('<h4>Mogelijke verbanden voor '+gGraphs[visualisatieId].nodes[selectedIEId].heading+':</h4>');
+
+	var verbindingen=popup.append('div').attr({class: "keuzelijstFrame"});
 
 	eligibleL2nodes.forEach(function(element, index, array) {
 		verbindingen.append('div')
-			.attr({class: "keuzelijst"})
-			.html(element)
+			.attr({class: "keuzelijst", onclick: "setLinkToAdd("+element.linkNumber+",'"+element.uri+"');"})
+			.html(getFriendlyDescriptionForLink(element.type,element.extraInfo)+" "+element.heading)
 	});
 	keuzelijstEffecten();
 }
@@ -202,8 +222,6 @@ function keuzelijstEffecten()
 
 function nieuwIE_finish()
 {
-	console.log(popupVars);
-
 	instanceOfId=findNodeByUri(secVisualisatieId,popupVars.selectedIE);
 	instanceOfNode=gGraphs[secVisualisatieId].nodes[instanceOfId];
 	groupId=findGroupByUri(visualisatieId,popupVars.contextkeuze);
@@ -264,6 +282,47 @@ function nieuweContext_finish()
 
 		} );
 	} );
+}
+
+function nieuwVerband_finish()
+{
+	var sourceId=findNodeByUri(visualisatieId,popupVars.selectedIE);
+	var targetId=findNodeByUri(visualisatieId,popupVars.targetUri);
+	var sourceNode=gGraphs[visualisatieId].nodes[sourceId];
+	var targetNode=gGraphs[visualisatieId].nodes[targetId];
+	var notitie=$("#nieuwVerband-notitie").val();
+
+	var newlink={};
+	newlink.source=sourceNode;
+	newlink.target=targetNode;
+	newlink.type=popupVars.links[popupVars.linkNumber].type;
+	newlink.note=notitie;
+	newlink.contributionValue = (newlink.type=='contributes') ? popupVars.links[popupVars.linkNumber].contributionValue: "";
+	newlink.connectionType = (newlink.type=='connects') ? popupVars.links[popupVars.linkNumber].connectionType: "";
+	newlink.linkCondition = (newlink.type=='connects') ? popupVars.links[popupVars.linkNumber].linkCondition: "";
+
+	gGraphs[visualisatieId].links.push(newlink);
+
+	redrawAfterChange(visualisatieId);
+	verbergOfVerwijderPopup('nieuwVerband');
+
+	mw.loader.using( 'mediawiki.api', function () {
+	( new mw.Api() ).get( {
+		action: 'EMVAI',
+		actie: 'maakverband',
+	 	type: 'ie',
+	 	hoofdcontextUri: contextUri,
+	 	van: popupVars.selectedIE,
+	 	naar: popupVars.targetUri,
+	 	linkType: newlink.type,
+	 	notitie: notitie,
+	 	contributionValue: newlink.contributionValue,
+	 	connectionType: newlink.connectionType,
+	 	linkCondition: newlink.linkCondition
+	} ).done( function() {
+
+	} );
+} );
 }
 
 //////////////////////////
@@ -337,4 +396,25 @@ function tekenVerbandTooltip(d,x,y)
 	}
 
 	tekenTooltip(tekst,x,y);
+}
+
+function getFriendlyDescriptionForLink(linkType,extraInfo)
+{
+	switch(linkType)
+	{
+		case 'depends':
+			return 'Afhankelijk van';
+		case 'contributes':
+			return 'Draagt bij ('+extraInfo+') aan';
+		case 'connects':
+			return 'Verbindt ('+extraInfo+') met';
+		case 'produces':
+			return 'Produceert';
+		case 'consumes':
+			return 'Consumeert';
+		case 'partOf':
+			return 'Onderdeel van';
+		default:
+			return linkType;
+	}
 }
