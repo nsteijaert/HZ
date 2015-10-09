@@ -273,7 +273,7 @@ function nieuwVerbandPopup()
 				nodeEntry.linkNumber=linkIndex;
 
 				if(linkElement.type=='Connects')
-					nodeEntry.extraInfo=linkElement.connectionType+", "+linkElement.linkCondition;
+					nodeEntry.extraInfolinkElement.connectionType+", "+linkElement.linkCondition;
 				else if(linkElement.type=='Contributes')
 					nodeEntry.extraInfo=linkElement.contributionValue;
 				else
@@ -309,9 +309,21 @@ function nieuwVerband_finish()
 	newlink.target=targetNode;
 	newlink.type=popupVars.links[popupVars.linkNumber].type;
 	newlink.note=notitie;
-	newlink.contributionValue = (newlink.type=='contributes') ? popupVars.links[popupVars.linkNumber].contributionValue: "";
-	newlink.connectionType = (newlink.type=='connects') ? popupVars.links[popupVars.linkNumber].connectionType: "";
-	newlink.linkCondition = (newlink.type=='connects') ? popupVars.links[popupVars.linkNumber].linkCondition: "";
+	newlink.extraInfo="";
+	newlink.contributionValue="";
+	newlink.connectionType="";
+	newlink.linkCondition="";
+
+	if(newlink.type=='Contributes') {
+		newlink.contributionValue=popupVars.links[popupVars.linkNumber].contributionValue;
+		newlink.extraInfo=': '+newlink.contributionValue;
+	}
+	else if(newlink.type=='Connects')
+	{
+		newlink.connectionType = popupVars.links[popupVars.linkNumber].connectionType;
+		newlink.linkCondition = opupVars.links[popupVars.linkNumber].linkCondition;
+		newlink.extraInfo=': '+newlink.connectionType+' '+newlink.linkCondition;
+	}
 
 	gGraphs[visualisatieId].links.push(newlink);
 
