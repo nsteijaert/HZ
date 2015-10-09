@@ -31,15 +31,15 @@ class VisualisationVisitor implements PHPEMontVisitor
 
 			foreach($visitee->getPartOf() as $link)
 			{
-				$links[]=array('source'=>$uri,'type'=>'partOf','target'=>$link->getUri());
+				$links[]=array('source'=>$uri,'type'=>'Part of','target'=>$link->getUri());
 			}
 			foreach($visitee->getContributes() as $link)
 			{
-				$links[]=array('source'=>$uri,'type'=>'contributes','target'=>$link->getLink()->getUri(),'note'=>$link->getLinkNote(),'extraInfo'=>': '.$link->getContributionValue(),'contributionValue'=>$link->getContributionValue());
+				$links[]=array('source'=>$uri,'type'=>'Contributes','target'=>$link->getLink()->getUri(),'note'=>$link->getLinkNote(),'extraInfo'=>': '.$link->getContributionValue(),'contributionValue'=>$link->getContributionValue());
 			}
 			foreach($visitee->getDepends() as $link)
 			{
-				$links[]=array('source'=>$uri,'type'=>'depends','target'=>$link->getLink()->getUri(),'note'=>$link->getLinkNote(),'extraInfo'=>'');
+				$links[]=array('source'=>$uri,'type'=>'Depends','target'=>$link->getLink()->getUri(),'note'=>$link->getLinkNote(),'extraInfo'=>'');
 			}
 			foreach($visitee->getContext() as $link)
 			{
@@ -50,7 +50,7 @@ class VisualisationVisitor implements PHPEMontVisitor
 			{
 				foreach($visitee->getConnects() as $link)
 				{
-					$links[]=array('source'=>$uri,'type'=>'connects','target'=>$link->getLink()->getUri(), 'note'=>$link->getLinkNote(), 'extraInfo'=>': '.$link->getConnectionType().' '.$link->getLinkCondition(), 'connectionType'=>$link->getConnectionType(), 'linkCondition'=>$link->getLinkCondition());
+					$links[]=array('source'=>$uri,'type'=>'Connects','target'=>$link->getLink()->getUri(), 'note'=>$link->getLinkNote(), 'extraInfo'=>': '.$link->getConnectionType().' '.$link->getLinkCondition(), 'connectionType'=>$link->getConnectionType(), 'linkCondition'=>$link->getLinkCondition());
 				}
 			}
 

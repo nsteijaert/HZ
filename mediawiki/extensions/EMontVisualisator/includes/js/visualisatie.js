@@ -364,10 +364,10 @@ function findLinksFromNodeId(visualisatieId,sourceId)
 			connection.target=gGraphs[visualisatieId].links[i].target.index;
 			connection.type=gGraphs[visualisatieId].links[i].type;
 
-			if(connection.type=='contributes') {
+			if(connection.type=='Contributes') {
 				connection.contributionValue=gGraphs[visualisatieId].links[i].contributionValue;
 			}
-			if(connection.type=='connects') {
+			if(connection.type=='Connects') {
 				connection.connectionType=gGraphs[visualisatieId].links[i].connectionType;
 				connection.linkCondition=gGraphs[visualisatieId].links[i].linkCondition;
 			}

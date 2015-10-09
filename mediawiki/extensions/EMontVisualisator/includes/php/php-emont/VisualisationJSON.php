@@ -59,7 +59,7 @@ foreach($links as $link)
 {
 	$newlink=array('source'=>$indices[$link['source']],'target'=>$indices[$link['target']],'type'=>$link['type'],'extraInfo'=>$link['extraInfo'],'note'=>$link['note']);
 
-	if($link['type']=='connects')
+	if($link['type']=='Connects')
 	{
 		$newlink['connectionType']=$link['connectionType'];
 		$newlink['linkCondition']=$link['linkCondition'];
@@ -70,11 +70,11 @@ foreach($links as $link)
 		//	$post['constraints'][]=array('gap'=>0,'axis'=>'y', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
 		}
 	}
-	elseif($link['type']=='contributes')
+	elseif($link['type']=='Contributes')
 	{
 		$newlink['contributionValue']=$link['contributionValue'];
 	}
-	elseif($link['type']!='partOf')
+	elseif($link['type']!='Part of')
 	{
 		$post['constraints'][]=array('gap'=>120,'axis'=>'x', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
 		//$post['constraints'][]=array('gap'=>0,'axis'=>'y', 'left'=>$indices[$link['source']],'right'=>$indices[$link['target']]);
