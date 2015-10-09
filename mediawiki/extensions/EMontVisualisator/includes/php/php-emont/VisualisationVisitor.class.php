@@ -28,6 +28,7 @@ class VisualisationVisitor implements PHPEMontVisitor
 			$node['heading']=$visitee->getHeading();
 			$node['decompositionType']=$visitee->getDecompositionType();
 			$node['instanceOf']=$visitee->getInstanceOf();
+			$node['vn']=Uri::SMWUriNaarLeesbareTitel(SPARQLConnection::geefEersteResultaatSubject('wiki:Eigenschap-3AModel_link',$uri));
 
 			foreach($visitee->getPartOf() as $link)
 			{

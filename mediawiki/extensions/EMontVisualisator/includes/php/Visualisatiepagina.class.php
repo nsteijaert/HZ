@@ -184,9 +184,6 @@ class Visualisatiepagina
 			$this->inhoud.='</table><input type="submit" value="Verwijderen"></form>';
 
 			////
-			//$this->inhoud.='<h2>Context verwijderen</h2>';
-
-			////
 			$this->inhoud.='<h2>Supercontext toevoegen aan context</h2>';
 			$this->inhoud.='<form method="post" action="?actie=extrasupercontext&amp;type=context">';
 			$this->inhoud.='Context: <select name="context">'.$contextenlijst.'</select><br />';

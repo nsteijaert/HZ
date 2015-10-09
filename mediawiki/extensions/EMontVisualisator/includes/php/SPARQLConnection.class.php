@@ -78,5 +78,14 @@ class SPARQLConnection
 
 		return $result['results']['bindings'][0]['object']['value'];
 	}
+
+	public static function geefEersteResultaatSubject($predicate,$object)
+	{
+		$query='SELECT ?subject WHERE {?subject % %}';
+		$connectie=new SPARQLConnection();
+		$result=$connectie->escapedQuery($query,array($predicate,$object));
+
+		return $result['results']['bindings'][0]['subject']['value'];
+	}
 }
 ?>

@@ -226,7 +226,7 @@ function setNodes(visualisatieId)
         .enter().append("text")
          .attr("class", function (d) {return "label label"+d.type;})
          .on('click', function (d) { setSelectedIE(d.uri, d.heading);})
-         .on('dblclick', function (d) { openInNewTab(domeinprefix+d.name);})
+         .on('dblclick', function (d) { openInNewTab(domeinprefix+(d.vn? d.vn : d.name));})
 	     .call(gVisualisationData[visualisatieId].force.drag);
 
     var insertLinebreaks = function (d) {
