@@ -273,7 +273,7 @@ function nieuwVerbandPopup()
 				nodeEntry.linkNumber=linkIndex;
 
 				if(linkElement.type=='Connects')
-					nodeEntry.extraInfolinkElement.connectionType+", "+linkElement.linkCondition;
+					nodeEntry.extraInfo=linkElement.connectionType+" "+linkElement.linkCondition;
 				else if(linkElement.type=='Contributes')
 					nodeEntry.extraInfo=linkElement.contributionValue;
 				else
@@ -321,7 +321,7 @@ function nieuwVerband_finish()
 	else if(newlink.type=='Connects')
 	{
 		newlink.connectionType = popupVars.links[popupVars.linkNumber].connectionType;
-		newlink.linkCondition = opupVars.links[popupVars.linkNumber].linkCondition;
+		newlink.linkCondition = popupVars.links[popupVars.linkNumber].linkCondition;
 		newlink.extraInfo=': '+newlink.connectionType+' '+newlink.linkCondition;
 	}
 
