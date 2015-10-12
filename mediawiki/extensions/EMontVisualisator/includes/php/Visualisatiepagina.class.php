@@ -70,7 +70,6 @@ class Visualisatiepagina
 		if(Model::modelIsExperience($model_uri)) {
 			$this->inhoud.=' <button title="Nieuw Intentional Element" onclick="toggleL1modelDiv(true);">➕ IE</button>';
 			$this->inhoud.=' <button title="Nieuwe Context" onclick="nieuweContextPopup();">➕ Context</button>';
-			$this->inhoud.=' <button title="Nieuwe verband" onclick="nieuwVerbandPopup();">➕ Verband</button>';
 		}
 
 		$this->inhoud.=sprintf('
@@ -247,7 +246,8 @@ class Visualisatiepagina
 
 					createL1hoverPopup(secVisualisatieId);
 					startVisualisatie(secVisualisatieId, secContextUri);
-				</script>';
+				</script>
+				<div id="popupOverlay"></div>';
 		}
 	}
 

@@ -26,6 +26,8 @@ function setLinkToAdd(linkNumber, uri)
 
 function createPopup(id)
 {
+	$('#popupOverlay').show();
+
 	if(document.getElementById(id)==null)
 	{
 		d3.select("body").append("div").attr({id: id, class: "popup"});
@@ -48,6 +50,8 @@ function createPopup(id)
 
 function verbergOfVerwijderPopup(id)
 {
+	$('#popupOverlay').hide();
+
 	if(id =='l1hover')
 	{
 		document.getElementById('l1hover').style.visibility="hidden";
@@ -124,10 +128,12 @@ function toggleL1modelDiv(zichtbaar)
 	if (zichtbaar == false)
 	{
 		l1modelDiv.style.visibility='hidden';
+		$('#popupOverlay').hide();
 	}
 	else
 	{
 		l1modelDiv.style.visibility='visible';
+		$('#popupOverlay').show();
 	}
 }
 
@@ -441,4 +447,32 @@ function getFriendlyDescriptionForLink(linkType,extraInfo)
 		default:
 			return linkType;
 	}
+}
+
+window.addEventListener('click', function(e) { if(!(e.button==2 || e.which==2)) sluitContextMenu(); }, false);
+
+window.addEventListener('dblclick', sluitContextMenu, false);
+
+window.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+}, false);
+
+function toonContextMenu(uri, x, y)
+{
+	popupVars.selectedIE=uri;
+	var contextMenu = d3.select('body').append('div').attr({id: 'contextMenu',style: 'left: '+x+'px; top: '+y+'px;'});
+	contextMenu.append('div')
+		.attr({class: 'contextMenuItem'})
+		.html('Verbind met...')
+		.on('click', function () {sluitContextMenu(); nieuwVerbandPopup(); });
+
+	$('.contextMenuItem').hover(
+   		function(){ $(this).addClass('contextMenuItemHover'); },
+   		function(){ $(this).removeClass('contextMenuItemHover'); }
+	);
+}
+
+function sluitContextMenu()
+{
+	$('#contextMenu').remove();
 }

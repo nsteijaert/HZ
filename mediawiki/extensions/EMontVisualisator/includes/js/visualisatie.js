@@ -226,6 +226,8 @@ function setNodes(visualisatieId)
         .enter().append("text")
          .attr("class", function (d) {return "label label"+d.type;})
          .on('click', function (d) { setSelectedIE(d.uri, d.heading);})
+         // Geen contextmenu's bij L1-modellen
+         .on('contextmenu', function (d) { if(secVisualisatieId) { if(secVisualisatieId!=visualisatieId) toonContextMenu(d.uri,d3.event.pageX+5,d3.event.pageY+5); }})
          .on('dblclick', function (d) { openInNewTab(domeinprefix+(d.vn? d.vn : d.name));})
 	     .call(gVisualisationData[visualisatieId].force.drag);
 
