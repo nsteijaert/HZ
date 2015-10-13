@@ -265,6 +265,17 @@ function nieuwVerbandPopup()
 	var instanceOf=gGraphs[visualisatieId].nodes[selectedIEId].instanceOf;
 	var instanceOfId=findNodeByUri(secVisualisatieId,instanceOf);
 
+	var existingLinks=[];
+	gGraphs[visualisatieId].links.forEach(function(element, index, array) {
+		if(element.source.uri==popupVars.selectedIE) {
+			var link={};
+			link.targetUri=element.target.uri;
+			link.type=element.type;
+			existingLinks.push(link);
+		}
+	});
+
+	console.log(existingLinks);
 	popupVars.links=findLinksFromNodeId(secVisualisatieId, instanceOfId);
 
 	eligibleL2nodes=[];
@@ -295,8 +306,18 @@ function nieuwVerbandPopup()
 	var verbindingen=popup.append('div').attr({class: "keuzelijstFrame"});
 
 	eligibleL2nodes.forEach(function(element, index, array) {
+		var cssClass="keuzelijst";
+		var onClick="setLinkToAdd("+element.linkNumber+",'"+element.uri+"');";
+
+		existingLinks.forEach(function(linkElement,linkIndex,linkArray) {
+			if(linkElement.targetUri==element.uri && linkElement.type==element.type) {
+				cssClass="keuzelijstDisabled";
+				onClick="false;";
+			}
+		});
+
 		verbindingen.append('div')
-			.attr({class: "keuzelijst", onclick: "setLinkToAdd("+element.linkNumber+",'"+element.uri+"');"})
+			.attr({class: cssClass, onclick: onClick})
 			.html(getFriendlyDescriptionForLink(element.type,element.extraInfo)+" "+element.heading);
 	});
 	keuzelijstEffecten();
