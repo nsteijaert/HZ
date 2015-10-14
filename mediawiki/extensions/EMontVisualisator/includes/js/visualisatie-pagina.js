@@ -15,7 +15,7 @@ function setSelectedIE(ie_uri, ie_heading)
 {
 	popupVars.selectedIE=ie_uri;
 	var instanceBalk = document.getElementById('instanceBalk');
-	instanceBalk.innerHTML = "<b>Geselecteerd IE: </b>"+ie_heading;
+	instanceBalk.innerHTML = ie_heading!=null ? "<b>Geselecteerd IE: </b>"+ie_heading : "";
 }
 
 function setLinkToAdd(linkNumber, uri)
@@ -52,14 +52,13 @@ function verbergOfVerwijderPopup(id)
 {
 	$('#popupOverlay').hide();
 
-	if(id =='l1hover')
-	{
+	if(popupVars.check)
+		clearInterval(popupVars.check);
+
+	if(id=='l1hover')
 		document.getElementById('l1hover').style.visibility="hidden";
-	}
 	else
-	{
 		d3.select('#'+id).remove();
-	}
 }
 
 function contextKeuzelijst(div_id)
@@ -112,7 +111,7 @@ function createL1hoverPopup(secVisualisatieId)
 		.attr({id: "titel-nieuw-ie", type: "text", placeholder: "Naam nieuw Intentional Element", style: "width: 250px;"});
 
 	rechterknoppen.append("button")
-		.attr({id: "l1hover-opslagknop"})
+		.attr({id: "l1hover-naarstap2"})
 		.text("➔ Volgende")
 		.on("click", function() { nieuwIE_naarStap2();});
 
@@ -134,29 +133,64 @@ function toggleL1modelDiv(zichtbaar)
 	{
 		l1modelDiv.style.visibility='visible';
 		$('#popupOverlay').show();
+		$('#titel-nieuw-ie').val('');
+		setSelectedIE(null,null);
+		$('#l1hover-naarstap2').attr({disabled:true});
+
+		popupVars.check = setInterval(function() {
+			var invoerIsCorrect=nieuwIEPopup_checkInvoer_stap1();
+			document.getElementById('l1hover-naarstap2').disabled=!invoerIsCorrect;
+		}, 1000);
 	}
+}
+
+function nieuwIEPopup_checkInvoer_stap1()
+{
+	if(!$("#titel-nieuw-ie").val())
+		return false;
+
+	if(popupVars.selectedIE==null)
+		return false;
+
+	return true;
 }
 
 function nieuwIE_naarStap2()
 {
+	clearInterval(popupVars.check);
 	popupVars.titelNieuwIE = document.getElementById('titel-nieuw-ie').value;
+	popupVars.contextkeuze=null;
 
 	toggleL1modelDiv(false);
 	createPopup('nieuwie-stap2');
 
 	var popup = d3.select('#nieuwie-stap2');
 	d3.select("#nieuwie-stap2-rechterknoppen").append("button")
-		.attr({id: "l1hover-opslagknop"})
+		.attr({id: "l1hover-opslagknop",disabled:true})
 		.text("✓ Voeg toe")
 		.on("click", function() { nieuwIE_finish();});
 
 	popup.append('div').attr({'style': "text-align:center; margin-top:10px;"}).html('<h4>Kies in welke context u dit intentional element wilt plaatsen:</h4>');
 
 	contextKeuzelijst('nieuwie-stap2');
+
+	popupVars.check = setInterval(function() {
+		var invoerIsCorrect=nieuwIEPopup_checkInvoer_stap2();
+		document.getElementById('l1hover-opslagknop').disabled=!invoerIsCorrect;
+	}, 1000);
+}
+
+function nieuwIEPopup_checkInvoer_stap2()
+{
+	if(popupVars.contextkeuze==null)
+		return false;
+
+	return true;
 }
 
 function nieuwIE_finish()
 {
+	clearInterval(popupVars.check);
 	instanceOfId=findNodeByUri(secVisualisatieId,popupVars.selectedIE);
 	instanceOfNode=gGraphs[secVisualisatieId].nodes[instanceOfId];
 	groupId=findGroupByUri(visualisatieId,popupVars.contextkeuze);
@@ -194,6 +228,7 @@ function nieuwIE_finish()
 // Nieuwe Context
 function nieuweContextPopup()
 {
+	popupVars.contextkeuze=null;
 	createPopup('nieuweContext');
 
 	var popup = d3.select('#nieuweContext');
@@ -204,17 +239,34 @@ function nieuweContextPopup()
 		.attr({id: "titel-nieuwe-context", type: "text", placeholder: "Naam nieuwe context", style: "width: 250px;"});
 
 	rechterknoppen.append("button")
-		.attr({id: "nieuweContext-opslagknop"})
+		.attr({id: "nieuweContext-opslagknop",disabled:true})
 		.text("✓ Voeg toe")
 		.on("click", function() { nieuweContext_finish();});
 
 	popup.append('div').attr({'style': "text-align:center; margin-top:10px;"}).html('<h4>Kies een supercontext:</h4>');
 
 	contextKeuzelijst('nieuweContext');
+
+	popupVars.check = setInterval(function() {
+		var invoerIsCorrect=nieuwContextPopup_checkInvoer();
+		document.getElementById('nieuweContext-opslagknop').disabled=!invoerIsCorrect;
+	}, 1000);
+}
+
+function nieuwContextPopup_checkInvoer()
+{
+	if(!$('#titel-nieuwe-context').val())
+		return false;
+
+	if(popupVars.contextkeuze==null)
+		return false;
+
+	return true;
 }
 
 function nieuweContext_finish()
 {
+	clearInterval(popupVars.check);
 	var titel=document.getElementById('titel-nieuwe-context').value;
 	var newgroup={};
 	newgroup.leaves=[];
@@ -244,6 +296,9 @@ function nieuweContext_finish()
 // Nieuw verband
 function nieuwVerbandPopup()
 {
+	popupVars.linkNumber=null;
+	popupVars.targetUri=null;
+
 	createPopup('nieuwVerband');
 
 	var popup = d3.select('#nieuwVerband');
@@ -254,7 +309,7 @@ function nieuwVerbandPopup()
 		.attr({id: "nieuwVerband-notitie", type: "text", placeholder: "Notitie (optioneel)", style: "width: 250px;"});
 
 	rechterknoppen.append("button")
-		.attr({id: "nieuwVerband-opslagknop"})
+		.attr({id: "nieuwVerband-opslagknop", disabled:true})
 		.text("✓ Voeg toe")
 		.on("click", function () { nieuwVerband_finish(); });
 
@@ -275,7 +330,6 @@ function nieuwVerbandPopup()
 		}
 	});
 
-	console.log(existingLinks);
 	popupVars.links=findLinksFromNodeId(secVisualisatieId, instanceOfId);
 
 	eligibleL2nodes=[];
@@ -321,10 +375,28 @@ function nieuwVerbandPopup()
 			.html(getFriendlyDescriptionForLink(element.type,element.extraInfo)+" "+element.heading);
 	});
 	keuzelijstEffecten();
+
+	popupVars.check = setInterval(function() {
+		var invoerIsCorrect=nieuwVerbandPopup_checkInvoer();
+		document.getElementById('nieuwVerband-opslagknop').disabled=!invoerIsCorrect;
+	}, 1000);
+
+}
+
+/**
+ * @return: False bij ongeldige invoer, true bij geldige.
+ */
+function nieuwVerbandPopup_checkInvoer()
+{
+	if(popupVars.linkNumber==null || popupVars.targetUri==null)
+		return false;
+
+	return true;
 }
 
 function nieuwVerband_finish()
 {
+	clearInterval(popupVars.check);
 	var sourceId=findNodeByUri(visualisatieId,popupVars.selectedIE);
 	var targetId=findNodeByUri(visualisatieId,popupVars.targetUri);
 	var sourceNode=gGraphs[visualisatieId].nodes[sourceId];

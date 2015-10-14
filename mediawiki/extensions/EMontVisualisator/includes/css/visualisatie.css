@@ -249,3 +249,8 @@ marker#standaard
 	color:#f5f5f5;
 	cursor:default;
 }
+
+button[disabled]
+{
+	color:#bbbbbb;
+}
