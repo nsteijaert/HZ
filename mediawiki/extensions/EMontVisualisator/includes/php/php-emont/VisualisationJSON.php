@@ -23,8 +23,8 @@ $ies_contexten=array();
 $contexten=array();
 $contextLinks=array();
 $indices=array();
-$extragroups=array();
 $teller=0;
+
 foreach($result as $uri =>$object)
 {
 	if($object instanceOf IntentionalElement)
@@ -130,13 +130,7 @@ foreach($contextLinks as $contextLink)
 
 	if($contextnr!==FALSE && $supercontextnr!==FALSE && !$gebruikteSubcontexten[$contextnr])
 	{
-		if(!empty($post['groups'][$contextnr])) {
-			$post['groups'][$supercontextnr]['groups'][]=$contextnr;
-		}
-		else {
-			$extragroups[$supercontextnr][]=$contextnr;
-		}
-
+		$post['groups'][$supercontextnr]['groups'][]=$contextnr;
 	}
 	if(!$gebruikteSubcontexten[$contextnr])
 		$gebruikteSubcontexten[$contextnr]=array();
@@ -188,26 +182,16 @@ foreach ($post['groups'] as $index=>$inhoud)
 
 $groups=$post['groups'];
 $post['groups']=array();
-$teller=0;
 
 foreach ($groups as $group)
 {
-	if($extragroups[$teller]) {
-		$grouptemp=$group;
-		if($grouptemp['groups'])
-			$grouptemp['groups']=array_merge($group['groups'],$extragroups[$teller]);
-		else
-			$grouptemp['groups']=$extragroups[$teller];
-
-		$post['allgroups'][]=$grouptemp;
-	}else {
-		$post['allgroups'][]=$group;
+	// Als de groep leeg is, maak dan een dummy-ie aan en voeg het volgnummer
+	// toe aan deze groep.
+	if(!(count($group['leaves'])>0 && count($group['groups'])>0)) {
+		$post['nodes'][]=array('type'=>dummy,'heading'=>'');
+		$group['leaves']=array(max(array_keys($post['nodes'])));
 	}
-
-	if(count($group['leaves'])>0 || count($group['groups'])>0)
-		$post['groups'][]=$group;
-
-	$teller++;
+	$post['groups'][]=$group;
 }
 
 // Teken groepen met meer nodes eerst
