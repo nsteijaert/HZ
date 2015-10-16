@@ -13,11 +13,7 @@ class EMVAjaxInterface extends ApiBase
 		$type = $this->getParameter('type');
 		$actie = $this->getParameter('actie');
 		$naamprefix = Uri::SMWuriNaarLeesbareTitel($this->getParameter('hoofdcontextUri'));
-
-		$formattedData = array();
-		$result = $this->getResult();
-		$result->setIndexedTagName($formattedData, 'p');
-		$result->addValue(null, $this->getModuleName(), $formattedData);
+		$return="";
 
 		if ($type == 'context')
 		{
@@ -84,5 +80,15 @@ class EMVAjaxInterface extends ApiBase
 				Model::verwijderVerband($waardes[0], $waardes[2], $waardes[1]);
 			}
 		}
+		elseif ($actie=='naamNaarUri') {
+			$naam=$this->getParameter('naam');
+			$return='wiki:'.Uri::codeerSMWNaam($naamprefix.' '.$naam);
+		}
+
+		/*$formattedData = array();
+		$result = $this->getResult();
+		$result->setIndexedTagName($formattedData, 'p');
+		$result->addValue(null, $this->getModuleName(), $formattedData);*/
+		$this->getResult()->addValue(null, $this->getModuleName(), $return);
 	}
 }

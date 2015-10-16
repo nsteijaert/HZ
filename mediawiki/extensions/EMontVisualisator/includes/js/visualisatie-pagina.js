@@ -198,12 +198,23 @@ function nieuwIE_finish()
 	var newnode={};
 	newnode.name=popupVars.titelNieuwIE;
 	newnode.heading=popupVars.titelNieuwIE;
-	newnode.instanceof=popupVars.selectedIE;
+	newnode.instanceOf=popupVars.selectedIE;
 	newnode.type=instanceOfNode.type;
 	newnode.decompositionType=instanceOfNode.decompositionType;
 
+	mw.loader.using( 'mediawiki.api', function() {
+		(new mw.Api() ).get( {
+			action: 'EMVAI',
+			actie: 'naamNaarUri',
+			hoofdcontextUri: contextUri,
+		 	naam: popupVars.titelNieuwIE
+		}).done( function(data) {
+			newnode.uri=data.EMVAI;
+		});
+	});
+
 	gGraphs[visualisatieId].nodes.push(newnode);
-	gGraphs[visualisatieId].groups[groupId].leaves.push(newnode); //(gGraphs[visualisatieId].nodes.length)-1);
+	gGraphs[visualisatieId].groups[groupId].leaves.push(newnode);
 
 	redrawAfterChange(visualisatieId);
 	verbergOfVerwijderPopup('nieuwie-stap2');
@@ -268,15 +279,47 @@ function nieuweContext_finish()
 {
 	clearInterval(popupVars.check);
 	var titel=document.getElementById('titel-nieuwe-context').value;
+	var supercontextId=findGroupByUri(visualisatieId,popupVars.contextkeuze);
+	var supercontextTitel=gGraphs[visualisatieId].groups[supercontextId].titel;
+
+	//Uitgecomment wegens bug met visualisatie-library.
+	/*var dummynode = {};
+	dummynode.heading="";
+	dummynode.type="dummy";
+	gGraphs[visualisatieId].nodes.push(dummynode);
+
+	redrawAfterChange(visualisatieId);
+	var nodeNummer=gGraphs[visualisatieId].nodes.length-1;
+
 	var newgroup={};
 	newgroup.leaves=[];
 	newgroup.bijschrift=titel;
+	newgroup.langbijschrift=[];
+	newgroup.langbijschrift.push(supercontextTitel+' '+titel);
 	newgroup.titel=titel;
 	newgroup.tooltip=titel;
+	newgroup.leaves=[];
+
+	mw.loader.using( 'mediawiki.api', function() {
+		(new mw.Api() ).get({
+			action: 'EMVAI',
+			actie: 'naamNaarUri',
+			hoofdcontextUri: contextUri,
+		 	naam: titel
+		}).done( function(data) {
+			newgroup.uri=data.EMVAI;
+		});
+	});
 
 	gGraphs[visualisatieId].groups.push(newgroup);
+	var newGroupId=gGraphs[visualisatieId].groups.length-1;
 
-	redrawAfterChange(visualisatieId);
+	gGraphs[visualisatieId].groups[newGroupId].leaves.push(gGraphs[visualisatieId].nodes[nodeNummer]);
+
+	if(!gGraphs[visualisatieId].groups[supercontextId].groups)
+		gGraphs[visualisatieId].groups[supercontextId].groups=[];
+
+	redrawAfterChange(visualisatieId);*/
 	verbergOfVerwijderPopup('nieuweContext');
 
 	mw.loader.using( 'mediawiki.api', function () {
@@ -552,6 +595,7 @@ window.addEventListener('contextmenu', function (e) {
 
 function toonContextMenu(uri, x, y)
 {
+	sluitContextMenu();
 	popupVars.selectedIE=uri;
 	var contextMenu = d3.select('body').append('div').attr({id: 'contextMenu',style: 'left: '+x+'px; top: '+y+'px;'});
 	contextMenu.append('div')

@@ -67,7 +67,7 @@ class Uri
 	{
 		// ID's in RDF-store staan in procentnotatie, maar met een - ipv een %. Dit stukje code zorgt voor
 		// een correcte procentnotatie en zet die vervolgens om naar de bedoelde tekens.
-		return strtr(urlencode($naam),"% ","-_");
+		return strtr(urlencode(strtr($naam,' ','_')),'%','-');
 	}
 
 

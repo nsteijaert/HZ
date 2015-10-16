@@ -114,8 +114,7 @@ foreach($contexten as $uri=>$description)
 {
 	if(!array_search($uri,$contextindex))
 	{
-		/*$post['nodes'][]=array('uri'=>'dummy','name'=>'','heading'=>'dummy','type'=>'dummy');*/
-		$post['groups'][]=array(); //'leaves'=>array(count($post['nodes'])-1));
+		$post['groups'][]=array();
 		$contextindex[]=$uri;
 	}
 }
